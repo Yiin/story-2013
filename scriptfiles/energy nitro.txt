@@ -1,0 +1,6 @@
+new PlayerBar:bar = CreatePlayerProgressBar(playerid,434.00, 421.00, 139.50, 9.19, -2004287489, 100.0);
+ShowProgressBarForAll(bar);
+
+Now, take a look at the official SA:MP forum topic to know how to use this:
+
+http://forum.sa-mp.com/index.php?topic=138556

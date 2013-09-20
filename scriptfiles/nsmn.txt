@@ -1,0 +1,24 @@
+// Ðonas
+SetPlayerCameraPos(playerid, 104.20, -154.58, 2368.70);
+SetPlayerCameraLookAt(playerid, 104.43, -149.81, 2367.22);
+
+// Priekis
+SetPlayerCameraPos(playerid, 99.76, -152.38, 2368.99);
+SetPlayerCameraLookAt(playerid, 103.52, -149.57, 2367.28);
+
+// Galas
+SetPlayerCameraPos(playerid, 108.96, -151.98, 2368.54);
+SetPlayerCameraLookAt(playerid, 104.64, -149.46, 2367.01);
+
+// Ratai
+SetPlayerCameraPos(playerid, 101.66, -152.62, 2367.87);
+SetPlayerCameraLookAt(playerid, 104.35, -148.52, 2366.91);
+
+// Stogas
+SetPlayerCameraPos(playerid, 108.25, -151.83, 2369.44);
+SetPlayerCameraLookAt(playerid, 104.00, -149.20, 2367.03);
+
+// Repair
+SetPlayerCameraPos(playerid, 114.35, -161.71, 2368.91);
+SetPlayerCameraLookAt(playerid, 110.86, -165.29, 2367.81);
+

@@ -1,0 +1,369 @@
+/*
+
+
+
+
+
+
+
+
+
+							Story of Cities
+
+								FÛRISTAI
+
+
+
+
+
+
+
+
+*/
+
+func furistuNpc(pid)
+{
+	new const id = 0;
+	Main:
+
+	head(gt, C_Y"%s"C_SOC", kroviniø perveþimas.", GetPlayerNameEx(id));
+
+	newline(gt);
+	newrow(gt, "Uþsakyti prekiø.");
+	newrow(gt, "Atðaukti uþsakymà.");
+
+	if(pinfo[darbas] == FURISTAS)
+	{
+		newline(gt);
+		newrow(gt, "Perþiûrëti darbo statistikà.");
+		newrow(gt, "Pasiimti uþdarbá.");
+		newrow(gt, "Bendradarbiai.");
+		newline(gt);
+		newrow(gt, "Iðeiti ið darbo.");
+	}
+	if(pinfo[direktorius] == FURISTAS)
+	{
+		newline(gt);
+		newrow(gt, "Darbo fondas.");
+		newrow(gt, "Darbuotojø tvarkymas.");
+		newrow(gt, "Maðinø tvarkymas.");
+		newrow(gt, "Rangø tvarkymas.");
+		newrow(gt, "Prekiø tvarkymas.");
+	}
+
+	inline mainResponse(id0, did, re, li, string:in[])
+	{
+		#pragma unused id0, did, li
+		if(re)
+		{
+			if(checkrow(in, "Uþsakyti prekiø"))
+			{
+				First:
+
+				new const Result:r = sql_query( sqlHandle,
+					
+					f("SELECT daiktai FROM sandeliai WHERE id = %i", FURISTAS),
+					QUERY_CACHED
+				);
+
+				new const Result:m = sql_query( sqlHandle,
+					
+					f("SELECT COUNT(id) FROM masinos WHERE tipas = %i", FURISTAS + vehicleOffset),
+					QUERY_CACHED
+				);
+
+				sql_get_field_assoc(r, "daiktai", gt);
+				static snf[4];
+				format(snf, sizeof snf, "p</>a<i>[%i]", 2+eBonus);
+				static StorageBuffer[MAX_ITEM][e_bag];
+				static itemsBuffer[MAX_ITEM][100];
+				sscanf(gt, "p<|>a<s[100]>["#MAX_ITEM"]", itemsBuffer);
+
+				new 
+					rowWeapon,
+					rowFood,
+					rowHeal,
+					rowFurniture,
+					rowClothe
+				;
+
+				for(new i; i != MAX_ITEM; ++i)
+				{
+					sscanf(itemsBuffer[i], snf, StorageBuffer[i]);
+					if(ItemInfo[ StorageBuffer[i][item] ][item_params] & IS_WEAPON)
+						++rowWeapon;
+					if(ItemInfo[ StorageBuffer[i][item] ][item_params] & IS_FOOD)
+						++rowFood;
+					if(ItemInfo[ StorageBuffer[i][item] ][item_params] & IS_CLOTHE)
+						++rowClothe;
+					if(ItemInfo[ StorageBuffer[i][item] ][item_params] & IS_FURNITURE)
+						++rowFurniture;
+					if(ItemInfo[ StorageBuffer[i][item] ][item_params] & IS_MEDICAMENT)
+						++rowHeal;
+				}
+
+				head(gt, "Kokios kategorijos prekiø nori uþsisakyti?");
+				//newline(gt);
+				newrow(gt, "Maistas ( %i ).", rowFood);
+				newrow(gt, "Drabuþiai ( %i ).", rowClothe);
+				newrow(gt, "Vaistai ( %i ).", rowHeal);
+				newrow(gt, "Ginklai ( %i ).", rowWeapon);
+				newrow(gt, "Baldai ( %i ).", rowFurniture);
+				newrow(gt, "Maðinos ( %i ).", sql_get_field_assoc_int(m, "COUNT(id)"));
+
+				inline response1(id1, did1, re1, li1, string:in1[])
+				{
+					#pragma unused id1, did1, li1
+					if(re1)
+					{
+						if(checkrow(in1, "Maistas") && rowFood)
+						{
+							Maistas:
+							head(gt, "Maistas");
+							new II[MAX_ITEM];
+							new IIcount;
+							for(new i; i != MAX_ITEM; ++i)
+							{
+								if(ItemInfo[ StorageBuffer[i][item] ][item_params] & IS_FOOD)
+								{
+									II[IIcount++] = i;
+									newrow(gt, "%s ( %i )", ItemInfo[ StorageBuffer[i][item] ][item_name], StorageBuffer[i][kiekis]);
+								}
+							}
+							inline response2(id2, did2, re2, li2, string:in2[])
+							{
+								#pragma unused id2, did2, in2
+								if(re2)
+								{
+									if(li2 > 1)
+									{
+										head(gt, "%s", ItemInfo[ StorageBuffer[ II[li2 - 2] ][item] ][item_name]);
+										newrow(gt, "Pirkti");
+
+									} else {
+
+										goto Maistas;
+									}
+
+								} else {
+
+									goto First;
+								}
+							}
+							showDialog(pid, using inline response2, DIALOG_STYLE_LIST, " ", gt, "Rinktis", "Atgal");
+
+						} else if(checkrow(in1, "Drabuþiai") && rowClothe) {
+
+
+						}// else if(checkrow(in1, ))
+
+					} else {
+
+						goto Main;
+					}
+				}
+
+			} else if(checkrow(in, "Atðaukti uþsakymà")) {
+
+				
+
+			} else if(checkrow(in, "Iðeiti ið darbo")) {
+
+				inline r_u_sure(id1, did1, response1, listitem1, string:txt1[])
+				{
+					#pragma unused id1, did1, listitem1, txt1
+					if(response1)
+					{
+						leaveJob(pid);
+
+					} else {
+
+						goto Main;
+					}
+				}
+				showDialog(pid, using inline r_u_sure, DIALOG_STYLE_MSGBOX, " ", C_SOC"Ar tikrai nori palikti darbà?", "Taip", "Atgal");
+			
+			} else if(checkrow(in, "Rangø tvarkymas")) {
+
+				rank_manage:
+				format(gt, sizeof gt, C_SOC"Rangø tvarkymas\n ");
+				strcat(gt, "\n\t"C_DOT C_SOC" Pridëti naujà rangà.");
+				strcat(gt, "\n\t"C_DOT C_SOC" Iðtrinti visus rangus.");
+
+				strcat(gt, "\n \n\t"C_SOC" Visi rangai:");
+				if( isnull(rangai[FURISTAS][0][r_name] ))
+				{
+					strcat(gt, "\n\t"C_DOT C_SOC" Nëra jokiø rangø.");
+
+				} else {
+
+					for(new i; i != 30 && !isnull(rangai[FURISTAS][i][r_name]); ++i)
+					{
+						strcat(gt, f("\n\t"C_DOT C_SOC" %s", rangai[FURISTAS][i][r_name]));
+					}
+				}
+				inline rank_response(id1, did1, response1, listitem1, string:text1[])
+				{
+					#pragma unused id1, did1
+					if(response1)
+					{
+						if(listitem1 > 5)
+						{
+							// jei paspaudþia ant rango
+							head(gt, "%s", rangai[FURISTAS][0][r_name]);
+							newrow(gt, "Tekstas");
+							//strcat(gt, "\n\t"C_DOT C_SOC"")
+
+						} else {
+
+							if(strfind(text1, "Pridëti naujà rangà") != -1)
+							{
+								new index = -1;
+								for(new j; j != 30; ++j)
+								{
+									if( isnull(rangai[FURISTAS][j][r_name]))
+									{
+										index = j;
+										break;
+									}
+								}
+								if(index == -1)
+								{
+									// jeigu jau pasiektas maksimalus rangø skaièius
+									notification2(pid, "Maksimalus rangu skaicius pasiektas.");
+									goto rank_manage;
+
+								} else {
+
+									goto_rank_name:
+									inline rank_name(id2, did2, response2, listitem2, string:text2[])
+									{
+										#pragma unused id2, did2, listitem2
+										if(response2)
+										{
+											sql_escape_string(sqlHandle, text2, text2);
+											new find, find2;
+											do
+											{
+												find = strfind(text2, "/");
+												if(find != -1)
+													strdel(text2, find, find);
+												find2 = strfind(text2, "|");
+												if(find2 != -1)
+													strdel(text2, find2, find2);
+											}
+											while(find != -1 && find2 != -1);
+											if(isnull(text2))
+											{
+												goto goto_rank_name;
+
+											} else {
+
+												goto_skin_v:
+
+												format(gt, sizeof gt, C_SOC"Pasirink ðio rango vaikinø aprangà.\n ");
+												for(new i; JOB::GetSkin(FURISTAS, VAIKINAS, i); ++i)
+												{
+													strcat(gt, f("\n\t"C_DOT C_SOC"%i", JOB::GetSkin(FURISTAS, VAIKINAS, i)));
+												}
+
+												inline rank_skin_v(id3, did3, response3, listitem3, string:text3[])
+												{
+													#pragma unused id3, did3, text3
+													if(response3)
+													{
+														new const skin_v = listitem3 - 2;
+														if(skin_v >= 0)
+														{
+															goto_skin_m:
+
+															format(gt, sizeof gt, C_SOC"Pasirink ðio rango merginø aprangà.\n ");
+															for(new i; JOB::GetSkin(FURISTAS, MERGINA, i); ++i)
+															{
+																strcat(gt, f("\n\t"C_DOT C_SOC"%i", JOB::GetSkin(FURISTAS, MERGINA, i)));
+															}
+															inline rank_skin_m(id4, did4, response4, listitem4, string:text4[])
+															{
+																#pragma unused id4, did4, text4
+																if(response4)
+																{
+																	new const skin_m = listitem4 - 2;
+																	if(skin_m >= 0)
+																	{
+																		format(rangai[FURISTAS][index][r_name], 24, text2);
+																		rangai[FURISTAS][index][r_skin_v] = skin_v;
+																		rangai[FURISTAS][index][r_skin_m] = skin_m;
+																		printf("rangas %s sukurtas sëkmingai", rangai[FURISTAS][index][r_name]);
+																		notification2(pid, F("Rangas (%s) sukurtas sekmingai.", rangai[FURISTAS][index][r_name]));
+																		goto rank_manage;
+
+																	} else {
+
+																		goto goto_skin_m;
+																	}
+
+																} else {
+
+																	goto goto_skin_v;
+																}
+															}
+															showDialog(pid, using inline rank_skin_m, DIALOG_STYLE_LIST, "3/3", gt, "Sukurti", "Atgal");
+
+														} else {
+
+															goto goto_skin_v;
+														}
+
+													} else {
+
+														goto goto_rank_name;
+													}
+												}
+												showDialog(pid, using inline rank_skin_v, DIALOG_STYLE_LIST, "2/3", gt, "Toliau", "Atgal");
+											}
+
+										} else {
+
+											goto rank_manage;
+										}
+									}
+									showDialog(pid, using inline rank_name, DIALOG_STYLE_INPUT, "1/3", "Ávesk rango pavadinimà.", "Toliau", "Atgal");
+								}
+							}
+							else if(strfind(text1, "Iðtrinti visus rangus") != -1)
+							{
+								inline rusure(id2, did2, response2, listitem2, string:text2[])
+								{
+									#pragma unused id2, did2, listitem2, text2
+									if(response2)
+									{
+										for(new i; i != 30; ++i)
+										{
+											rangai[FURISTAS][i][r_name][0] = EOS;
+											rangai[FURISTAS][i][r_skin_m] = 0;
+											rangai[FURISTAS][i][r_skin_v] = 0;
+										}
+										notification2(pid, "Rangai istrinti.");
+										goto rank_manage;
+
+									} else {
+
+										goto rank_manage;
+									}
+								}
+								showDialog(pid, using inline rusure, DIALOG_STYLE_MSGBOX, text1, "Ar tikrai nori iðtrinti visus rangus?", "Taip", "Atgal");
+							} else goto rank_manage;
+						}
+
+					} else {
+
+						goto Main;
+					}
+				}
+				showDialog(pid, using inline rank_response, DIALOG_STYLE_LIST, " ", gt, "Rinktis", "Atgal");
+			} 
+		}
+	}
+
+	showDialog(pid, using inline mainResponse, DIALOG_STYLE_LIST, GetPlayerNameEx(id), gt, "Rinktis", "Uþdaryti");
+}

@@ -1,0 +1,123 @@
+/*
+
+
+
+
+
+
+
+
+
+                     Story of Cities
+
+                        HOUSES
+
+
+
+
+
+
+
+
+*/
+
+func createHouse(intModel, coords<1>)
+{
+   sql_query(sqlHandle, F("INSERT INTO namai (modelis, savininkas, pos_outside) VALUES (%i,0,'%f %f %f')", intModel, coords<1>), QUERY_THREADED);
+
+   new success;
+   new t = hCount+1;
+
+   while(!success)
+   {
+      if ((- _x_ /2 <= h_x) && (h_x <=  _x_ /2) && (-_y_/2 <= h_y) && (h_y <= _y_/2))
+      {
+         vector_push_back(vHouseOwner, savininkas);
+         vector_push_back(vHousePickup, CreateDynamicPickup(1273, 1, coords<1>, 0));
+         vector_push_back(vHouseIntID, CreateDynamicObject(hInfo[intModel][hModelis], h_x, h_y, 5000, 0, 0, 0));
+         vector_push_back_float(vHouse_inX, h_x + hInfo[intModel][hX]);
+         vector_push_back_float(vHouse_inY, h_y + hInfo[intModel][hY]);
+         vector_push_back_float(vHouse_inZ, 5000 + hInfo[intModel][hZ]);
+
+         // TODO: baldai
+
+
+         printf("x = %i, y = %i", h_x, h_y);
+         // DO STUFF...
+         hCount++;
+         success++;
+      }
+      if( (h_x == h_y) || ((h_x < 0) && (h_x == -h_y)) || ((h_x > 0) && (h_x == 50-h_y)))
+      {
+         t = h_dx;
+         h_dx = -h_dy;
+         h_dy = t;
+      }
+
+      h_x += h_dx*50;
+      h_y += h_dy*50;
+   }
+}
+
+
+func LoadHousesInt()
+{
+   new Result:r = sql_query(sqlHandle, "SELECT * FROM namai WHERE 1", QUERY_CACHED);
+   new housesCount = sql_num_rows(r);
+
+   new t = housesCount;
+   //new maxI = t*t;
+
+   new _x_ = housesCount * 50;
+   new _y_ = _x_;
+
+   new buffer[64];
+
+   for(new i; i < housesCount*50; i += 50)
+   {
+      if ((- _x_ /2 <= h_x) && (h_x <=  _x_ /2) && (-_y_/2 <= h_y) && (h_y <= _y_/2))
+      {
+         new coords<1>;
+
+         new model = sql_get_field_assoc_int(r, "modelis");
+         new savininkas = sql_get_field_assoc_int(r, "savininkas");
+         sql_get_field_assoc(r, "pos_outside", buffer); sscanf(buffer, "fff", coords<1>);
+
+         vector_push_back(vHouseOwner, savininkas);
+         vector_push_back(vHousePickup, CreateDynamicPickup(1273, 1, coords<1>, 0));
+         vector_push_back(vHouseIntID, CreateDynamicObject(model, h_x, h_y, 5000, 0, 0, 0));
+
+         vector_push_back_float(vHouse_inX, h_x + hInfo[model][hX]);
+         vector_push_back_float(vHouse_inY, h_y + hInfo[model][hY]);
+         vector_push_back_float(vHouse_inZ, 5000 + hInfo[model][hZ]);
+
+         // TODO: baldai
+
+
+         printf("x = %i, y = %i", h_x, h_y);
+         // DO STUFF...
+         hCount++;
+      }
+      if( (h_x == h_y) || ((h_x < 0) && (h_x == -h_y)) || ((h_x > 0) && (h_x == 50-h_y)))
+      {
+         t = h_dx;
+         h_dx = -h_dy;
+         h_dy = t;
+      }
+
+      h_x += h_dx*50;
+      h_y += h_dy*50;
+      sql_next_row(r);
+   }
+}
+
+YCMD:createHouse(pid, params[], help)
+{
+   new coords<1>;
+
+   GetPlayerPos(pid, coords<1>);
+
+   sql_query(sqlHandle, F("INSERT INTO namai (savininkas,pos_outside,pos_inside) VALUES "))
+
+   return 1;
+}

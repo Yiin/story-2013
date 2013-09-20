@@ -1,0 +1,362 @@
+/*
+
+
+
+
+
+
+
+
+
+							Story of Cities
+
+								STORAGE
+
+
+
+
+
+
+
+
+*/
+
+func hide_trunk(veh,pid)
+{
+	vehicle.bool.off(veh, fTrunkInUse);
+	player.bool.off(pid, bTrunkOpen);
+	for(new i; i < 37; ++i)
+		PlayerTextDrawHide(pid, pTrunk[pid][0][i]),
+		PlayerTextDrawHide(pid, pTrunk[pid][1][i]);
+	for(new i; i < 16; ++i)
+		TextDrawHideForPlayer(pid, iTrunk[i]);
+}
+
+stock load_trunk(veh,pid,side1 = 0, side2 = 0, reloadall = 1)
+{
+	vehicle.bool.on(veh, fTrunkInUse);
+	baguse[trunk_id] = veh;
+	hide_trunk(veh,pid);
+	new fitem1, fitem2;
+	
+	if(reloadall)
+		UpdateAmmo(pid);
+
+	switch(side1)// trunk pusë
+	{
+		case 0: fitem1 = 0;
+		case 1: fitem1 = LoadTrunkNext(pid);
+		case 2: fitem1 = LoadTrunkPrev(pid);
+		case 3: fitem1 = GetCurrentTrunkPage(pid);
+	}
+	switch(side2)//bag pusë
+	{
+		case 0: fitem2 = 0;
+		case 1: fitem2 = LoadTrunkBagNext(pid);
+		case 2: fitem2 = LoadTrunkBagPrev(pid);
+		case 3: fitem2 = GetCurrentTrunkBagPage(pid);
+	}
+	if(reloadall)// perkrauti viskà?
+	{
+		PlayerTextDrawSetString(pid, pTrunk[pid][1][0],f("%i", baguse[tbagpageid]+1));
+		PlayerTextDrawShow(pid, pTrunk[pid][1][0]);
+		PlayerTextDrawSetString(pid, pTrunk[pid][0][0],f("%i", baguse[ttrunkpageid]+1));
+		PlayerTextDrawShow(pid, pTrunk[pid][0][0]);
+			
+		player.bool.on(pid, bTrunkOpen);
+		baguse[last_clicked_textdraw_row] = PlayerText:-1;
+		baguse[selecteditem] = PlayerText:-1;
+		slcslot = -1;
+		for(new i; i < 13; ++i)
+			baguse[bagedit:i] = -1;
+	}
+
+	//Parodom fonà ir pagrindinius mygtukus.
+	for(new i; i < 16; ++i)
+	{
+		TextDrawShowForPlayer(pid, iTrunk[i]);
+	}
+	
+// bag pusë
+
+	// Jeigu pirmas puslapis, neberodom mygtuko 'Atgal'
+	if( baguse[tbagpageid] <= 0)
+		TextDrawHideForPlayer(pid, iTrunk[14]);
+	else
+		TextDrawShowForPlayer(pid, iTrunk[14]);
+
+	// Jeigu paskutinis, nerodom mygtuko 'pirmyn'
+	if( baguse[tbagpageid]+1 >= GetMaxPagesTrunkBag(pid))
+		TextDrawHideForPlayer(pid, iTrunk[15]);
+	else
+		TextDrawShowForPlayer(pid, iTrunk[15]);
+
+	// Rodom daiktø eilutes.
+	for(new idx = fitem2, i, j, n = 1; idx < MAX_ITEM && j < 12; idx++)
+	{
+		tryagain:
+		i = bag[idx][item];
+		if( i == 0) continue;
+		if(!bag[idx][kiekis])
+		{
+			RemoveItemFromSlot(pid, idx, -1);
+			goto tryagain;
+		}
+
+		baguse[bagedit:j] = idx;
+		j++;
+
+		if( flag_get(bag[idx][item_info], IS_INUSE) )
+			PlayerTextDrawColor( pid, pTrunk[pid][1][n], COLOR_OK);
+		else
+			PlayerTextDrawColor( pid, pTrunk[pid][1][n], -1);
+
+		PlayerTextDrawBoxColor( pid, pTrunk[pid][1][n], COLOR_BAG_DEFAULT);
+
+		PlayerTextDrawSetString(pid,pTrunk[pid][1][n], ItemInfo[i][item_name]);
+		PlayerTextDrawShow(pid, pTrunk[pid][1][n]);
+			n++;
+		PlayerTextDrawSetString(pid,pTrunk[pid][1][n], f("%i",bag[idx][kiekis]));
+		PlayerTextDrawShow(pid, pTrunk[pid][1][n]);
+			n++;
+		PlayerTextDrawSetString(pid,pTrunk[pid][1][n], f("%.1fkg",float(getBagSlotWeight(pid, idx)) / 1000.0 ));
+		PlayerTextDrawShow(pid, pTrunk[pid][1][n]);
+			n++;
+	}
+
+// trunk pusë
+	if( baguse[ttrunkpageid] <= 0)
+		TextDrawHideForPlayer(pid, iTrunk[9]);
+	else
+		TextDrawShowForPlayer(pid, iTrunk[9]);
+
+	// Jeigu paskutinis, nerodom mygtuko 'pirmyn'
+	new const maxpg = GetMaxPagesTrunkTrunk(pid);
+	if( baguse[ttrunkpageid]+1 >= maxpg)
+		TextDrawHideForPlayer(pid, iTrunk[8]);
+	else
+		TextDrawShowForPlayer(pid, iTrunk[8]);
+
+	// Rodom daiktø eilutes.
+	for(new idx = fitem1, i, j, n = 1; idx < MAX_ITEM && j < 12; idx++)
+	{
+		tryagain:
+		i = trunk[veh][idx][item];
+		if( i == 0) continue;
+		if(!trunk[veh][idx][kiekis])
+		{
+			RemoveItemFromTrunkSlot(veh, idx, -1);
+			goto tryagain;
+		}
+
+		baguse[bagedit:(j+13)] = idx;
+		j++;
+
+		if( flag_get(trunk[veh][idx][item_info], IS_INUSE) )
+			PlayerTextDrawColor( pid, pTrunk[pid][0][n], COLOR_OK);
+		else
+			PlayerTextDrawColor( pid, pTrunk[pid][0][n], -1);
+
+		PlayerTextDrawBoxColor( pid, pTrunk[pid][0][n], COLOR_BAG_DEFAULT);
+
+		PlayerTextDrawSetString(pid,pTrunk[pid][0][n], ItemInfo[i][item_name]);
+		PlayerTextDrawShow(pid, pTrunk[pid][0][n]);
+			n++;
+		PlayerTextDrawSetString(pid,pTrunk[pid][0][n], f("%i",trunk[veh][idx][kiekis]));
+		PlayerTextDrawShow(pid, pTrunk[pid][0][n]);
+			n++;
+		PlayerTextDrawSetString(pid,pTrunk[pid][0][n], f("%.1fkg",float(getTrunkSlotWeight(veh, idx)) / 1000.0 ));
+		PlayerTextDrawShow(pid, pTrunk[pid][0][n]);
+			n++;
+	}
+}
+
+stock AddItemToTrunk(id, itemid, amount, iEffect[eBonus] = {0,...})
+{
+	if(!itemid || !amount) return 0;
+
+	new newitem[e_bag];
+	newitem[item] = itemid;
+	newitem[kiekis] = amount;
+
+	for(new i; i != eBonus; ++i)
+	newitem[effect][i] = iEffect[i];
+
+	newitem[item_info] = flag_item:0;
+
+	for(new i; i < MAX_ITEM; ++i)
+	{
+		if(trunk[id][i][item] == itemid)
+		{
+			if(!memcmp(trunk[id][i][effect], iEffect, eBonus, eBonus))
+			{
+				trunk[id][i][kiekis] += amount;
+				return 1;
+			}
+		}
+	}
+
+	insertToTrunkSlot(id, 0, newitem);
+
+	return 1;
+}
+
+func insertToTrunkSlot(id, slot, info[e_bag])
+{
+	for(new i = MAX_ITEM-1; i > slot; i--)
+		slotcpy(trunk[id][i], trunk[id][i-1]);
+
+	slotcpy(trunk[id][slot], info);
+}
+
+func BagToTrunk(pid)
+{
+	if(slcslot == -1) return notification(pid, "nieko nepasirinkai");
+	if(bag[slcslot][kiekis] > 1)
+	{
+		inline dialog(id, did, response, listitem, string:txt[])
+		{
+			#pragma unused id, did, listitem
+			if(response)
+			{
+				new amount = strval(txt);
+				if(isnull(txt) || amount <= 0) return showDialog(pid, using inline dialog, DIALOG_STYLE_INPUT, "Dëti á bagaþinæ", C_SOC"Kiek vnt. perkelti á bagaþinæ?", "Rinktis", "Atðaukti");
+				if(amount > bag[slcslot][kiekis])
+					amount = bag[slcslot][kiekis];
+				new efc[eBonus];
+				memadd(efc, bag[slcslot][effect]);
+				AddItemToTrunk(baguse[trunk_id], bag[slcslot][item], amount, efc);
+				RemoveItemFromSlot(pid, slcslot, amount);
+				load_trunk(baguse[trunk_id], pid, 3, 3);
+			}
+			return 1;
+		}
+		showDialog(pid, using inline dialog, DIALOG_STYLE_INPUT, "Dëti á bagaþinæ", C_SOC"Kiek vnt. perkelti á bagaþinæ?", "Rinktis", "Atðaukti");
+	
+	} else {
+
+
+		new efc[eBonus];
+		memadd(efc, bag[slcslot][effect]);
+		AddItemToTrunk(baguse[trunk_id], bag[slcslot][item], 1, efc);
+		RemoveItemFromSlot(pid, slcslot, 1);
+		load_trunk(baguse[trunk_id], pid, 3, 3);
+	}
+	return 1;
+}
+
+func TrunkToBag(pid)
+{
+	if(slcslot == -1) return notification(pid, "nieko nepasirinkai");
+	if(trunk[baguse[trunk_id]][slcslot][kiekis] > 1)
+	{
+		inline dialog(id, did, response, listitem, string:txt[])
+		{
+			#pragma unused id, did, listitem
+			if(response)
+			{
+				new amount = strval(txt);
+				if(isnull(txt) || amount <= 0) return showDialog(pid, using inline dialog, DIALOG_STYLE_INPUT, "Dëti á kuprinæ", C_SOC"Kiek vnt. perkelti á kuprinæ?", "Rinktis", "Atðaukti");
+				if(amount > trunk[baguse[trunk_id]][slcslot][kiekis])
+					amount = trunk[baguse[trunk_id]][slcslot][kiekis];
+
+				new efc[eBonus];
+				memadd(efc, trunk[baguse[trunk_id]][slcslot][effect]);
+				AddItem(pid, trunk[baguse[trunk_id]][slcslot][item], amount, efc);
+				RemoveItemFromTrunkSlot(baguse[trunk_id], slcslot, amount);
+				load_trunk(baguse[trunk_id], pid, 3, 3);
+			}
+			return 1;
+		}
+		showDialog(pid, using inline dialog, DIALOG_STYLE_INPUT, "Dëti á kuprinæ", C_SOC"Kiek vnt. perkelti á kuprinæ?", "Rinktis", "Atðaukti");
+	
+	} else {
+
+		new efc[eBonus];
+		memadd(efc, trunk[baguse[trunk_id]][slcslot][effect]);
+		AddItem(pid, trunk[baguse[trunk_id]][slcslot][item], 1, efc);
+		RemoveItemFromTrunkSlot(baguse[trunk_id], slcslot, 1);
+		load_trunk(baguse[trunk_id], pid, 3, 3);
+	}
+	return 1;
+}
+
+/*
+func RemoveItemFromTrunkSlot(veh,slot, amount)
+{
+	if(trunk[veh][slot][kiekis] <= amount < 0)
+	{
+		clearTrunkSlot(veh, slot);
+		for(new i = slot; i < MAX_ITEM-1; ++i)
+		{
+			slotcpy(trunk[veh][i], trunk[veh][i + 1]);
+		}
+	}
+}
+*/
+func clearTrunkSlot(veh,slot)
+{
+	trunk[veh][slot][item] = 0;
+	trunk[veh][slot][kiekis] = 0;
+	for(new i; i != eBonus; ++i)
+		trunk[veh][slot][effect][i] = 0;
+	trunk[veh][slot][item_info] = flag_item:0;
+}
+
+func LoadTrunkNext(pid)
+{
+	baguse[ttrunkpageid]++;
+	return baguse[ttrunkpageid] * 12;
+}
+
+func LoadTrunkPrev(pid)
+{
+	baguse[ttrunkpageid]--;
+	return baguse[ttrunkpageid] * 12;
+}
+
+func GetCurrentTrunkPage(pid)
+{
+	return baguse[ttrunkpageid] * 12;
+}
+
+func GetCurrentTrunkBagPage(pid)
+{
+	return baguse[tbagpageid] * 12;
+}
+
+func LoadTrunkBagNext(pid)
+{
+	baguse[tbagpageid]++;
+	return baguse[tbagpageid] * 12;
+}
+
+func LoadTrunkBagPrev(pid)
+{
+	baguse[tbagpageid]--;
+	return baguse[tbagpageid] * 12;
+}
+
+func GetMaxPagesTrunkTrunk(veh)
+{
+	new j = 0;
+	for(new i = 0; i < MAX_ITEM; ++i)
+		if( ! trunk[veh][i][item] || !trunk[veh][i][kiekis] ) continue;
+		else j++;
+	if(j % 12)
+		return j / 12 + 1;
+	else
+		return j / 12;
+}
+
+func GetMaxPagesTrunkBag(pid)
+{
+	new j = 0;
+	for(new i = 0; i < MAX_ITEM; ++i)
+		if( ! bag[i][item] || !bag[i][kiekis] ) continue;
+		else j++;
+	if(j % 12)
+		return j / 12 + 1;
+	else
+		return j / 12;
+}

@@ -1,0 +1,37 @@
+﻿ApplyAnimation(playerid, "PED", "WALK_DOORPARTIAL", 4.0, 0, 0, 0, 0, 0); // durys
+ApplyAnimation(playerid, "CRACK", "CRCKIDLE2", 4.0, 1, 0, 0, 1, 0); // guli
+ApplyAnimation(playerid, "MEDIC", "CPR", 4.0, 0, 0, 0, 0, 0); // medic
+ApplyAnimation(playerid, "FOOD", "EAT_BURGER", 4.0, 1, 0, 0, 0, 0); // valgis
+ApplyAnimation(playerid, "PED", "IDLE_CHAT", 4.0, 1, 0, 0, 0, 0); // chat
+ApplyAnimation(playerid, "BAR", "BARCUSTOM_GET", 4.0, 1, 0, 0, 0, 0); // paima is spinteles
+ApplyAnimation(playerid, "JST_BUISNESS", "GIRL_02", 4.0, 1, 0, 0, 0, 0); // loll
+ApplyAnimation(playerid, "PED", "HANDSUP", 4.0, 0, 0, 0, 1, 0); // handsup
+ApplyAnimation(playerid, "PED", "IDLE_STANCE", 4.0, 1, 1, 1, 1, 0); // freeze
+ApplyAnimation(playerid, "SWORD", "SWORD_PART", 4.0, 0, 0, 0, 0, 0); // iðtraukei valà
+ApplyAnimation(playerid, "SWORD", "SWORD_BLOCK", 1.0, 0, 0, 0, 1, 0); // IDLE
+ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_LOOP", 4.0, 1, 0, 0, 0, 0); // mech_fixing
+ApplyAnimation(playerid, "BASEBALL", "BAT_4", 4.0, 1, 0, 0, 0, 0); // MINING
+ApplyAnimation(playerid, "PED", "CAR_SITPLO", 4.0, 1, 0, 0, 0, 0); // medikas sedi
+ApplyAnimation(playerid, "PED", "COWER", 4.0, 1, 0, 0, 0, 0); // cover
+ApplyAnimation(playerid, "CHAINSAW", "CSAW_G", 4.0, 1, 0, 0, 0, 0); // chainsaw
+ApplyAnimation(playerid, "CRACK", "CRCKDETH2", 4.0, 1, 0, 0, 0, 0); // ligoninei guli
+
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_DEF_JUMP_SHOT", 4.0, 0, 0, 0, 0, 1000); // random jump shot
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_DEF_LOOP", 4.0, 0, 0, 0, 0, 1000); // def loop
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_DEF_STEPR", 4.0, 0, 1, 1, 0, 1000); // def step right
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_DEF_STEPL", 4.0, 0, 1, 1, 0, 1000); // def step left
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_DNK", 4.0, 0, 1, 1, 0, 1000); // dunk
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_DNK_GLI", 4.0, 0, 0, 0, 0, 0); // dunk start
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_DNK_LND", 4.0, 0, 0, 0, 0, 0); // dunk finish
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_IDLE", 4.0, 0, 0, 0, 0, 0); // idle
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_IDLE2", 4.0, 0, 0, 0, 0, 0); // idle2
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_IDLELOOP", 4.0, 1, 0, 0, 0, 0); // idle loop musineja kamuoli
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_JUMP_CANCEL", 4.0, 1, 0, 0, 0, 0); // jump cancel
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_JUMP_END", 4.0, 1, 0, 0, 0, 0); // jump end
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_JUMP_SHOT", 4.0, 1, 0, 0, 0, 0); // jump shot
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_PICKUP", 4.0, 1, 0, 0, 0, 0); // pickup ball
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_REACT_MISS", 4.0, 1, 0, 0, 0, 0); // react miss
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_REACT_SCORE", 4.0, 1, 0, 0, 0, 0); // react score
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_RUN", 4.0, 1, 0, 0, 0, 0); // bball run
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_WALK", 4.0, 1, 0, 0, 0, 0); // bball walk
+ApplyAnimation(playerid, "BSKTBALL", "BBALL_PICKUP", 4.0, 0, 0, 0, 0, 1000); // pickup gun

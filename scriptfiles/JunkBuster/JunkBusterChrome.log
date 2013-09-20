@@ -1,0 +1,250 @@
+[Mantuxas, 0]
+Comment: No comment
+Date: 1. Spalis 2012
+Time: 14:36:42
+IP: 62.212.200.150
+Ping: 0
+gpci: 4945DECED9CAE99DC5E9449E00898D8DCEAD5CD4
+Coordinates: 0.000000 0.000000 0.000000 0.000000 0 65645
+State: 0 0.000000 0.000000 0  
+Speed: 0 0 0.000000 0.000000 0.000000
+Armed weapon: 0 0
+Color: 0x0
+Money: 0 0
+Score: 0
+Skin: 17
+Wanted level: 0
+Drunk level: 0
+Player time: 12:00
+Keys: 0xC 0x0 0x0
+Camera: 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
+Special action: 0
+Weapons: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Vehicle: None
+Vehicle components: None
+
+[asdadng, 0]
+Comment: No comment
+Date: 1. Spalis 2012
+Time: 15:53:53
+IP: 127.0.0.1
+Ping: 0
+gpci: 4945DECED9CAE99DC5E9449E00898D8DCEAD5CD4
+Coordinates: 201.661117 -230.202774 1.412010 220.786041 0 0
+State: 1 100.000000 100.000000 1189 PED IDLE_STANCE
+Speed: 0 0 0.000000 0.000000 0.000000
+Armed weapon: 0 0
+Color: 0x0
+Money: 0 0
+Score: 0
+Skin: 17
+Wanted level: 0
+Drunk level: 1639
+Player time: 12:00
+Keys: 0x0 0x0 0x0
+Camera: 204.198104 -228.047607 3.093199 -0.724856 -0.615753 -0.308919
+Special action: 0
+Weapons: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Vehicle: None
+Vehicle components: None
+
+[asdadng, 0]
+Comment: No comment
+Date: 1. Spalis 2012
+Time: 21:13:57
+IP: 127.0.0.1
+Ping: 0
+gpci: 4945DECED9CAE99DC5E9449E00898D8DCEAD5CD4
+Coordinates: 203.049926 -217.974777 1.578125 58.711112 0 0
+State: 1 100.000000 100.000000 1189 PED IDLE_STANCE
+Speed: 0 0 0.000000 0.000000 0.000000
+Armed weapon: 0 0
+Color: 0x0
+Money: 0 0
+Score: 0
+Skin: 17
+Wanted level: 0
+Drunk level: 1277
+Player time: 12:00
+Keys: 0x0 0x0 0x0
+Camera: 205.430999 -219.421798 2.590600 -0.845345 0.513753 -0.146450
+Special action: 0
+Weapons: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Vehicle: None
+Vehicle components: None
+
+[asdadng, 0]
+Comment: No comment
+Date: 1. Spalis 2012
+Time: 23:44:27
+IP: 127.0.0.1
+Ping: 0
+gpci: 4945DECED9CAE99DC5E9449E00898D8DCEAD5CD4
+Coordinates: 203.032501 -217.641662 1.578125 3.000026 0 0
+State: 1 100.000000 100.000000 1133 PED FALL_LAND
+Speed: 0 0 0.000000 0.000000 0.000000
+Armed weapon: 0 0
+Color: 0x0
+Money: 0 0
+Score: 0
+Skin: 17
+Wanted level: 0
+Drunk level: 1956
+Player time: 12:00
+Keys: 0x0 0x0 0x0
+Camera: 203.714904 -221.046005 2.619899 -0.194968 0.972653 -0.126224
+Special action: 0
+Weapons: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Vehicle: None
+Vehicle components: None
+
+[Mafijos_Tevas, 1]
+Comment: No comment
+Date: 1. Spalis 2012
+Time: 23:56:05
+IP: 193.219.168.137
+Ping: 1
+gpci: D4F59FD4EFE5EDFE8CF59E0DAD4D4A04C8CD8854
+Coordinates: 0.000000 0.000000 0.000000 0.000000 0 65842
+State: 0 0.000000 0.000000 0  
+Speed: 0 0 0.000000 0.000000 0.000000
+Armed weapon: 0 0
+Color: 0x0
+Money: 0 0
+Score: 0
+Skin: 17
+Wanted level: 0
+Drunk level: 0
+Player time: 12:00
+Keys: 0xC 0x0 0x0
+Camera: 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
+Special action: 0
+Weapons: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Vehicle: None
+Vehicle components: None
+
+[Compadre_Estebano, 1]
+Comment: No comment
+Date: 2. Spalis 2012
+Time: 00:01:20
+IP: 193.219.163.64
+Ping: 1
+gpci: D4990AC484E99EAD8C4804F88DDD9CE9EC4D8DFF
+Coordinates: 684.682312 -469.821807 -16.050939 3.000026 0 0
+State: 1 79.000000 10.000000 1130 PED FALL_FALL
+Speed: 105 0 0.000000 0.000000 -0.657867
+Armed weapon: 0 0
+Color: 0x0
+Money: 14800 14800
+Score: 2
+Skin: 17
+Wanted level: 0
+Drunk level: 1988
+Player time: 12:00
+Keys: 0x0 0x0 0x0
+Camera: 684.808105 -473.315185 -5.111100 -0.035901 0.998104 -0.049979
+Special action: 0
+Weapons: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Vehicle: None
+Vehicle components: None
+
+[asdadng, 0]
+Comment: No comment
+Date: 2. Spalis 2012
+Time: 00:02:02
+IP: 127.0.0.1
+Ping: 0
+gpci: 4945DECED9CAE99DC5E9449E00898D8DCEAD5CD4
+Coordinates: 0.000000 0.000000 0.000000 0.000000 0 65646
+State: 0 0.000000 0.000000 0  
+Speed: 0 0 0.000000 0.000000 0.000000
+Armed weapon: 0 0
+Color: 0x0
+Money: 0 0
+Score: 0
+Skin: 17
+Wanted level: 0
+Drunk level: 0
+Player time: 12:00
+Keys: 0xC 0x0 0x0
+Camera: 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
+Special action: 0
+Weapons: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Vehicle: None
+Vehicle components: None
+
+[Compadre_Estebano, 1]
+Comment: No comment
+Date: 2. Spalis 2012
+Time: 00:08:27
+IP: 193.219.163.64
+Ping: 1
+gpci: D4990AC484E99EAD8C4804F88DDD9CE9EC4D8DFF
+Coordinates: 0.000000 0.000000 0.000000 0.000000 0 65758
+State: 0 0.000000 0.000000 0  
+Speed: 0 0 0.000000 0.000000 0.000000
+Armed weapon: 0 0
+Color: 0x0
+Money: 0 14800
+Score: 0
+Skin: 17
+Wanted level: 0
+Drunk level: 0
+Player time: 12:00
+Keys: 0xC 0x0 0x0
+Camera: 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000
+Special action: 0
+Weapons: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Vehicle: None
+Vehicle components: None
+
+[asdasdas, 0]
+Comment: No comment
+Date: 2. Spalis 2012
+Time: 01:46:01
+IP: 86.100.72.15
+Ping: 0
+gpci: 4945DECED9CAE99DC5E9449E00898D8DCEAD5CD4
+Coordinates: 0.000000 0.000000 0.000000 0.000000 0 66012
+State: 0 0.000000 0.000000 0  
+Speed: 0 0 0.000000 0.000000 0.000000
+Armed weapon: 52 0
+Color: 0x0
+Money: 0 0
+Score: 0
+Skin: 17
+Wanted level: 0
+Drunk level: 0
+Player time: 12:00
+Keys: 0xC 0x0 0x0
+Camera: -0.000000 -135123.296875 0.000000 -0.000000 -0.000000 0.000031
+Special action: 0
+Weapons: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Vehicle: None
+Vehicle components: None
+
+[asdasdas, 0]
+Comment: No comment
+Date: 3. Spalis 2012
+Time: 17:58:24
+IP: 127.0.0.1
+Ping: 0
+gpci: 4945DECED9CAE99DC5E9449E00898D8DCEAD5CD4
+Coordinates: 125.451660 -210.925643 1.432722 262.993560 0 0
+State: 1 100.000000 100.000000 1189 PED IDLE_STANCE
+Speed: 0 0 0.000000 0.000000 0.000000
+Armed weapon: 0 0
+Color: 0x0
+Money: 0 0
+Score: 1
+Skin: 50
+Wanted level: 0
+Drunk level: 605
+Player time: 12:00
+Keys: 0x0 0x0 0x0
+Camera: 125.755599 -210.958297 5.519299 -0.086851 0.009326 -0.996177
+Special action: 0
+Weapons: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+Vehicle: None
+Vehicle components: None
+

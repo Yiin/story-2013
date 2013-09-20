@@ -1,0 +1,51 @@
+YCMD:clickon2(pid, params[], help)
+{
+	#pragma unused help
+	new _id = strval(params);
+	notification(pid, "mouse 2");
+	inline xd(_pid, dialogid, response, listitem, string:inputtext[])
+	{
+		#pragma unused dialogid, response, inputtext
+		switch(listitem)
+		{
+			case 0: notification(_pid, "Info");
+			case 1: notification(_pid, "Trade");
+			case 2: notification(_pid, "Friend");
+			case 3:
+			{
+				if(pinfo[direktorius] == pDB[_id][darbas])
+				{
+					inline warning(pid_, dialogid_, response_, listitem_, string:inputtext_[])
+					{
+						#pragma unused dialogid_, listitem_, inputtext_
+						if(response_)
+						{
+							pDB[_id][darbas] = 0;
+							notification(_id, "Tu ismestas is darbo");
+							notification(pid, f("Atleidai %s is darbo", GetPlayerNameEx(_id)));
+						} else {
+							//Command_ReProcess(pid_, valstr(_id), false);
+						}
+					}
+					Dialog_ShowCallback(pid, using inline warning, DIALOG_STYLE_MSGBOX, GetPlayerNameEx(_id), f("Ar tikrai nori ismesti %s is darbo?", GetPlayerNameEx(_id)), "Taip", "Ne");
+				}
+			}
+		}
+	}
+	new txt[24];
+	if(pinfo[direktorius])
+	{
+		if(pinfo[direktorius] == pDB[_id][darbas])
+		{
+			txt = "Atleisti ið darbo.";
+		} else {
+			txt = "Kviesti á darbà.";
+		}
+	}
+	if(pinfo[direktorius])
+		Dialog_ShowCallback(pid, using inline xd, DIALOG_STYLE_LIST, GetPlayerNameEx(_id), f("Informacija\nMainytis\nDraugas\n%s", txt), "Uþdaryti");
+	else
+		Dialog_ShowCallback(pid, using inline xd, DIALOG_STYLE_LIST, GetPlayerNameEx(_id), f("Informacija\nMainytis\nDraugas"), "Uþdaryti");
+	
+	return 1;
+}

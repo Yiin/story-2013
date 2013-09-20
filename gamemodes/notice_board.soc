@@ -1,0 +1,422 @@
+/*
+
+
+
+
+
+
+
+
+
+							Story of Cities
+
+								PRANEÐIMØ LENTA
+
+
+
+
+
+
+
+
+*/
+
+#define NOTICE_BOARD:: nb__
+#define AREA:: area__
+#define LABEL:: label_
+
+new AREA::notice_board;
+
+NOTICE_BOARD::Init()
+{		
+	SetDynamicObjectMaterial(CreateDynamicObject(2789, 144.81021, -62.05324, 1.84218,   0.00000, 0.00000, 4.90497), 0, 2789, "airp_prop", "CJ_BANDEDMETAL", 0);
+	SetDynamicObjectMaterial(CreateDynamicObject(2789, 139.89784, -62.71021, 1.84218,   0.00000, 0.00000, 9.60327), 0, 2789, "airp_prop", "CJ_BANDEDMETAL", 0);
+
+	AREA::notice_board = CreateDynamicSphere((144.81021+139.89784)/2, (-62.05324-62.71021)/2, 1.84218, 8);
+	Create3DTextLabel("Skelbimø lenta", COLOR_SOC, (144.81021+139.89784)/2, (-62.05324-62.71021)/2, 1.84218, 0, 0);
+}
+
+NOTICE_BOARD::ProcessArea(pid, AREA::id)
+{
+	if(AREA::id == AREA::notice_board)
+	{
+		show_area(pid, "Noredamas perziureti skelbimus spausk ~y~ALT~w~.");
+		return true;
+
+	} else {
+
+		return false;
+	}
+}
+
+NOTICE_BOARD::PushNotice(pid, text[])
+{
+	static name[MAX_PLAYER_NAME];
+	GetPlayerName(pid, name, sizeof name);
+	vector_push_back(vNoticeBoard + nbSkelbejoID, pinfo[DBID]);
+	vector_push_back_arr(vNoticeBoard + nbSkelbejas, name);
+	vector_push_back_arr(vNoticeBoard + nbPranesimas, text);
+	vector_push_back(vNoticeBoard + nbLaikas, gettime());
+}
+
+NOTICE_BOARD::IsNearBoard(pid)
+{
+	return IsPlayerInDynamicArea(pid, AREA::notice_board);
+}
+
+NOTICE_BOARD::Show_SearchNotice(pid)
+{
+	head(gt, "Ávesk skelbimo autoriø, arba tekstà kuris yra skelbime.");
+	newrow(gt, "Pvz.:");
+	newline(gt);
+	newrow(gt, "Vardas");
+	newrow(gt, "Vardas_Pavarde");
+	newrow(gt, "Vardas_Pav");
+	newrow(gt, "rdas_Pava");
+	newrow(gt, "sultan");
+	newrow(gt, "perku");
+	newrow(gt, "parduodu");
+	inline results(id, did, re, li, string:in[])
+	{
+		#pragma unused id, did, li
+		if(re)
+		{
+			if(isnull(in))
+			{
+				NOTICE_BOARD::Show_SearchNotice(pid);
+			
+			} else {
+
+				LABEL::Rasti_Skelbimai:
+
+				static find_buffer[2][200];
+				head(gt, "Rasti skelbimai:");
+				for(new i, j = vector_size(vNoticeBoard + nbPranesimas); i != j; ++i)
+				{
+					vector_get_arr(vNoticeBoard + nbSkelbejas, i, find_buffer[0]);
+					vector_get_arr(vNoticeBoard + nbPranesimas, i, find_buffer[1]);
+					if(strfind(find_buffer[0], in) != -1 || strfind(find_buffer[1], in) != -1)
+					{
+						newrow(gt, "%i) %s: %.30s%s", ((j - 1) - i), find_buffer[0], find_buffer[1], strlen(find_buffer[1]) > 30 ? ("...") : (""));
+					}
+				}
+				inline results_list(id0, did0, re0, li0, string:in0[])
+				{
+					#pragma unused id0, did0
+					if(re0)
+					{
+						if(li0 > 1)
+						{
+							strdel(in0, strfind(in0, ")"), strlen(in0));
+							new const xid = strval(in0);
+							if(vector_index_exists(vNoticeBoard + nbPranesimas, xid))
+							{
+								NOTICE_BOARD::DisplayNotice(pid, xid);
+
+							} else {
+
+								NOTICE_BOARD::Show(pid);
+							}
+
+						} else {
+
+							goto LABEL::Rasti_Skelbimai;
+						}
+
+					} else {
+
+						NOTICE_BOARD::Show(pid);
+					}
+				}
+				showDialog(pid, using inline results_list, DIALOG_STYLE_LIST, " ", gt, "Rinktis", "Atgal");
+			}
+
+		} else {
+
+			NOTICE_BOARD::Show(pid);
+		}
+	}
+	showDialog(pid, using inline results, DIALOG_STYLE_INPUT, " ", gt, "Ieðkoti", "Atgal");
+}
+
+NOTICE_BOARD::Show_NewNotice(pid)
+{
+	LABEL::Rasyti_nauja:
+	new iCount, last_message = -1;
+
+	new const MAX = vector_size(vNoticeBoard + nbPranesimas);
+	for(new ii; ii != MAX; ++ii)
+	{
+		if(vector_get(vNoticeBoard + nbSkelbejoID, ii) == pinfo[DBID])
+		{
+			++iCount;	
+			new msg_time = vector_get(vNoticeBoard + nbLaikas, ii);
+			if(msg_time > last_message)
+			{
+				last_message = msg_time;
+			}
+		}
+	}
+	inline response_back(id0, did0, re0, li0, string:in0[])
+	{
+		#pragma unused id0, did0, re0, li0, in0
+		NOTICE_BOARD::Show(pid);
+	}
+	head(gt, "Naujo skelbimo raðymas.");
+	if(iCount >= 5)
+	{
+		newrow(gt, "Jau esi paskelbes %i skelbimus, nukabink kurá nors ið jø.", iCount);
+		showDialog(pid, using inline response_back, DIALOG_STYLE_MSGBOX, " ", gt, "Atgal", "");
+	
+	} else {
+
+		if(last_message + 20 > gettime() && last_message != -1)
+		{
+			newrow(gt, "Skelbimà raðyti gali tik kas 30 sec. Palauk dar %i sec.", (last_message - (gettime() - 30)));
+			showDialog(pid, using inline response_back, DIALOG_STYLE_MSGBOX, " ", gt, "Atgal", "");
+
+		} else {
+
+			newrow(gt, "Kità skelbimà galësi raðyti tik po 20min.");
+			newrow(gt, "Maksimalus ilgis: 144 simboliai.");
+			newrow(gt, "Kaina: 1 lt / 5 simboliai.");
+			inline input(id1, did1, re1, li1, string:in1[])
+			{
+				#pragma unused id1, did1, li1
+				if(re1)
+				{
+					new const fix_index_144 = 144;
+					if(strlen(in1) > fix_index_144)
+					{
+						in1[fix_index_144] = EOS;
+						strcat(in1, "...");
+					
+					} else if(isnull(in1)) {
+
+						goto LABEL::Rasyti_nauja;
+					}
+					if(strlen(in1) / 5 > PLAYER::GetMoney(pid))
+					{
+						if(PLAYER::GetMoney(pid))
+						{
+							inline ok(id2, did2, re2, li2, string:in2[])
+							{
+								#pragma unused id2, did2, li2, in2
+								if(re2)
+								{
+									if(PLAYER::GetMoney(pid))
+									{
+										PLAYER::GiveMoney(pid, PLAYER::GetMoney(pid) * -1);
+										in1[PLAYER::GetMoney(pid) * 5 - 1] = EOS;
+										NOTICE_BOARD::PushNotice(pid, in1);
+									
+									} else {
+
+										notification2(pid, "Neturi pinigu.");
+										NOTICE_BOARD::Show(pid);
+									}
+
+								} else {
+
+									NOTICE_BOARD::Show(pid);
+								}
+							}
+							showDialog(pid, using inline ok, DIALOG_STYLE_MSGBOX, " ", F("Uþ turimus pinigus gali paraðyti tik %i simboliu(s). Tæsti?", PLAYER::GetMoney(pid) * 5), "Taip", "Atgal");
+
+						} else {
+
+							notification2(pid, "Neturi pinigu.");
+							NOTICE_BOARD::Show(pid);
+						}
+
+					} else {
+
+						PLAYER::GiveMoney(pid, strlen(in1) / -5);
+						NOTICE_BOARD::PushNotice(pid, in1);
+						NOTICE_BOARD::Show(pid);
+					}
+
+				} else {
+
+					NOTICE_BOARD::Show(pid);
+				}
+			}
+			showDialog(pid, using inline input, DIALOG_STYLE_INPUT, " ", gt, "Skelbti", "Atgal");
+		}
+	}
+}
+
+NOTICE_BOARD::Show_MyNotices(pid)
+{
+	head(gt, "Tavo skelbimai:");
+	static find_buffer[2][200];
+	for(new i, j = vector_size(vNoticeBoard + nbPranesimas); i != j; ++i)
+	{
+		if(vector_get(vNoticeBoard + nbSkelbejoID, i) == pinfo[DBID])
+		{
+			vector_get_arr(vNoticeBoard + nbSkelbejas, i, find_buffer[0]);
+			vector_get_arr(vNoticeBoard + nbPranesimas, i, find_buffer[1]);
+			newrow(gt, "%i) %s: %.30s%s", ((j - 1) - i), find_buffer[0], find_buffer[1], strlen(find_buffer[1]) > 30 ? ("...") : (""));
+		}
+	}
+	inline my_response(id, did, re, li, string:in[])
+	{
+		#pragma unused id, did, li
+		if(re)
+		{
+			strdel(in, strfind(in, ")"), strlen(in));
+			new const xid = strval(in);
+			if(vector_index_exists(vNoticeBoard + nbPranesimas, xid))
+			{
+				NOTICE_BOARD::DisplayNotice(pid, xid);
+			}
+
+		} else {
+
+			NOTICE_BOARD::Show(pid);
+		}
+	}
+	showDialog(pid, using inline my_response, DIALOG_STYLE_LIST, " ", gt, "Rinktis", "Atgal");
+}
+
+NOTICE_BOARD::DisplayNotice(pid, xid)
+{
+	static buffer[200];
+	vector_get_arr(vNoticeBoard + nbSkelbejas, xid, buffer);
+	head(gt, C_Y"%s"C_SOC":", buffer);
+	vector_get_arr(vNoticeBoard + nbPranesimas, xid, buffer);
+	newrow(gt, "%s", buffer);
+
+	if(vector_get(vNoticeBoard + nbSkelbejoID, xid) == pinfo[DBID])
+	{
+		inline response_owner(id0, did0, re0, li0, string:in0[])
+		{
+			#pragma unused id0, did0, li0, in0
+			if(re0)
+			{
+				NOTICE_BOARD::RemoveNotice(xid);
+
+			} else {
+
+				NOTICE_BOARD::Show(pid);
+			}
+		}
+		showDialog(pid, using inline response_owner, DIALOG_STYLE_MSGBOX, " ", gt, "Panaikinti", "Atgal");
+
+	} else {
+
+		inline response_back(id0, did0, re0, li0, string:in0[])
+		{
+			#pragma unused id0, did0, re0, li0, in0
+			NOTICE_BOARD::Show(pid);
+		}
+		showDialog(pid, using inline response_back, DIALOG_STYLE_MSGBOX, " ", gt, "Atgal", "");
+	}
+}
+
+NOTICE_BOARD::RemoveNotice(xid)
+{
+	if(vector_index_exists(vNoticeBoard + nbPranesimas, xid))
+	{
+		vector_remove(vNoticeBoard + nbPranesimas, xid);
+		vector_remove(vNoticeBoard + nbSkelbejoID, xid);
+		vector_remove(vNoticeBoard + nbSkelbejas, xid);
+		vector_remove(vNoticeBoard + nbLaikas, xid);
+	}
+}
+
+NOTICE_BOARD::Show(pid)
+{
+	LABEL::start:
+	head(gt, "Skelbimø lenta");
+
+	newrow(gt, "Raðyti naujà skelbimà.");
+	if(vector_size(vNoticeBoard + nbPranesimas))
+	{
+		newrow(gt, "Ieðkoti skelbimo.");
+		if(vector_find(vNoticeBoard + nbSkelbejoID, pinfo[DBID]) != -1)
+		{
+			newrow(gt, "Mano skelbimai.");
+		}
+	}
+	newline(gt);
+
+	newrow(gt, "Visi skelbimai:");
+	newline(gt);
+	static buffer[200];
+	buffer[0] = EOS;
+	for(new i = vector_size(vNoticeBoard + nbPranesimas) - 1, j = 1; i != -1; --i, ++j)
+	{
+		vector_get_arr(vNoticeBoard + nbPranesimas, i, buffer);
+		if(strlen(buffer) > 40)
+		{
+			buffer[40] = EOS;
+			strcat(buffer, "...");
+		}
+		newrow(gt, "%i) %s", j, buffer);
+	}
+	if(isnull(buffer))
+	{
+		newrow(gt, "Skelbimø nëra.");
+	}
+	inline list_menu(id, did, re, li, string:in[])
+	{
+		#pragma unused id, did
+		if(re)
+		{
+			if(li >= 8)
+			{
+				if(!checkrow(in, "Skelbimø nëra"))
+				{
+					new const vsize = vector_size(vNoticeBoard + nbPranesimas);
+					new const xid = (vsize - 1) - (li - 8);
+					if(vsize > xid)
+					{
+						NOTICE_BOARD::DisplayNotice(pid, xid);
+
+					} else {
+
+						goto LABEL::start;
+					}
+				
+				} else {
+
+					goto LABEL::start;
+				}
+
+			} else {
+
+				if(checkrow(in, "Raðyti naujà skelbimà"))
+				{
+					NOTICE_BOARD::Show_NewNotice(pid);
+				
+				} else if(checkrow(in, "Ieðkoti skelbimo")) {
+
+					NOTICE_BOARD::Show_SearchNotice(pid);
+				
+				} else if(checkrow(in, "Mano skelbimai")) {
+
+					NOTICE_BOARD::Show_MyNotices(pid);
+				
+				} else {
+
+					NOTICE_BOARD::Show(pid);
+				}
+			}
+		}
+	}
+	showDialog(pid, using inline list_menu, DIALOG_STYLE_LIST, " ", gt, "Rinktis", "Uþdaryti");
+	return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+

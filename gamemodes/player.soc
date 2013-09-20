@@ -1,0 +1,1256 @@
+/*
+
+
+
+
+
+
+
+
+
+							Story of Cities
+
+								PLAYER
+
+
+
+
+
+
+
+
+*/
+
+func resetPlayerVariables(pid)
+{
+	for(new i;i!=e_garage;++i)
+	vector_clear(getGarageIndex(pid, i));
+	vector_clear(vPlayerFlags+pid);
+	vector_clear(vMapIcon+pid);
+	vector_clear(vGangWar+pid);
+	vector_clear(vGangPeace+pid);
+
+	CRAFT::Hide(pid);
+
+	for(new i; i != MAX_ITEM; ++i)
+		memset(bag[i]);
+
+	ptemp[gunzone] = -1;
+	memset(ptemp[quests]);
+	memset(ptemp[peffect]);
+	memset(ptemp[current_handgun]);
+	memset(ptemp[current_wep]);
+	pfreeze[pid] = 0;
+	Delete3DTextLabel(tinfo[textlabel]);
+	pbool = flag_pbools:0;
+	pflag = flag_player:0;
+	bball[pid] = e_bball:0;
+	if(pinfo[carid] != INVALID_VEHICLE_ID)
+		car[pinfo[carid]][car_id] = INVALID_VEHICLE_ID;
+	pinfo[carid] = INVALID_VEHICLE_ID;
+	baguse[pageid] = 0;
+	for(new i = 0; i < 13; ++i)
+		baguse[bagedit:i] = -1;
+	trylog[pid] = 0;
+	pTemp[pid][socket] = -1;
+	for(new gx=0; gx < MAX_DOTS; gx++) Routes[pid][gx]=-1;
+	tinfo[gps_dest_node] = -1;
+	set.LastDamageBy[pid] = INVALID_PLAYER_ID;
+	pinfo[death_state] = DEATH_STATE_NONE;
+	if(ptemp[lova] != -1)
+	{
+		lova_in_use{ptemp[lova]} = false;
+		ptemp[lova] = -1;
+	}
+	//DestroyRoutes(pid);
+}
+
+func PLAYER::Load(Result:r, pid)
+{
+	player.bool.on(pid,bKatikPrisijunge);
+
+	new darbo_patirtis[200];
+	//pinfo[]
+	PLAYER::JOB::Set(pid, 		      sql_get_field_assoc_int(r,  	"darbas"));
+	PLAYER::GANG::Set(pid, 			   sql_get_field_assoc_int(r,  	"gauja")); 
+	PLAYER::GANG::SetJoinTime(pid,	sql_get_field_assoc_int(r,  	"gauja_join_time"));
+	PLAYER::GANG::SetExp(pid,  		sql_get_field_assoc_int(r,  	"gauja_rep_diff"));
+	PLAYER::GANG::SetJoined(pid,	   sql_get_field_assoc_int(r,  	"gauja_joined"));
+	pinfo[last_kills] =				   sql_get_field_assoc_int(r,  	"last_kills");
+	pinfo[kills] =					      sql_get_field_assoc_int(r,  	"kills");
+	PLAYER::SetFlags(pid,			   sql_get_field_assoc_int(r,  	"flags"));
+	pinfo[vip] = 					      sql_get_field_assoc_int(r,  	"vip"); 
+	PLAYER::SetMoney(pid, 			   sql_get_field_assoc_int(r,  	"pinigai")); 
+	PLAYER::SetExp(pid, 				   sql_get_field_assoc_int(r,  	"patirtis")); 
+	PLAYER::SetHealthLimit(pid,	   sql_get_field_assoc_float(r,	"max_hp"));
+	PLAYER::SetHealth(pid,				sql_get_field_assoc_float(r,	"hp"));
+	PLAYER::SetSprint(pid, 			   sql_get_field_assoc_float(r,	"sprint_energy"));
+	PLAYER::SetWanted(pid,		      sql_get_field_assoc_int(r,  	"wanted"));
+	pinfo[lytis] = 					   sql_get_field_assoc_int(r,  	"lytis"); 
+	pinfo[skin] = 					      sql_get_field_assoc_int(r,  	"skin"); 
+	PLAYER::SetRuby(pid,			      sql_get_field_assoc_int(r,  	"rubinai"));
+	PLAYER::SetSkin(pid,			      sql_get_field_assoc_int(r,  	"skinid")); 
+	fset.spawn_x[pid] =  			   sql_get_field_assoc_float(r,	"x");
+	fset.spawn_y[pid] = 			      sql_get_field_assoc_float(r,	"y");
+	fset.spawn_z[pid] =  			   sql_get_field_assoc_float(r,	"z");
+									         sql_get_field_assoc(r,      	"darbo_patirtis", darbo_patirtis);
+	PLAYER::SetRoadColor(pid,		   sql_get_field_assoc_int(r,  	"gps_spalva")); 
+	PLAYER::JOB::SetDirector(pid,    sql_get_field_assoc_int(r,  	"direktorius")); 
+	pinfo[DBID] = 					      sql_get_field_assoc_int(r,  	"id");
+									         sql_get_field_assoc(r,      	"gauja_name", pinfo[gauja][g_name]);
+	PLAYER::SetJailTime(pid,		   sql_get_field_assoc_int(r,  	"jail_time"));
+	tinfo[jail_time_diff] = 			gettime();
+	PLAYER::JOB::SetRank(pid, 		   sql_get_field_assoc_int(r,  	"rangas"));
+	pinfo[time_joined] =					gettime();
+	pinfo[darbas][time_today] = 	   sql_get_field_assoc_int(r,  	"t_today");
+	pinfo[darbas][time_week] = 		sql_get_field_assoc_int(r,  	"t_week");
+	pinfo[darbas][data1_today] =	   sql_get_field_assoc_int(r,  	"v_today");
+	pinfo[darbas][data1_week] = 	   sql_get_field_assoc_int(r,  	"v_week");
+	pinfo[darbas][data2_today] =	   sql_get_field_assoc_int(r,  	"v2_today");
+	pinfo[darbas][data2_week] = 	   sql_get_field_assoc_int(r,  	"v2_week");
+	PLAYER::SetDeathState(pid,		   sql_get_field_assoc_int(r,  	"death_state"));
+	PLAYER::SetCurrentQuest(pid,	   sql_get_field_assoc_int(r,  	"current_quest"));
+	PLAYER::JOB::SetJoinTime(pid,	   sql_get_field_assoc_int(r,  	"darbas_joined"));
+												sql_get_field_assoc(r, 			"items", gt);
+	print(gt);
+
+	UpdateWanted(pid);
+
+	static buffer[MAX_ITEM][200];
+	static snf[16];
+	format(snf, sizeof snf, "p</>a<i>[%i]", eBonus+2);
+	sscanf(gt, "p<|>a<s[200]>["#MAX_ITEM"]", buffer);
+	for(new i; i != MAX_ITEM; ++i)
+	{
+		sscanf(buffer[i], snf, bag[i]);
+	}
+
+	sscanf(darbo_patirtis, "iiiiiii", 
+
+		pinfo[darbas][darbo_xp][MECHANIKAS-1], pinfo[darbas][darbo_xp][PD-1], 				pinfo[darbas][darbo_xp][MEDIKAS-1], 
+		pinfo[darbas][darbo_xp][TAXI-1], 		pinfo[darbas][darbo_xp][GAISRININKAS-1], 	pinfo[darbas][darbo_xp][VALYTOJAS-1], 
+		pinfo[darbas][darbo_xp][FURISTAS-1]
+
+	);
+
+	if(player.bool.get(pid, bUzsiregistravo))
+	{
+		sql_query(sqlHandle, F("INSERT INTO gaujos (id) VALUES (%i)", pinfo[DBID]));
+		vset.g_kill_count[gang[pid]] = 0;
+		vset.g_wins[gang[pid]] = 0;
+		vset.g_losses[gang[pid]] = 0;
+	}
+
+	vector_clear(vGangWar+pid);
+	vector_clear(vGangPeace+pid);
+
+	sql_get_field_assoc(r, "gauja_war", gt);
+	new idx, tmp2[20];
+	if(!isnull(gt))
+	{
+		do
+		{
+			tmp2 = strtok(gt, idx);
+			if(strval(tmp2))
+			{
+				vector_push_back(vGangWar+pid, strval(tmp2));
+			}
+		}
+		while (!isnull(tmp2));
+	}
+	sql_get_field_assoc(r, "gauja_peace", gt);
+	idx = 0;
+	if(!isnull(gt))
+	{
+		do
+		{
+			tmp2 = strtok(gt, idx);
+			if(strval(tmp2))
+			{
+				vector_push_back(vGangPeace+pid, strval(tmp2));
+			}
+		}
+		while (!isnull(tmp2));
+	}
+	
+	if(!PLAYER::JOB::Get(pid)) 
+	{
+		pinfo[darbas][data1_today] = 0;
+		pinfo[darbas][data2_today] = 0;
+		pinfo[darbas][data1_week] = 0;
+		pinfo[darbas][data2_week] = 0;
+	}
+
+	checkKeys(._player = pid);
+
+	for(new i = 0; i < 100; ++i)
+	{
+		Command_SetPlayer(i, pid, true);
+	}
+	printf("Galimos komandos: %i",Command_GetPlayerCommandCount(pid));
+	PLAYER::SetSkin(pid);
+	TogglePlayerSpectating(pid, false);
+	LoadVehicles(pid);
+	socf(pid, SPRINT_UPDATE, "%f", fget.max_sprint[pid]);
+	return 1;
+}
+
+PLAYER::Save(pid, is_update = 0)
+{
+	if( player.bool.get(pid,bPrisijunges) )
+	{
+		new
+			coords<1>;
+
+
+		new query_type;
+		if(get.gmexit[pid]) query_type = QUERY_CACHED;
+		else query_type = QUERY_THREADED;
+
+		if( ! is_update)
+		{
+			printf("Iðsaugoma. [%s]", GetPlayerNameEx(pid));
+			UpdateAmmo(pid);
+		}
+
+		gt{0} = EOS;
+
+		format(gt, sizeof gt, "UPDATE zaidejai SET ");
+
+		GetPlayerPos(pid,coords<1>);
+
+		save("x = %f, y = %f, z = %f",    coords<1> );
+		save("skin = %i, skinid = %i",    PLAYER::ReturnSkin(pid), PLAYER::GetSkin(pid) );
+		save("darbas = %i, rangas = %i",  PLAYER::JOB::Get(pid), PLAYER::JOB::GetRank(pid) );
+		save("direktorius = %i", 			 PLAYER::JOB::GetDirector(pid));
+		save("kicksbans = %i",            pinfo[kb] );
+		save("pinigai = %i",              PLAYER::GetMoney(pid) );
+		save("patirtis = %i",             PLAYER::GetExp(pid) );
+		save("darbo_patirtis = '%i %i %i %i %i %i %i'",    pinfo[darbas][darbo_xp][MECHANIKAS-1], pinfo[darbas][darbo_xp][PD-1], pinfo[darbas][darbo_xp][MEDIKAS-1], pinfo[darbas][darbo_xp][TAXI-1], pinfo[darbas][darbo_xp][GAISRININKAS-1], pinfo[darbas][darbo_xp][VALYTOJAS-1], pinfo[darbas][darbo_xp][FURISTAS-1]);
+		save("sprint_energy = %f",        PLAYER::GetSprint(pid) );
+		save("wanted = %i",               PLAYER::GetWanted(pid));
+		save("gps_spalva = %i",           PLAYER::GetRoadColor(pid));
+		save("gauja = %i",					 PLAYER::GANG::Get(pid));
+		save("gauja_name = '%s'",         PLAYER::GANG::GetName(pid));
+		save("gauja_join_time = %i",      PLAYER::GANG::GetJoinTime(pid) + gettime() - pinfo[time_joined]);
+		save("gauja_joined = %i", 			 PLAYER::GANG::GetJoined(pid));
+		save("gauja_rep_diff = %i",       PLAYER::GANG::GetExp(pid)); 
+		save("flags = %i",                PLAYER::GetFlags(pid));
+		save("jail_time = %i",            PLAYER::GetJailTime(pid));
+		save("death_state = %i",          PLAYER::GetDeathState(pid));
+		save("current_quest = %i",        PLAYER::GetCurrentQuest(pid));
+		save("darbas_joined = %i",        PLAYER::JOB::GetJoinTime(pid));
+		save("rubinai = %i", 				 PLAYER::GetRuby(pid));
+
+		new y,m,d;
+		getdate(y,m,d);
+		save("last_logout = '%i %i %i'", y,m,d);
+		save("t_today = %i", pinfo[darbas][time_today] + gettime() - pinfo[time_joined]);
+		save("t_week = %i", pinfo[darbas][time_week] + gettime() - pinfo[time_joined]);
+
+		strcat (gt, f("hp = %f, max_hp = %f WHERE vardas = '%s'", PLAYER::GetHealth(pid), pinfo[max_hp], GetPlayerNameEx(pid)));
+		sql_query(sqlHandle, gt, query_type);
+
+		format(gt, sizeof gt, "UPDATE zaidejai SET gauja_war = '");
+		for(new i, j = vector_size(vGangWar+pid); i != j; ++i)
+		{
+			strcat(gt, f("%i ", vector_get(vGangWar+pid, i)));
+		}
+		strcat(gt, "', gauja_peace = '");
+		for(new i, j = vector_size(vGangPeace+pid); i != j; ++i)
+		{
+			strcat(gt, f("%i ", vector_get(vGangPeace+pid, i)));
+		}
+		strcat(gt, f("' WHERE vardas = '%s'", GetPlayerNameEx(pid)));
+		sql_query(sqlHandle, gt, query_type);
+
+		//print(gt);
+
+		if(!is_update)
+		{
+			//////////////////////////////////////////////////////////////////
+			/////////// ITEM ID's //////////////////////////////////////////// 
+			format(gt, sizeof gt, "UPDATE zaidejai SET items = '");
+			static buffer[500];
+			for(new i = 0; bag[i][item] != 0 ; ++i)
+			{
+				format(buffer, sizeof buffer, "%i/%i/",bag[i][item], bag[i][kiekis]);
+				for(new j; j != eBonus; ++j)
+					strcat(buffer, f("%i/", bag[i][effect][j]));
+				strcat(buffer, "|");
+				strcat(gt, buffer);
+			}
+			strcat(gt, f("' WHERE vardas = '%s'", GetPlayerNameEx(pid)));
+			sql_query(sqlHandle, gt, query_type);
+			strdel(gt,0,sizeof(gt));
+			//////////////////////////////////////////////////////////////////
+		
+			if(pinfo[carid] != INVALID_VEHICLE_ID)
+			{
+				SaveVehicle(pinfo[carid], query_type);
+				pinfo[carid] = INVALID_VEHICLE_ID;
+			}
+		}
+	}
+	return 1;
+}
+
+PLAYER::JOB::Get(pid) { return pinfo[darbas]; }
+PLAYER::JOB::Set(pid, JOB::id) { pinfo[darbas] = JOB::id; }
+PLAYER::JOB::GetRank(pid) { return pinfo[darbas][rangas]; }
+PLAYER::JOB::SetRank(pid, rankid) { pinfo[darbas][rangas] = rankid; }
+PLAYER::JOB::GetDirector(pid) { return pinfo[direktorius]; }
+PLAYER::JOB::SetDirector(pid, JOB::id) { pinfo[direktorius] = JOB::id; }
+PLAYER::JOB::GetJoinTime(pid) { return pinfo[darbas_joined]; }
+PLAYER::JOB::SetJoinTime(pid, new_time = 0) { pinfo[darbas_joined] = new_time ? new_time : gettime(); }
+PLAYER::JOB::GetExp(pid, JOB::id = -1){
+
+	if(JOB::id > 0)
+	{
+		return pinfo[darbas][darbo_xp][JOB::id - 1];
+
+	} else {
+
+		return pinfo[darbas][darbo_xp][ PLAYER::JOB::Get(pid) - 1];
+	}}
+PLAYER::JOB::GiveExp(pid, amount, JOB::id = -1){
+	if(id > 0)
+	{
+		return pinfo[darbas][darbo_xp][JOB::id - 1] += amount;
+	
+	} else {
+
+		return pinfo[darbas][darbo_xp][ PLAYER::JOB::Get(pid) - 1 ] += amount;
+	}}
+PLAYER::JOB::SetExp(pid, amount, JOB::id = -1){
+	if(id > 0)
+	{
+		return pinfo[darbas][darbo_xp][JOB::id - 1] = amount;
+	
+	} else {
+
+		return pinfo[darbas][darbo_xp][ PLAYER::JOB::Get(pid) - 1 ] = amount;
+	}}
+PLAYER::SetRuby(pid, amount){
+	pinfo[rubinai] = 0;
+	PLAYER::GiveRuby(pid, amount);}
+PLAYER::GetRuby(pid){
+	return pinfo[rubinai];}
+PLAYER::GiveRuby(pid, amount){
+	PlayerTextDrawSetString(pid, p_stats[1][playerid], FormatNumber( pinfo[rubinai] += amount ));
+	PlayerTextDrawShow(pid, p_stats[1][playerid]);
+	return pinfo[rubinai];}
+PLAYER::GetMoney(pid) { return get.money[pid]; }
+PLAYER::GiveMoney(pid, amount)
+{
+	static iMoney;
+	iMoney = get.money[pid];
+	set.money[pid] = iMoney += amount;-
+	PlayerTextDrawSetString(pid, p_stats[0][playerid], FormatNumber( iMoney ));
+	PlayerTextDrawShow(pid, p_stats[0][playerid]);
+	return iMoney;
+}
+PLAYER::SetMoney(pid, amount)
+{
+	del.money[pid];
+	PLAYER::GiveMoney(pid, amount);
+}
+func Float:PLAYER::GetHealthLimit(pid) { return pinfo[max_hp]; }
+PLAYER::SetHealthLimit(pid, Float:limit) { pinfo[max_hp] = limit; }
+PLAYER::GetFlags(pid) { return pFlags[pid]; }
+PLAYER::SetFlags(pid, flags) { pFlags[pid] = flag_player:flags; }
+PLAYER::GetExp(pid) { return pinfo[patirtis]; }
+PLAYER::SetExp(pid, amount) { pinfo[patirtis] = 0; PLAYER::GiveExp(pid, amount); }
+PLAYER::GiveExp(pid, amount, bool:jobXp = false)
+{
+	if(pinfo[vip])
+	{
+		if(amount > 0)
+		{
+			amount *= 2;
+		}
+	}
+
+	pinfo[patirtis] += (amount);
+	PLAYER::GANG::GiveExp(pid, amount);
+
+	if(jobXp && PLAYER::JOB::Get(pid))
+	{
+		pinfo[darbas][darbo_xp][pinfo[darbas]-1] += (amount);
+		darbai[pinfo[darbas]][dAktyvumas] += (amount);
+	}
+	
+	updatePlayer(pid);
+	SetPlayerScore(pid, pinfo[patirtis]);
+	return pinfo[patirtis];
+}
+func Float:PLAYER::GetSprint(pid) { return fget.max_sprint[pid]; }
+PLAYER::SetSprint(pid, Float:amount) { fset.max_sprint[pid] = amount; }
+PLAYER::GetWanted(pid) { return pinfo[wanted]; }
+PLAYER::SetWanted(pid, amount) { pinfo[wanted] = amount; }
+PLAYER::AddWanted(pid, amount) { return pinfo[wanted] += amount; }
+PLAYER::GetRoadColor(pid) { return pinfo[gps_color]; }
+PLAYER::SetRoadColor(pid, color = 0xFF0000FF) { pinfo[gps_color] = color; }
+PLAYER::GANG::Get(pid) { return pinfo[gauja]; }
+PLAYER::GANG::Set(pid, id) { pinfo[gauja] = id; }
+PLAYER::GANG::GetName(pid)
+{
+	static name[MAX_PLAYER_NAME];
+	format(name, sizeof name, pinfo[gauja][g_name]);
+	return name;
+}
+PLAYER::GANG::SetName(pid, name[]) { format(pinfo[gauja][g_name], 24, name); }
+PLAYER::GANG::GetJoinTime(pid) { return pinfo[gauja][g_joinTime]; }
+PLAYER::GANG::SetJoinTime(pid, amount = 0) { pinfo[gauja][g_joinTime] = amount ? amount : gettime(); }
+PLAYER::GANG::GetJoined(pid) { return pinfo[gauja][g_joined]; }
+PLAYER::GANG::SetJoined(pid, new_time) { pinfo[gauja][g_joined] = new_time; }
+PLAYER::GANG::GetExp(pid) { return pinfo[gauja][g_rep_diff]; }
+PLAYER::GANG::GiveExp(pid, amount) { return pinfo[gauja][g_rep_diff] += amount; }
+PLAYER::GANG::SetExp(pid, new_exp) { pinfo[patirtis] = new_exp; }
+PLAYER::GetJailTime(pid) { return pinfo[jail_time]; }
+PLAYER::SetJailTime(pid, new_time) { pinfo[jail_time] = new_time; }
+PLAYER::GetDeathState(pid) { return pinfo[death_state]; }
+PLAYER::SetDeathState(pid, new_state) { pinfo[death_state] = new_state; }
+PLAYER::GetCurrentQuest(pid) { return pinfo[current_quest]; }
+PLAYER::SetCurrentQuest(pid, new_quest) { pinfo[current_quest] = new_quest; }
+PLAYER::ReturnSkin(pid)
+{
+	switch(pinfo[skinid])
+	{
+		case 0:
+		{
+			return pinfo[skin];
+		}
+		case 1:
+		{
+			new const skin_id = 
+			rangai[pinfo[darbas]]
+					[pinfo[darbas][rangas]]
+					[pinfo[lytis]?r_skin_m:r_skin_v];
+			return JOB::GetSkin(pinfo[darbas], pinfo[lytis], skin_id);
+		}
+	}
+	return pinfo[skin];
+}
+PLAYER::GetSkin(pid) { return pinfo[skinid]; }
+PLAYER::SetSkin(pid, skinas = -1, use_skin = 0)
+{
+	if(use_skin)
+	{
+		pinfo[skin] = use_skin;
+		pinfo[skinid] = SKIN_PLAYER;
+	}
+	switch(skinas)
+	{
+		case -1:
+		{
+			switch(pinfo[skinid])
+			{
+				case SKIN_PLAYER: SetPlayerSkin(pid, pinfo[skin]);
+				case SKIN_DARBO: SetPlayerSkin(pid, PLAYER::ReturnSkin(pid));
+			}
+		}
+		case 0:
+		{
+			pinfo[skinid] = skinas;
+			SetPlayerSkin(pid, pinfo[skin]);
+		}
+		case 1:
+		{
+			pinfo[skinid] = skinas;
+			SetPlayerSkin(pid, PLAYER::ReturnSkin(pid));
+		}
+	}
+}
+func skinSelect(pid)
+{
+	for(new i; i < 4; ++i)
+		TextDrawShowForPlayer(pid, iSkin[i]);
+
+	//soc(pid, LOCK_ON);
+
+	ClearAnimations(pid);
+	applyAnimation(playerid, "PED", "IDLE_STANCE", 4.0, 1, 1, 1, 1, 0);
+
+	switch(pinfo[lytis])
+	{
+		case VAIKINAS: PLAYER::SetSkin(pid, .use_skin = skins_v[0]);
+		default: PLAYER::SetSkin(pid, .use_skin = skins_m[0]);
+	}
+	player.bool.on(pid, bRenkasiSkina);
+}
+
+func DamagePlayer(pid, Float:amount, weaponid, Float:hp, issuerid)
+{
+	if(amount == 0.0)
+		return 1;
+	/*	
+	if(IsPlayerNPC(pid))
+	{
+		PlayerTextDrawSetString( issuerid, dmg[0][issuerid], "0" );
+		PlayerTextDrawSetString( issuerid, dmg[1][issuerid], "500");
+		PlayerTextDrawShow(issuerid, dmg[0][issuerid]);
+		PlayerTextDrawShow(issuerid, dmg[1][issuerid]);
+		pTemp[issuerid][dmg_diff] = gettime();
+		player.bool.on(issuerid, bDmg);
+		return 1;
+	}
+	*/
+
+	if(issuerid == INVALID_PLAYER_ID)
+	{
+		hp -= amount;
+		ptemp[blood_count] += amount;
+
+	} else {
+
+		amount *= 1.8;
+		amount += Float:random(80) / 20.0;
+
+		new const ibGive = GetWeaponSlot(weaponid) + ibFistDmgGive;
+		new const ibTake = GetWeaponSlot(weaponid) + ibFistDmgTake;
+
+		new void = -1;
+		if(pTemp[issuerid][peffect][ibCritical])
+		{
+			void = random(100 / pTemp[issuerid][peffect][ibCritical]);
+			if(!void) amount *= 2;
+		}
+
+		amount += pTemp[issuerid][peffect][ibGive];
+		amount -= ptemp[peffect][ibTake];
+
+		new Float:x,Float:y,Float:z;
+		new Float:xx,Float:yy,Float:zz;
+		GetPlayerCameraPos(issuerid, x,y,z);
+		GetPlayerPos(pid, xx,yy,zz);
+		switch(GetPlayerAimedBodyPart(issuerid, pid, Distance(x,y,z,xx,yy,zz)))
+		{
+			case HEAD: 
+			{
+				if(weaponid == 34)
+					amount = PLAYER::GetHealth(pid);
+				else
+					amount *= 1.5;
+			}
+			case LEG:	amount *= 0.6;
+			case ARM:	amount *= 0.5;
+		}
+		hp -= amount;
+		
+		ptemp[blood_count] += amount;
+
+		PlayerTextDrawSetString( issuerid, dmg[0][issuerid], F("%.1f", amount) );
+		PlayerTextDrawSetString( issuerid, dmg[1][issuerid], F("%.1f", hp<=0?0.0:hp ));
+		PlayerTextDrawShow(issuerid, dmg[0][issuerid]);
+		PlayerTextDrawShow(issuerid, dmg[1][issuerid]);
+		pTemp[issuerid][dmg_diff] = gettime();
+		player.bool.on(issuerid, bDmg);
+		//PLAYER::SetPain(pid, PLAYER::GetPain(pid) + floatround(amount) * 10);
+	}
+	PLAYER::SetHealth(pid, hp, weaponid);
+	return 1;
+}
+
+PLAYER::SetPain(pid,amount) { SetPlayerDrunkLevel(pid, amount); }
+PLAYER::GetPain(pid) { return GetPlayerDrunkLevel(pid); }
+
+forward Float:PLAYER::GetHealth(pid);
+Float:PLAYER::GetHealth(pid) { return fget.Health[pid]; }
+//forward PLAYER::SetHealth(pid,Float:hp, reason = 0);
+stock PLAYER::SetHealth(pid,Float:hp,reason = 0)
+{
+	#pragma unused reason
+	if(hp <= 0.0 && !player.bool.get(pid, bKatikPrisijunge))
+	{
+		if(player.flag.get(pid, fOnFire))
+		{
+			if(get.timer_onfire[pid])
+			{
+				killTimer(get.timer_onfire[pid]);
+				del.timer_onfire[pid];
+			}
+			for(new i; i < MAX_FIRES; ++i)
+				if(fire[i][3] == pid)
+				{
+					killFire(i);
+					break;
+				}
+			player.flag.off(pid, fOnFire);
+		}
+		if(!player.flag.get(pid, fMirsta))
+		{
+			new const killerid = get.LastDamageBy[pid];
+			suzeistas(pid);
+			if(killerid != INVALID_PLAYER_ID)
+			{
+				if(getWar(killerid, pid))
+				{
+					PLAYER::GiveExp(killerid, 2);
+					PLAYER::GiveExp(pid, -2);
+					JOB::POLICIJA::GiveWanted(killerid, 3);
+					vset.g_kill_count[gang[killerid]] = vget.g_kill_count[gang[killerid]] + 1;
+					new const Result:r = sql_query(sqlHandle, F("SELECT COUNT(*) FROM zaidejai WHERE gauja = %i", pInfo[killerid][gauja]), QUERY_CACHED);
+					if(vget.g_kill_count[gang[killerid]] == sql_get_field_assoc_int(r, "COUNT(*)"))
+					{
+						vset.g_wins[gang[killerid]] = vget.g_wins[gang[killerid]] + 1;
+						vset.g_losses[gang[pid]] = vget.g_losses[gang[pid]] + 1;
+						foreach(new i : Player)
+						{
+							if(pInfo[i][gauja] == pInfo[killerid][gauja])
+							{
+								PLAYER::GiveExp(i, 20);
+								notification2(i, F("Karas pries ~y~%s~w~ laimetas !", pinfo[gauja][g_name]));
+								infoMsg(i, "Karas prieð "C_Y"%s"C_SOC" laimëtas ! Paskutiná prieðà áveikë "C_Y"%s"C_SOC"!", pinfo[gauja][g_name], GetPlayerNameEx(killerid));
+
+							} else if(pInfo[i][gauja] == pinfo[gauja])
+							{
+								PLAYER::GiveExp(i, -15);
+								notification2(i, F("Karas pries ~y~%s~w~ pralaimetas...", pInfo[killerid][gauja][g_name]));
+								infoMsg(i, "Karas prieð "C_Y"%s"C_SOC" pralaimëtas... Paskutinë auka kritusi nuo prieðø buvo "C_Y"%s"C_SOC".", pInfo[killerid][gauja][g_name], GetPlayerNameEx(pid));
+							
+							} else {
+
+								infoMsg(i, C_Y"%s"C_SOC" laimëjo karà prieð "C_Y"%s"C_SOC".", pInfo[killerid][gauja][g_name], pInfo[killerid][gauja][g_name]);
+							}
+						}
+
+						format(gt, sizeof gt, 
+							"UPDATE zaidejai SET `patirtis` = `patirtis` + 20 WHERE gauja = %i;\
+							 UPDATE zaidejai SET `patirtis` = `patirtis` - 15 WHERE gauja = %i;\
+							 UPDATE gaujos SET `g_wins` = `g_wins` + 1 WHERE id = %i;\
+							 UPDATE gaujos SET `g_losses` = `g_losses` + 1 WHERE id = %i", 
+						pInfo[killerid][gauja], pinfo[gauja], gang[killerid], gang[pid]);
+
+						sql_query(sqlHandle, gt, QUERY_THREADED);
+					}
+
+				} else {
+
+					PLAYER::GiveExp(killerid, -15);
+					JOB::POLICIJA::GiveWanted(killerid, 25);
+				}
+				set.LastDamageBy[pid] = INVALID_PLAYER_ID;
+			}
+			new success;
+			new Float:x, Float:y, Float:z, Float:ang;
+			GetPlayerPos(playerid, x, y, z);
+			GetPlayerFacingAngle(playerid, ang);
+			static effect_buffer[200];
+			new modelid;
+			if(ptemp[current_wep][item])
+			{
+				new const dropped_item_slot = findExactItem(bag, ptemp[current_wep]);
+				
+				if(dropped_item_slot != -1)
+				{
+					success = ptemp[current_wep][item];
+					format(effect_buffer, sizeof effect_buffer, "%s", ptemp[current_wep][effect]);
+					vector_push_back(vDroppedWeapons+w_weapon_id, ptemp[current_wep][item]);
+					vector_push_back_arr(vDroppedWeapons+w_weapon_flags, effect_buffer);
+					RemoveItemFromSlot(pid, dropped_item_slot, 1);
+				}
+
+			} else if(ptemp[current_handgun][item]) {
+
+				new const dropped_item_slot = findExactItem(bag, ptemp[current_handgun]);
+				if(dropped_item_slot != -1)
+				{
+					success = ptemp[current_wep][item];
+					format(effect_buffer, sizeof effect_buffer, "%s", ptemp[current_handgun][effect]);
+					vector_push_back(vDroppedWeapons+w_weapon_id, ptemp[current_handgun][item]);
+					vector_push_back_arr(vDroppedWeapons+w_weapon_flags, effect_buffer);
+					RemoveItemFromSlot(pid, dropped_item_slot, 1);
+				}
+			}
+			modelid = GetWeaponModel(GetWeaponFromItem(success));
+			if(success)
+			{
+				if(vector_size(vDroppedWeapons+w_object) > 70)
+				{
+					DestroyObject(vector_get(vDroppedWeapons+w_object, 0));
+					destroyDynamicArea(vector_get(vDroppedWeapons+w_area, 0));
+					Delete3DTextLabel(Text3D:vector_get(vDroppedWeapons+w_text, 0));
+					vector_remove(vDroppedWeapons+w_object, 0);
+					vector_remove(vDroppedWeapons+w_area, 0);
+					vector_remove(vDroppedWeapons+w_text, 0);
+					vector_remove(vDroppedWeapons+w_weapon_id, 0);
+					vector_remove(vDroppedWeapons+w_weapon_flags, 0);
+				}
+				new const obj = CreateObject(modelid, x, y - 0.5 * floatcos(-(ang + 90.0), degrees), z, 93.7, 120.0, ang + 60.0);
+				new const area_ = CreateDynamicSphere(0,0,0,2); AttachDynamicAreaToObject(area_, obj, STREAMER_OBJECT_TYPE_GLOBAL);
+				
+				new wname[32];
+				GetWeaponName(GetPlayerWeapon(pid), wname, 32);
+				vector_push_back(vDroppedWeapons+w_object, obj);
+				vector_push_back(vDroppedWeapons+w_area, area_);
+				vector_push_back(vDroppedWeapons+w_text, 0);
+
+				PHY_InitObject(obj);
+				PHY_MoveObject(obj, 4.0 * floatsin(-ang, degrees), 4.0 * floatcos(-ang, degrees), 2.0);
+				PHY_SetObjectFriction(obj, 100);
+				PHY_SetObjectGravity(obj, 20.0);
+				PHY_SetObjectZBound(obj, z - 1.0, _, 0.0);
+
+
+
+				inline reset_obj()
+				{
+					new coords<1>;
+					PHY_GetObjectVelocity(obj, coords<1>);
+					if( _x1 == 0.0 && _y1 == 0.0)
+					{
+						new const find = vector_find(vDroppedWeapons+w_object, obj);
+						if(find != -1)
+						{
+							new const v_id = vector_get(vDroppedWeapons+w_timer, find);
+							GetObjectPos(obj, coords<1>);
+							new Text3D:text3d = Create3DTextLabel(wname, COLOR_SOC, coords<1>, 12, 0, 0);
+							if(find < vector_size(vDroppedWeapons+w_text))
+							{
+								vector_set(vDroppedWeapons+w_text, find, _:text3d);
+							}
+							
+							PHY_ObjectDelete(obj);
+							if(v_id != -1)
+							{
+								killTimer(v_id);
+							}
+						}
+					}
+				}
+				vector_push_back(vDroppedWeapons+w_timer, setTimer(using inline reset_obj, 100, 1));
+			}
+		}
+
+		hp = 0.0;
+	}
+	if(hp > pinfo[max_hp]) hp = pinfo[max_hp];
+	else if(hp < 0) hp = 0;
+
+	tinfo[blood] = 	(hp < pinfo[max_hp] / 4)	?	2
+					:(hp < pinfo[max_hp] / 3)	?	1
+					:(hp < pinfo[max_hp] / 2)	?	0:0;
+		if(ptemp[blood_count] > 255) ptemp[blood_count] = 255;
+		if(ptemp[blood_count]) player.bool.on(pid, bBloodScreen);
+		else player.bool.off(pid, bBloodScreen);
+
+	PlayerTextDrawHide(pid, p_stats[2][pid]);
+	PlayerTextDrawTextSize(pid, p_stats[2][pid], hp/pinfo[max_hp]*101, 3.2);
+	PlayerTextDrawShow(pid, p_stats[2][pid]);
+	SetPlayerHealth(pid, hp/pinfo[max_hp]*100+1);
+
+	fset.Health[pid] = hp;
+	return 1;
+}
+
+stock PLAYER::IsFreezed(pid, check = -1)
+{
+	if(check == -1)
+	{
+		return pfreeze[pid];
+
+	} else {
+
+		if(flag_get(pfreeze[pid], check))
+		{
+			return 1;
+
+		} else {
+
+			return 0;
+		}
+	}
+}
+
+stock PLAYER::Freeze(pid, bool:freezinti, reason = -1)
+{
+	if(!freezinti)
+	{
+		if(reason == -1)
+		{
+			pfreeze[pid] = 0;
+			TogglePlayerControllable(pid, true);
+			soc(pid, RESTORECAM);
+			player.flag.off(pid, fMirsta);
+			StopAudioStreamForPlayer(playerid);
+			Update3DTextLabelText(tinfo[textlabel], COLOR_NO, " ");
+			if(get.zvejoja[pid])
+			{
+				killTimer(get.zvejoja[pid]);
+				del.zvejoja[pid];
+			}
+
+		} else {
+
+			flag_off(pfreeze[pid], reason);
+			if(!pfreeze[pid]) TogglePlayerControllable(pid, true);
+			switch(reason)
+			{
+				case GARAZAS:
+				{
+					SetCameraBehindPlayer(pid);
+				}
+				case DEGALAI:
+				{
+					player.bool.off(pid,bPilaDegalus);
+					killTimer(timer_degaline[pcd[pid]]);
+					timer_degaline[pcd[pid]] = 0;
+					pcd[pid] = 0;
+					PlayerTextDrawHide(pid, kuro_kaina2[pid]);
+					PlayerTextDrawHide(pid, kuro_kaina3[pid]);
+					PlayerTextDrawHide(pid, kuro_kaina5[pid]);
+					PlayerTextDrawHide(pid, kuro_kaina6[pid]);
+					PlayerTextDrawHide(pid, kuro_kaina7[pid]);
+					PlayerTextDrawHide(pid, kuro_kaina8[pid]);
+					PlayerTextDrawHide(pid, kuro_kaina9[pid]);
+					PlayerTextDrawHide(pid, kuro_kaina10[pid]);
+					PlayerTextDrawHide(pid, kuro_kaina11[pid]);
+					notification(pid, f("Baigei pilti degalus. Kaina : ~g~%i", ipilti_kaina[pid][0]));
+					ipilti_kaina[pid][0] = 0;
+					ipilti_degalai[pid][0] = 0;
+				}
+				case GULI_LIGONINEI:
+				{
+
+					pinfo[death_state] = DEATH_STATE_NONE;
+					if(ptemp[lova] != -1)
+					{
+						lova_in_use{ptemp[lova]} = false;
+						ptemp[lova] = -1;
+					}
+					ClearAnimations(pid);
+				}
+				case KERTA_MEDI:
+				{
+					object.flag.off(gTree(ptemp[kertamas_medis]), fIsInUse);
+					ptemp[kertamas_medis] = -1;
+					socf(pid, WOOD_BAR_FINISH, "%i", 1);
+					ClearAnimations(pid);
+				}
+				case TVARKO:
+				{
+					del.fix[pid];
+					del.fix_lvl[pid];
+					del.clickedVeh[pid];
+					soc(pid, MECH_BAR_FINISH);
+					ClearAnimations(pid);
+				}
+				case TVARKO_GARAZE:
+				{
+					new const veh = get.clickedVeh[pid];
+					ClearAnimations(pid);
+					hideRepairBar(pid);
+					if(car[veh][repair_status] >= 100)
+					{
+	               notification2(pid, F("masina sekmingai sutvarkyta. +~y~%i~w~ patirties.", pinfo[repair_fixing] / 100 * aGarazas[ePeopleCount]));
+	               if(car[veh][car_status] == cRepair)
+	               {
+	                  car[veh][car_status] = cGarage;
+	                  SaveVehicle(veh, QUERY_THREADED);
+
+	                  if(vector_index_exists(vRepairList, 0))
+	                  {
+	                     new const V = vector_get(vRepairList, 0);
+	                     spawnVehicle(V);
+	                     vehToRemont(V);
+	                     vector_remove(vRepairList, 0);
+	                  }
+	               }
+					}
+               --aGarazas[ePeopleCount];
+					del.clickedVeh[pid];
+               if(get.repairT[pid])
+               {
+	               killTimer(get.repairT[pid]);
+	               del.repairT[pid];
+					}
+				}
+				case MIRSTA:
+				{
+					soc(pid, RESTORECAM);
+					player.flag.off(pid, fMirsta);
+					StopAudioStreamForPlayer(playerid);
+				}
+				case ZVEJOJA:
+				{
+					if(get.zvejoja[pid])
+					{
+						killTimer(get.zvejoja[pid]);
+						del.zvejoja[pid];
+					}
+					soc(pid, RESTORECAM);
+					ClearAnimations(pid);
+					ApplyAnimation(playerid, "SWORD", "SWORD_PART", 4.0, 0, 0, 0, 0, 0);
+				}
+				case SURAKINTAS:
+				{
+					//soc(pid, RESTORECAM);
+					player.flag.off(pid, fSurakintas);
+					SetPlayerSpecialAction(pid, SPECIAL_ACTION_NONE);
+					ClearAnimations(pid);
+				}
+			}
+			PLAYER::Freeze(pid, true);
+		}
+
+	} else {
+
+		if(reason == -1)
+		{
+			if(pfreeze[pid])
+			{
+				if(flag_get(pfreeze[pid], GARAZAS)) // lol
+				{
+					PLAYER::Freeze(pid, true, GARAZAS);
+				}
+				if(flag_get(pfreeze[pid], GULI_LIGONINEI))
+				{
+					PLAYER::Freeze(pid, true, GULI_LIGONINEI);
+				}
+				else if(flag_get(pfreeze[pid], KERTA_MEDI))
+				{
+					PLAYER::Freeze(pid, true, KERTA_MEDI);
+				}
+				else if(flag_get(pfreeze[pid], TVARKO))
+				{
+					PLAYER::Freeze(pid, true, TVARKO);
+				}
+				else if(flag_get(pfreeze[pid], TVARKO_GARAZE))
+				{
+					PLAYER::Freeze(pid, true, TVARKO_GARAZE);
+				}
+				else if(flag_get(pfreeze[pid], MIRSTA))
+				{
+					PLAYER::Freeze(pid, true, MIRSTA);
+				}
+				else if(flag_get(pfreeze[pid], PAUSED))
+				{
+					PLAYER::Freeze(pid, true, PAUSED);
+				}
+				else if(flag_get(pfreeze[pid], TELEPORT))
+				{
+					PLAYER::Freeze(pid, true, TELEPORT);
+				}
+				else if(flag_get(pfreeze[pid], ZVEJOJA))
+				{
+					PLAYER::Freeze(pid, true, ZVEJOJA);
+				}
+				else if(flag_get(pfreeze[pid], DEGALAI))
+				{
+					PLAYER::Freeze(pid, true, DEGALAI);
+				}
+				else if(flag_get(pfreeze[pid], SURAKINTAS))
+				{
+					PLAYER::Freeze(pid, true, SURAKINTAS);
+				}
+			
+			} else {
+
+				Update3DTextLabelText(tinfo[textlabel], COLOR_NO, " ");
+				TogglePlayerControllable(pid, true);
+			}
+
+		} else {
+
+			if( ! flag_get(pfreeze[pid], reason))
+			{
+				flag_on(pfreeze[pid], reason);
+			}
+			
+			switch(reason)
+			{
+				case GARAZAS:
+				{
+					TogglePlayerControllable(pid, false);
+					SetPlayerCameraPos(pid, cam_pos_garazas);
+					SetPlayerCameraLookAt(pid, cam_view_garazas);
+				}
+				case TVARKO_GARAZE:
+				{
+               pinfo[repair_fixing] = 0;
+               ++aGarazas[ePeopleCount];
+               notification2(pid, "Laikyk ~y~FIRE~w~ arba ~y~CTRL~w~ mygtuka.");
+					ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_LOOP", 4.0, 1, 0, 0, 0, 0);
+					Update3DTextLabelText(tinfo[textlabel], COLOR_NO, "Remontuoja maðinà");
+				}
+				case TVARKO:
+				{
+					socf(pid, MECH_BAR_START, "%i", get.fix_lvl[pid]);
+					ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_LOOP", 4.0, 1, 0, 0, 0, 0);
+					Update3DTextLabelText(tinfo[textlabel], COLOR_NO, "Tvarko");
+				}
+				case KERTA_MEDI:
+				{
+					ApplyAnimation(playerid, "CHAINSAW", "CSAW_G", 4.0, 1, 0, 0, 0, 0);
+					Update3DTextLabelText(tinfo[textlabel], COLOR_NO, "Kerta medá");
+					//PlayAudioStreamForPlayer(pid, "http://storyofcities.lt/music/csaw.mp3");
+				}
+				case ZVEJOJA:
+				{
+					if( IsPlayerInWater(pid))
+						return inmind(pid, "Reiktø iðlipti á krantà.");
+					applyAnimation(playerid, "SWORD", "SWORD_BLOCK", 1.0, 0, 0, 0, 1, 0, 1);
+					Update3DTextLabelText(tinfo[textlabel], COLOR_NO, "Þvejoja");
+					
+					new const slotas = findItemInBag(pid, ITEM::meskere);
+
+					if( slotas == -1)
+						return inmind(pid, "Kur artimiausia parduotuvë, reikia meðkerës..");
+
+					if( !flag_get(bag[slotas][item_info], IS_INUSE))
+					{
+						UnuseAttachInSlot(pid, SLOT_RIGHTHAND, true);
+							
+						SetPlayerAttachedObject(pid, SLOT_RIGHTHAND, 18632, 6,0,0,0,180);
+						flag_on(bag[slotas][item_info], IS_INUSE);
+					}
+					cameraPos(pid);
+					
+					inline zvejotiIdle()
+					{
+						new const i = get.fspot[pid];
+						if( ! IsPlayerInCircle(pid, fishingspot[i][0], fishingspot[i][1], 30))
+						{
+							killTimer(get.zvejoja[pid]);
+							del.zvejoja[pid];
+							PLAYER::Freeze(pid, false, ZVEJOJA);
+						}
+						switch(random(6))
+						{
+							case 0: 
+							{
+								if(get.zvejoja[pid])
+								{
+									killTimer(get.zvejoja[pid]);
+									del.zvejoja[pid];
+								}
+								soc(pid, FISHINGBAR);
+								inmind(pid, "O, kimba !");
+								applyAnimation(pid, "SWORD", "sword_block", 4.0, 1,1,1,0,0,1);
+							}
+							default:
+							{
+								applyAnimation(playerid, "SWORD", "SWORD_BLOCK", 1.0, 0, 0, 0, 1, 0,1);
+							}
+						}
+					}
+					set.zvejoja[pid] = setTimer(using inline zvejotiIdle, 3000, 1);
+				}
+				case DEGALAI:
+				{
+					Update3DTextLabelText(tinfo[textlabel], COLOR_NO, "Pila degalus");
+
+					if( IsPlayerInAnyVehicle(pid))
+					{
+						RemovePlayerFromVehicle(pid);
+					}
+					ipilti_degalai[pid][0] = 0;
+					ipilti_degalai[pid][1] = 0;
+					ipilti_degalai[pid][2] = 0;
+					ipilti_degalai[pid][3] = 0;
+					ipilti_kaina[pid][0] = 0;
+					ipilti_kaina[pid][1] = 0;
+					ipilti_kaina[pid][2] = 0;
+
+					PlayerTextDrawSetString(pid,kuro_kaina7[pid], "0");
+					PlayerTextDrawSetString(pid,kuro_kaina6[pid], "0");
+					PlayerTextDrawSetString(pid,kuro_kaina5[pid], "0");
+							
+					PlayerTextDrawSetString(pid,kuro_kaina3[pid], "0");
+					PlayerTextDrawSetString(pid,kuro_kaina9[pid], "0");
+					PlayerTextDrawSetString(pid,kuro_kaina8[pid], "0");
+					PlayerTextDrawSetString(pid,kuro_kaina10[pid], "0");
+
+					//Kuras    Kaina
+					// 567 	  10 893
+					PlayerTextDrawShow(pid, kuro_kaina2[pid]);
+					PlayerTextDrawShow(pid, kuro_kaina3[pid]);
+					PlayerTextDrawShow(pid, kuro_kaina5[pid]);
+					PlayerTextDrawShow(pid, kuro_kaina6[pid]);
+					PlayerTextDrawShow(pid, kuro_kaina7[pid]);
+					PlayerTextDrawShow(pid, kuro_kaina8[pid]);
+					PlayerTextDrawShow(pid, kuro_kaina9[pid]);
+					PlayerTextDrawShow(pid, kuro_kaina10[pid]);
+					PlayerTextDrawShow(pid, kuro_kaina11[pid]);
+					applyAnimation(pid, "VENDING", "VEND_Use", 1, 0, 0, 0, 0, 1500, 1);
+					notification2(pid, "Nustosi pilti jeigu paspausi ~y~ENTER");
+
+					inline degaline_use()
+					{
+						if(car[pcd[pid]][degalai] == fuel(car[pcd[pid]][car_model]))
+						{
+							PLAYER::Freeze(pid, false, DEGALAI);
+							return 1;
+						}
+						++car[pcd[pid]][degalai];
+						++ipilti_degalai[pid][0];
+						++ipilti_degalai[pid][3];
+						if( ipilti_degalai[pid][3] == 10)
+						{
+							ipilti_degalai[pid][3] = 0;
+							++ipilti_degalai[pid][2];
+						}
+						if( ipilti_degalai[pid][2] == 10)
+						{
+							ipilti_degalai[pid][2] = 0;
+							++ipilti_degalai[pid][1];
+						}
+							
+						ipilti_kaina[pid][0] += 3;
+						ipilti_kaina[pid][4] += 3;
+						if( ipilti_kaina[pid][4] >= 10)
+						{
+							ipilti_kaina[pid][4] -= 10;
+							++ipilti_kaina[pid][3];
+						}
+						if( ipilti_kaina[pid][3] == 10)
+						{
+							ipilti_kaina[pid][3] = 0;
+							++ipilti_kaina[pid][2];
+						}
+						if( ipilti_kaina[pid][2] == 10)
+						{
+							ipilti_kaina[pid][2] = 0;
+							++ipilti_kaina[pid][1];
+						}
+
+						PlayerTextDrawSetString(pid,kuro_kaina7[pid], f("%i", ipilti_degalai[pid][3]));
+						PlayerTextDrawSetString(pid,kuro_kaina6[pid], f("%i", ipilti_degalai[pid][2]));
+						PlayerTextDrawSetString(pid,kuro_kaina5[pid], f("%i", ipilti_degalai[pid][1]));
+							
+						PlayerTextDrawSetString(pid,kuro_kaina3[pid], f("%i", ipilti_kaina[pid][4]));
+						PlayerTextDrawSetString(pid,kuro_kaina9[pid], f("%i", ipilti_kaina[pid][3]));
+						PlayerTextDrawSetString(pid,kuro_kaina8[pid], f("%i", ipilti_kaina[pid][2]));
+						PlayerTextDrawSetString(pid,kuro_kaina10[pid], f("%i", ipilti_kaina[pid][1]));
+					}
+					timer_degaline[pcd[pid]] = setTimer(using inline degaline_use, 1200, true);
+				}
+				case GULI_LIGONINEI:
+				{
+					applyChecks(pid, cCritical);
+					TogglePlayerControllable(pid, true);
+					applyAnimation(playerid, "CRACK", "CRCKDETH2", 4.0, 1, 0, 0, 0, 0);
+				}
+				case MIRSTA:
+				{
+					applyChecks(pid, cCritical);
+					TogglePlayerControllable(pid, false);
+					cameraPos(pid);
+					Update3DTextLabelText(tinfo[textlabel], COLOR_NO, "Mirðta");
+				}
+				case TELEPORT:
+				{
+					applyChecks(pid, cCritical);
+					TogglePlayerControllable(pid, false);
+					Update3DTextLabelText(tinfo[textlabel], COLOR_NO, "Laukia");
+				}
+				case SURAKINTAS:
+				{
+					applyChecks(pid, cCritical);
+					ClearAnimations(pid,1);
+					player.flag.on(pid, fSurakintas);
+					applyAnimation(playerid, "PED", "IDLE_STANCE", 4.0, 1, 1, 1, 1, 0);
+					//cameraPos(pid, PD);
+					SetPlayerSpecialAction(pid, SPECIAL_ACTION_CUFFED);
+					Update3DTextLabelText(tinfo[textlabel], COLOR_NO, "Surakintas");
+				}
+			}
+		}
+	}
+	return 1;
+}
+
+
+func suzeistas(pid)
+{
+	if( ! player.flag.get(pid, fFirstDeath))
+	{
+		player.flag.on(pid, fFirstDeath);
+	}
+	if(get.timer_onfirecar[pid])
+	{
+		killTimer(get.timer_onfirecar[pid]);
+		del.timer_onfirecar[pid];
+	}
+	if(get.timer_onfire[pid])
+	{
+		killTimer(get.timer_onfire[pid]);
+		del.timer_onfire[pid];
+	}
+	PLAYER::Freeze(pid, true, MIRSTA);
+	player.flag.on(pid, fMirsta);
+
+	if(IsPlayerInAnyVehicle(pid))
+	{
+		RemovePlayerFromVehicle(pid);
+		ClearAnimations(pid);
+	}
+
+	ClearAnimations(pid);
+	applyAnimation(pid, "PED", "KO_SHOT_STOM", 4.0, 0, 0, 0, 1, 0, 1);
+	for(new i; i < MAX_VEHICLES; ++i)
+	{
+		setVehicleParamsForPlayer(i, pid, 0, 1);
+	}
+	inline hospital(id, did, response, listitem, string:word[])
+	{
+		#pragma unused id, did, response, listitem
+		if(strfind(word, "Gráþti á ligoninæ") != -1)
+		{
+			pinfo[death_state] = DEATH_STATE_HOSPITAL;
+			soc(pid, RESTORECAM);
+			PLAYER::SetHealth(pid, 5);
+
+			if(ptemp[lova] != -1)
+			{
+						#define b[%0] Ligonines_lova[ptemp[lova]][%0]
+
+				fade_setPlayerPos(pid, b[0], b[1], b[2], .a = b[3]);
+				inline timer()
+				{
+					PLAYER::Freeze(pid, false, MIRSTA);
+					PLAYER::Freeze(pid, true, GULI_LIGONINEI);
+				}
+				setTimer(using inline timer, 4000, 0);
+
+						#undef b
+
+			} else {
+
+				new const x = random(sizeof randomHospitalSpawn);
+
+				#define b[%0] randomHospitalSpawn[x][%0]
+
+				fade_setPlayerPos(pid, b[0], b[1], b[2], .a = b[3]);
+				ptemp[hospital_diff] = gettime();
+
+				#undef b
+			}
+		}
+		else if(strfind(word, "Laukti medikø") != -1)
+		{
+			updateMap(MEDIKAS);
+		}
+	}
+	format(gt, sizeof gt, C_SOC"Tu mirðti, kà nori daryti?\n ");
+	if(getHospitalSlot() != -1)
+	{
+		new const x = getHospitalSlot();
+		lova_in_use{x} = true;
+
+		ptemp[lova] = x;
+
+	
+	} else {
+
+		ptemp[lova] = -1;
+	}
+	strcat(gt, "\n\t"C_DOT C_SOC" Gráþti á ligoninæ.");
+	strcat(gt, "\n\t"C_DOT C_SOC" Laukti medikø.");
+
+	if(pinfo[death_state] != DEATH_STATE_INACTIVE)
+		showDialog(pid, using inline hospital, DIALOG_STYLE_LIST, "  Mirðti", gt, "Rinktis", "");
+
+	pinfo[death_state] = DEATH_STATE_INACTIVE;
+}

@@ -1,0 +1,243 @@
+/*
+
+
+
+
+
+
+
+
+
+							Story of Cities
+
+								CRAFTING
+
+
+
+
+
+
+
+
+*/
+
+new const CRAFT::recipes[][7] = {
+
+	{ITEM::Guma, 			ITEM::Nafta, ITEM::Nafta},
+	{ITEM::Ratlankis,		ITEM::Plienas, ITEM::Plienas},
+	{ITEM::Padanga,		ITEM::Guma, ITEM::Guma},
+	{ITEM::Ratas,			ITEM::Padanga, ITEM::Ratlankis},
+	{ITEM::m4,				ITEM::Plienas, ITEM::Plienas, ITEM::Guma}
+};
+
+func CRAFT::Show(pid)
+{
+	CRAFT::HideTextDraws(pid);
+	player.bool.on(pid, bCraftOpen);
+	for(new i; i != 6; ++i)
+	{
+		if(cSlots[pid][i][item])
+		{
+			PlayerTextDrawSetString(
+				pid,
+				p_craft[i][pid], 
+				ItemInfo[cSlots[pid][i][item]][item_name]
+			);
+			//layerTextDrawSetString(pid, p_craft[i+6][pid], IntToStr(cSlots[pid][i][kiekis]));
+			PlayerTextDrawShow(pid, p_craft[i][pid]);
+			//PlayerTextDrawShow(pid, p_craft[i+1][pid]);
+		}
+	}
+	new const success_rate = CRAFT::GetSuccess(pid);
+	new const craft_item = CRAFT::GetRecipe(pid);
+	if(craft_item)
+	{
+		PlayerTextDrawSetString(pid, p_craft[12][pid], F("Sekmes tikimybe: ~y~%i~w~%%", success_rate));
+		PlayerTextDrawSetString(pid, p_craft[13][pid], ItemInfo[craft_item][item_name]);
+		PlayerTextDrawShow(pid, p_craft[12][pid]);
+		PlayerTextDrawShow(pid, p_craft[13][pid]);
+		for(new i; i != 5; ++i)
+			TextDrawShowForPlayer(pid, g_craft[i]);
+	
+	} else {
+
+		PlayerTextDrawHide(pid, p_craft[12][pid]);
+		PlayerTextDrawHide(pid, p_craft[13][pid]);
+		TextDrawHideForPlayer(pid, g_craft[2]);
+	}
+
+	for(new i; i != sizeof g_craft; ++i)
+		TextDrawShowForPlayer(pid, g_craft[i]);
+}
+
+func CRAFT::HideTextDraws(pid)
+{
+	for(new i; i != sizeof g_craft; ++i)
+		TextDrawHideForPlayer(pid, g_craft[i]);
+	for(new i; i != sizeof p_craft; ++i)
+		PlayerTextDrawHide(pid, p_craft[i][pid]);
+}
+
+func CRAFT::Hide(pid)
+{
+	player.bool.off(pid, bCraftOpen);
+	del.lastClickedCraftRow[pid];
+	del.craftClick[pid];
+	CRAFT::HideTextDraws(pid);
+}
+
+func CRAFT::GetSuccess(pid)
+{
+	new success = 70;
+	for(new i; i != 6; ++i)
+	{
+		if(cSlots[pid][i][item])
+		{
+			success += cSlots[pid][i][effect][ibSuccessRate];
+		}
+	}
+	success += ptemp[peffect][ibCraftingSuccessRate];
+	if(success > 100)
+	{
+		success = 100;
+	}
+	return success;
+}
+
+func CRAFT::GetRecipe(pid)
+{
+	new checked[6];
+	new tiko;
+	for(new i; i != sizeof CRAFT::recipes; ++i) // einam per visus recipes
+	{
+		for(new j; j != 6; ++j) // einam per visus recipe mats
+		{
+			for(new k; k != 6; ++k) // kiekvienà mats tikrinam ar sutampa su kuriuo nors ið unchecked player mats
+			{
+				if(cSlots[pid][k][item] == CRAFT::recipes[i][j+1] && !checked[k])
+				{// jeigu kaþkuris ið recipe mats sutampa su kaþkuriuo unchecked player mats
+					checked[k] = true;
+					if(++tiko == 6) // jeigu visi mats patikrinti ir tinka, returninam gaminamà daiktà
+					{
+						return CRAFT::recipes[i][0];
+					}
+					break; // breakinam þaidëjo mats ieðkojimà, tesiam kito recipe mats tikrinimà
+				}
+			}
+		}
+		// nesutapo visi reikalingi mats, resetinam checkinimus, ieðkom kito recepto
+		memset(checked);
+		tiko = 0;
+	}
+	return false;
+}
+
+func CRAFT::TakeItem(pid, slot)
+{
+	for(new i; i != 6; ++i)
+	{
+		if( ! cSlots[pid][i][item] )
+		{
+			infoMsg(pid, "memcpy");
+			cSlots[pid][i][item] = bag[slot][item];
+			cSlots[pid][i][kiekis] = 1;
+			memcpy(cSlots[pid][i][effect], bag[slot][effect], eBonus*4, eBonus);
+			RemoveItemFromSlot(pid, slot, 1);
+			CRAFT::Show(pid);
+			load_bag(pid, 3);
+			break;
+		}
+	}
+	return true;
+}
+
+func CRAFT::CraftItem(pid)
+{
+	if( ! random(100 / CRAFT::GetSuccess(pid)) )
+	{
+		new const craftedItem = CRAFT::GetRecipe(pid);
+		AddItem(pid, craftedItem, 1);
+		notification2(pid, "Daiktas pagamintas sekmingai.");
+	
+	} else {
+
+		notification2(pid, "Daikto pagaminti nepavyko.");
+	}
+	for(new i; i != 6; ++i)
+	{
+		memset(cSlots[pid][i]);
+	}
+	CRAFT::Show(pid);
+	return false;
+}
+
+func CRAFT::ReturnAllItems(pid)
+{
+	for(new i; i != 6; ++i)
+	{
+		CRAFT::ReturnItem(pid, i);
+	}
+}
+
+func CRAFT::ReturnItem(pid, slot)
+{
+	if(!cSlots[pid][slot][item]) return false;
+
+	new efc[eBonus];
+	memcpy(efc, cSlots[pid][slot][effect], eBonus*4, eBonus);
+	AddItem(pid, cSlots[pid][slot][item], 1, efc);
+	memset(cSlots[pid][slot]);
+	for(new i = slot; i != 5; ++i)
+	{
+		memcpy(cSlots[pid][i], cSlots[pid][i+1], 3*4+eBonus*4, 3+eBonus);
+	}
+	return true;
+}
+
+func CRAFT::ProcessClick(pid, {_, PlayerText, Text}:id, type)
+{
+	if(type)
+	{
+		for(new i; i != 6; ++i)
+		{
+			if(id == _:p_craft[i][pid])
+			{
+				if(get.lastClickedCraftRow[pid] == id)
+				{
+					/* double click start */
+					if(get.craftClick[pid] > GetTickCount()-300)
+					{
+						CRAFT::ReturnItem(pid, i);
+						CRAFT::Show(pid);
+						load_bag(pid, 3);
+						return true;
+					}
+
+				} else {
+
+					set.lastClickedCraftRow[pid] = id;
+				}
+				set.craftClick[pid] = GetTickCount();
+				/* double click end */
+				return true;
+			}
+		}
+
+	} else {
+
+		if(_:id == _:g_craft[2])
+		{
+			if(CRAFT::GetRecipe(pid))
+			{
+				CRAFT::CraftItem(pid);
+			}
+			return true;
+		
+		} else if(_:id == _:g_craft[3]) {
+
+			CRAFT::Hide(pid);
+			return true;
+		}
+	}
+	return false;
+}

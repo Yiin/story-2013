@@ -1,0 +1,21 @@
+// namespaces
+#define BAG::%0(%1) BAG_%0(%1)
+#define GPS::%0(%1) gps_%0(%1)
+#define CRAFT:: crft
+#define ITEM:: it_m
+
+#define ppQUEST:: ppq
+#define ppJOB:: ppj
+#define ppGANG:: ppg
+#define PLAYER:: pp
+
+#define GANG:: g
+
+#define MEDIKAI:: jm
+#define POLICIJA:: jp
+
+#define QUEST:: q
+
+#define jMEDIKAI:: jjm
+#define jPOLICIJA:: jjp
+#define JOB:: j

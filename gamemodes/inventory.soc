@@ -1,0 +1,1134 @@
+/*
+
+
+
+
+
+
+
+
+
+							Story of Cities
+
+								QUEST
+
+
+
+
+
+
+
+.
+*/
+
+func Bag_USE(pid)
+{
+	applyChecks(pid, cUseItem);
+	UpdateAmmo(pid);
+
+	if( slcslot == -1) return 1;
+
+	if(player.bool.get(pid, bCraftOpen))
+	{
+		CRAFT::TakeItem(pid, slcslot);
+		return true;
+	}
+
+	new const daiktas = bag[slcslot][item];
+
+	if( !item.flag.get(daiktas, IS_USABLE)) return 1;
+	if( ! flag_get(bag[slcslot][item_info], IS_INUSE) )
+	{
+		if(item.flag.get(daiktas, IS_FOOD))
+		{
+			RemoveItemFromSlot(pid, slcslot, 1);
+			PLAYER::SetHealth(pid, PLAYER::GetHealth(pid) + getHealthByFood(daiktas));
+			ApplyAnimation(playerid, "FOOD", "EAT_BURGER", 4.0, 0, 0, 0, 0, 0);
+		}
+		if(item.flag.get(daiktas, IS_CLOTHE))
+		{
+			switch(daiktas)
+			{
+				case ITEM::akiniai1..ITEM::akiniai33:
+				{
+					UnuseAttachInSlot(pid, SLOT_FACE);
+
+					new akiniai;
+
+					if(daiktas > (ITEM::akiniai30))
+					{
+						akiniai = 19137 + daiktas - ITEM::akiniai30;
+
+					} else {
+
+						akiniai = 19006 + daiktas - (ITEM::akiniai1 - 1);
+					}
+					new const s = GetPlayerSkin(pid);
+					SetPlayerAttachedObject(pid, SLOT_FACE, akiniai, 2, glassesOffset[s][0], glassesOffset[s][1], glassesOffset[s][2], glassesOffset[s][3], glassesOffset[s][4], glassesOffset[s][5], glassesOffset[s][6], glassesOffset[s][6], glassesOffset[s][6]);
+					flag_on(bag[slcslot][item_info], IS_INUSE);
+				}
+				case ITEM::beret1..ITEM::beret4:
+				{
+					UnuseAttachInSlot(pid, SLOT_HEAD);
+					new const beret = 18921 + daiktas - ITEM::beret1;
+
+					new const s = GetPlayerSkin(pid);
+					SetPlayerAttachedObject(pid, SLOT_HEAD, beret, 2, beretOffset[s][0], beretOffset[s][1], beretOffset[s][2]+0.000743, beretOffset[s][3], beretOffset[s][4], beretOffset[s][5], 1.059000,1.000000,1.000000);
+					flag_on(bag[slcslot][item_info], IS_INUSE);
+				}
+				case ITEM::cap1..ITEM::cap9:
+				{
+					UnuseAttachInSlot(pid, SLOT_HEAD);
+					new const id = daiktas - ((ITEM::cap1)-1);
+					new cap;
+
+					switch(id)
+					{
+						case 1:    cap = 18926;
+						case 2..9: cap = 18926 + id;
+					}
+					new const s = GetPlayerSkin(pid);
+					SetPlayerAttachedObject(pid, SLOT_HEAD, cap, 2, capsOffset[s][0], capsOffset[s][1], capsOffset[s][2], capsOffset[s][3], capsOffset[s][4], capsOffset[s][5]);
+					flag_on(bag[slcslot][item_info], IS_INUSE);
+				}
+				case ITEM::b1..ITEM::b15:
+				{
+					UnuseAttachInSlot(pid, SLOT_HEAD);
+					new const bandana = 18891 - (ITEM::b1) + daiktas;
+					AttachBandanaToPlayer(pid, bandana);
+					flag_on(bag[slcslot][item_info], IS_INUSE);
+				}
+				case ITEM::armour:
+				{
+					UnuseAttachInSlot(pid, SLOT_BODY);
+					SetPlayerAttachedObject(pid, SLOT_BODY, 373, 1, 0.26500001, 0.01900006, -0.16899985, 70.99995422, 29.20002555, 33.70000839, 1.13700139, 1.00099945, 1.12299978);
+					flag_on(bag[slcslot][item_info], IS_INUSE);
+					set.armour[pid] = 1;
+				}
+			}
+		}
+		if(item.flag.get(daiktas, IS_WEAPON))
+		{
+			UnuseAttachInSlot(pid, SLOT_RIGHTHAND);
+
+			if(item.flag.get(daiktas, IS_PISTOL) || item.flag.get(daiktas, IS_SHOTGUN) ||
+				item.flag.get(daiktas, IS_SMG)	 || item.flag.get(daiktas, IS_RIFLE) ||
+				item.flag.get(daiktas, IS_AWP) 	 || item.flag.get(daiktas, IS_BADGUN))
+			{
+				new const kulkos = GetWeaponSlot(GetWeaponFromItem(daiktas)) + 60;
+				new const kslot  = findItemInBag(pid, kulkos);
+				if(kslot != -1)
+				{
+					if(item.flag.get(item, IS_ONEHANDED))
+					{
+						if(ptemp[current_handgun][item])
+						{
+							setUsedE(pid, ptemp[current_handgun], false);
+							removePlayerWeapon(pid, GetWeaponFromItem(ptemp[current_handgun][item]));
+						}
+						memcpy(ptemp[current_handgun], bag[slcslot], 0, 3*4+eBonus*4, 3+eBonus);
+
+					} else {
+
+						if(ptemp[current_wep][item])
+						{
+							setUsedE(pid, ptemp[current_wep], false);
+							removePlayerWeapon(pid, GetWeaponFromItem(ptemp[current_wep][item]));
+						}
+						memcpy(ptemp[current_wep], bag[slcslot], 0, 3*4+eBonus*4, 3+eBonus);
+					}
+					givePlayerWeapon(pid, GetWeaponFromItem(daiktas), bag[kslot][kiekis]);
+					UnuseWeaponInSlot(pid, kulkos - 60);
+					flag_on(bag[slcslot][item_info], IS_INUSE);
+				}
+				else notification(pid, "Nera kulku..");
+			
+			} else {
+
+				if(ptemp[current_handgun][item])
+				{
+					setUsedE(pid, ptemp[current_handgun], false);
+					removePlayerWeapon(pid, GetWeaponFromItem(ptemp[current_handgun][item]));
+				}
+				memcpy(ptemp[current_handgun], bag[slcslot], 0, 3*4+eBonus*4, 3+eBonus);
+
+				givePlayerWeapon(pid, GetWeaponFromItem(daiktas), bag[slcslot][kiekis]);
+				UnuseWeaponInSlot(pid, GetWeaponSlot(GetWeaponFromItem(daiktas)));
+				flag_on(bag[slcslot][item_info], IS_INUSE);
+			}
+		}
+		switch(daiktas)
+		{
+			case ITEM::pjuklas:
+			{
+				UnuseAttachInSlot(pid, SLOT_RIGHTHAND, true);
+				SetPlayerAttachedObject(pid, SLOT_RIGHTHAND, 341, 6, 0,0,0,0);
+				flag_on(bag[slcslot][item_info], IS_INUSE);
+			}
+			case ITEM::meskere:   
+			{   
+				UnuseAttachInSlot(pid, SLOT_RIGHTHAND, true);
+				SetPlayerAttachedObject(pid, SLOT_RIGHTHAND, 18632, 6,0,0,0,180);
+				flag_on(bag[slcslot][item_info], IS_INUSE);
+			}
+			case ITEM::gps:       
+			{
+				if(!get.wash[pid])
+				{
+					hide_bag(pid);
+					show_menu(pid);
+					menu_gps(pid);
+				}
+				return 1;
+			}
+			case ITEM::nuskausminamieji:
+			{
+				PLAYER::SetPain(pid, PLAYER::GetPain(pid) - 6000);
+				RemoveItemFromSlot(pid, slcslot, 1);
+			}
+			case ITEM::spraycan:
+			{
+				UnuseAttachInSlot(pid, SLOT_RIGHTHAND);
+
+				givePlayerWeapon(pid, 41, 50000);
+				UnuseWeaponInSlot(pid, 9);
+				flag_on(bag[slcslot][item_info], IS_INUSE);
+			}
+			case ITEM::cola,ITEM::pepsi,ITEM::sprite:
+			{
+				switch(GetPlayerSpecialAction(playerid))
+				{
+					case SPECIAL_ACTION_NONE, 20..23:
+					{
+						UnuseAttachInSlot(pid, SLOT_RIGHTHAND, true);
+						SetPlayerSpecialAction(pid, SPECIAL_ACTION_DRINK_SPRUNK);
+						flag_on(bag[slcslot][item_info], IS_INUSE);
+					}
+				}
+			}		
+		}
+
+	} else {
+
+		if(item.flag.get(daiktas, IS_WEAPON))
+		{
+			removePlayerWeapon(pid, GetWeaponFromItem(daiktas));
+			flag_off(bag[slcslot][item_info], IS_INUSE);
+		}
+		switch(daiktas)
+		{
+			case ITEM::akiniai1..ITEM::akiniai33:
+			{
+				UnuseAttachInSlot(pid, SLOT_FACE);
+			}
+			case ITEM::beret1..ITEM::beret4, ITEM::cap1..ITEM::cap9, ITEM::b1..ITEM::b15:
+			{
+				UnuseAttachInSlot(pid, SLOT_HEAD);
+			}
+
+			case ITEM::armour:
+			{
+				UnuseAttachInSlot(pid, SLOT_BODY);
+				del.armour[pid];
+			}
+			case ITEM::pjuklas:
+			{
+				StopPlayerHoldingObject(pid);
+				setUsed(pid, ITEM::pjuklas, false);
+			}
+			case ITEM::meskere:
+			{
+				StopPlayerHoldingObject(pid);
+				setUsed(pid, ITEM::meskere, false);
+			}
+			case ITEM::gps:
+			{
+				GPS::atvyko(pid);
+			}
+		}
+	}
+	load_bag(pid, 3, 0);
+	return 1;
+}
+
+func setUsedE(pid, id[], bool:_tf)
+{
+	new const slot = findExactItem(bag, id);
+	if(slot != -1)
+	{
+		if(_tf)
+		{
+			flag_on(bag[slot][item_info], IS_INUSE);
+		
+		} else {
+
+			flag_off(bag[slot][item_info], IS_INUSE);
+		}
+	}
+}
+
+func setUsed(pid, id, bool:_tf)
+{
+	new const slot = findItemInBag(pid, id);
+	if(slot != -1)
+	{
+		if(_tf)
+		{
+			flag_on(bag[slot][item_info], IS_INUSE);
+		
+		} else {
+
+			flag_off(bag[slot][item_info], IS_INUSE);
+		}
+	}
+}
+
+
+BAG::ProcessClick(pid, PlayerText:playertextid)
+{
+	for(new i = 12; i < 61; i+=4)
+	{ // praeinam visus textdrawus
+		if( playertextid == ibag[i])
+		{ // jeigu radom.
+
+			hideItemInfoBag(pid);
+			/* double click start */
+			if(get.bagclick[pid] > GetTickCount()-300)
+				return Bag_USE(pid);
+			set.bagclick[pid] = GetTickCount();
+			/* double click end */
+
+			if( baguse[last_clicked_textdraw_row] != PlayerText:-1)
+			{ // Jeigu prieð ðità paspaudimà jau buvo paspaustas kitas textdrawas
+				PlayerTextDrawBoxColor( pid, baguse[last_clicked_textdraw_row], COLOR_BAG_DEFAULT);
+				PlayerTextDrawShow(pid, baguse[last_clicked_textdraw_row]);
+
+				slcslot = -1;
+				if( baguse[last_clicked_textdraw_row] == playertextid && baguse[selecteditem] == playertextid)
+				{
+					baguse[selecteditem] = PlayerText:-1;
+					baguse[last_clicked_textdraw_row] = PlayerText:-1;
+					return 1;
+				}
+			}
+			baguse[last_clicked_textdraw_row] = PlayerText:playertextid;
+			slcslot = baguse[bagedit:( (i-12)/4 )];
+
+			if( flag_get(bagflags(slcslot), IS_INUSE) )
+			{
+				PlayerTextDrawSetString(pid, ibag[5], "padeti");
+
+			} else {
+
+				PlayerTextDrawSetString(pid, ibag[5], "naudoti");
+			}
+			if(!player.bool.get(pid, bCraftOpen))
+			{
+				showItemInfoBag(pid, slcslot);
+			}
+			PlayerTextDrawShow(pid, ibag[5]);
+			notification(pid, ItemInfo[ bag[slcslot][item] ][item_name]);
+			PlayerTextDrawBoxColor( pid, playertextid, COLOR_SELECT);
+			PlayerTextDrawShow(pid, playertextid);
+			baguse[selecteditem] = PlayerText:playertextid;
+			return 1;
+		}
+	}
+	if( playertextid == ibag[3])
+	{
+		if(pinfo[darbas] == CRAFTER)
+		{
+			if(player.bool.get(pid, bCraftOpen))
+				CRAFT::Hide(pid);
+			else
+				CRAFT::Show(pid);
+
+		} else {
+
+			PlayerTextDrawHide(pid, ibag[3]);
+		}
+		return true;
+	}
+	if( playertextid == ibag[4])
+	{
+		hideItemInfoBag(pid);
+		hide_bag(pid);
+		if(player.bool.get(pid, bCraftOpen))
+		{
+			CRAFT::ReturnAllItems(pid);
+			CRAFT::Hide(pid);
+		}
+		PlayerTextDrawBoxColor( pid, baguse[last_clicked_textdraw_row], COLOR_BAG_DEFAULT);
+		baguse[selecteditem] = PlayerText:-1;
+		baguse[last_clicked_textdraw_row] = PlayerText:-1;
+		slcslot = -1;
+		CancelSelectTextDraw(pid);
+		return 1;
+	}
+	if( playertextid == ibag[5])
+	{
+		hideItemInfoBag(pid);
+		return Bag_USE(pid);
+	}
+	if( playertextid == ibag[2])
+	{
+		if( slcslot != -1)
+		{
+			hideItemInfoBag(pid);
+			if( bag[slcslot][kiekis] > 1)
+			{
+				ShowDialog(pid, Show:<drop_item>, DIALOG_STYLE_INPUT, "{ffffff}Kuprinë", "Kiek iðmesti?", "Iðmesti", "Atðaukti");
+				return 1;
+			}
+			RemoveItemFromSlot(pid,slcslot, -1);
+			PlayerTextDrawColor( pid, baguse[selecteditem], -1);
+			PlayerTextDrawBoxColor( pid, baguse[last_clicked_textdraw_row], COLOR_BAG_DEFAULT);
+			baguse[selecteditem] = PlayerText:-1;
+			baguse[last_clicked_textdraw_row] = PlayerText:-1;
+			slcslot = -1;
+			load_bag(pid, 3);
+			return 1;
+		}
+		else return notification(pid, "nieko nepasirinkai");
+	}
+	if( playertextid == ibag[9])
+	{
+		hideItemInfoBag(pid);
+
+		if( baguse[pageid] + 1 == GetMaxPages(pid) )
+			return 1;
+		load_bag(pid, 1);
+		return 1;
+	}
+	if( playertextid == ibag[10])
+	{
+		hideItemInfoBag(pid);
+		if( baguse[pageid] <= 0) return 1;
+		load_bag(pid, 2);
+		return 1;
+	}
+	return -1;
+}
+
+function::isInUseE(pid,itemid[e_bag])
+{
+	new const slot = findExactItem(bag, itemid);
+	if(slot != -1)
+	if(flag_get(bag[slot][item_info], IS_INUSE))
+	return 1;
+	return 0;
+}
+
+function::isInUse(pid,itemid)
+{
+	new const slot = findItem(bag, itemid);
+	if(slot != -1)
+	if(flag_get(bag[slot][item_info], IS_INUSE))
+	return 1;
+	return 0;
+}
+
+func getSlotFromBagRow(pid, row)
+{
+	new const i = GetCurrentPage(pid)*13;
+	new itemcount;
+	for(new j = i; j < i + 13; j++)
+	{
+		if(bag[j][item])
+		{
+			itemcount++;
+			if(itemcount == row)
+			{
+				return j;
+			}
+		}
+	}
+	return 0;
+}
+
+func LoadBagNext(pid)
+{
+	baguse[pageid]++;
+	return baguse[pageid] * 13;
+}
+
+func LoadBagPrev(pid)
+{
+	baguse[pageid]--;
+	return baguse[pageid] * 13;
+}
+
+func GetCurrentPage(pid)
+{
+	return baguse[pageid] * 13;
+}
+
+func GetMaxPages(pid)
+{
+	if( IsBagEmpty(pid)) return 1;
+	new j = 0;
+	for(new i = 0; i < MAX_ITEM; ++i)
+		if( ! bag[i][item] || !bag[i][kiekis] ) continue;
+		else j++;
+	if(j % 13)
+		return j / 13 + 1;
+	else
+		return j / 13;
+}
+
+function::IsBagEmpty(id)
+{
+	for(new i = 0; i < MAX_ITEM; ++i)
+		if( Bag[id][i][item] ) return 0;
+	return 1;
+}
+
+function::IsItemInBag(id, itemid)
+{
+	if(findItem(Bag[id], itemid) != -1) return 1;
+	return 0;
+}
+
+function::GetItemAmount(id, itemid[e_bag])
+{
+	new const slot = findExactItem(Bag[id], itemid);
+	if(slot != -1) return Bag[id][slot][kiekis];
+	return 0;
+}
+
+function::getItemAmountInBagSlot(id, slot)
+{
+	return Bag[id][slot][kiekis];
+}
+
+stock GetItemsValue(itemid[], amount)
+{
+	return getItemPrice(itemid) * amount;
+}
+
+stock findExactItem(_bag[][e_bag], itemid[])
+{
+	for(new i; i < MAX_ITEM; ++i)
+	{
+		if(_bag[i][item] == itemid[item] &&
+			!memcmp(_bag[i][effect], itemid[effect], eBonus, eBonus))// _bag[i][item_flag] == itemid[item_flag])
+		return i;
+	}
+	return -1;
+}
+
+function::findItemInBag(id, itemid)
+{
+	for(new i = 0; i < MAX_ITEM; ++i)
+		if(Bag[id][i][item] == itemid)
+			return i;
+	return -1;
+}
+
+function::findItem(_bag[][e_bag], itemid)
+{
+	for(new i = 0; i < MAX_ITEM; ++i)
+		if(_bag[i][item] == itemid)
+			return i;
+	return -1;
+}
+
+function::getTrunkSlotWeight(veh, slot)
+{
+	return trunk[veh][slot][kiekis] * ItemInfo[ trunk[veh][slot][item] ][ item_svoris ];
+}
+
+function::GetItemWeight(itemid)
+{
+	return ItemInfo[itemid][item_svoris];
+}
+
+function::GetItemsWeight(itemid, amount)
+{
+
+	return ItemInfo[itemid][item_svoris] * amount;
+}
+
+function::getBagSlotWeight(pid, slot)
+{
+
+	return bag[slot][kiekis] * ItemInfo[bag[slot][item]][item_svoris];
+}
+
+function::GetPlayerItemsWeight(id, itemid)
+{
+
+	new const i = findItem(Bag[id], itemid);
+	return Bag[id][i][kiekis] * ItemInfo[itemid][item_svoris];
+}
+
+function::GetBagWeight(id)
+{
+	new bagWeight = 0;
+	for(new i = 0; i < MAX_ITEM; ++i)
+	{
+		bagWeight += Bag[id][i][kiekis] * GetItemWeight(Bag[id][i][item]);
+	}
+	switch(bagWeight)
+	{
+		case 0..12000:		SetPlayerProgressBarColor(id, get.BagTalpa[id], 0x777777ff);
+		case 12300..21000:	SetPlayerProgressBarColor(id, get.BagTalpa[id],	0xecad3ecc);
+		case 21300..30000:	SetPlayerProgressBarColor(id, get.BagTalpa[id],	0xe20000cc);
+		default:            SetPlayerProgressBarColor(id, get.BagTalpa[id],	0x7e0000cc);
+	}
+	return bagWeight;
+}
+
+stock GetItemName(itemid)
+{
+	return ItemInfo[itemid][item_name];
+}
+
+function::GetItemsCount(id)
+{
+
+	new count = 0;
+	for(new i = 0; i < MAX_ITEM; ++i)
+	{
+		if( IsItemInBag(id, i) )
+			count++;
+	}
+	return count;
+}
+
+function::slotcmp(slot1[e_bag], slot2[e_bag])
+{
+	if( !memcmp(slot1[effect], slot2[effect], eBonus, eBonus) && slot1[item] == slot2[item])
+	return 1;
+	return 0;
+}
+
+stock AddItem(id, itemid, amount, iEffect[eBonus] = {0,...})
+{
+	if(!itemid || !amount) return 0;
+
+	if( ! player.flag.get(id, fFirstItem) && !player.flag.get(id, fFirstBag))
+	{
+		showTip(id, TIP_KUPRINE_OPEN);
+		player.flag.on(id, fFirstItem);
+	}
+	new newitem[e_bag];
+	newitem[item] = itemid;
+	newitem[kiekis] = amount;
+
+	for(new i; i != eBonus; ++i)
+	newitem[effect][i] = iEffect[i];
+
+	newitem[item_info] = flag_item:0;
+
+	new slot;
+
+	new bool:success;
+	for(new i; i < MAX_ITEM; ++i)
+	{
+		if(Bag[id][i][item] == itemid)
+		{
+			if(!memcmp(Bag[id][i][effect], iEffect, eBonus, eBonus))
+			{
+				Bag[id][i][kiekis] += amount;
+				success = true;
+				slot = i;
+				break;
+			}
+		}
+	}
+	
+	if( ! success)
+	{
+		insertToBagSlot(id, 0, newitem);
+	}
+
+	notification(id, f("+ %s (%i)", ItemInfo[itemid][item_name], amount));
+		
+	switch(itemid)
+	{
+		case ITEM::raktai_mech_car: 	foreach (new veh : masinos[0])
+									setVehicleParamsForPlayer(veh, id, 0, 0);
+		case ITEM::raktai_pd_car:		foreach (new veh : masinos[1])
+									setVehicleParamsForPlayer(veh, id, 0, 0);
+		case ITEM::raktai_med_car:	foreach (new veh : masinos[2])
+									setVehicleParamsForPlayer(veh, id, 0, 0);
+		case ITEM::raktai_taxi_car:	foreach (new veh : masinos[3])
+									setVehicleParamsForPlayer(veh, id, 0, 0);
+		case ITEM::raktai_fire_car:	foreach (new veh : masinos[4])
+									setVehicleParamsForPlayer(veh, id, 0, 0);
+		case ITEM::raktai_wash_car:	foreach (new veh : masinos[5])
+									setVehicleParamsForPlayer(veh, id, 0, 0);
+		case ITEM::raktai_fura: 		foreach (new veh : masinos[6])
+									setVehicleParamsForPlayer(veh, id, 0, 0);
+		case ITEM::raktai_krov: 		foreach (new veh : masinos[7])
+									setVehicleParamsForPlayer(veh, id, 0, 0);
+		
+		case ITEM::kulkosp: {  if( PlayerHaveWeaponInSlot(id, 2))
+						SetPlayerAmmo(id,PlayerWeaponInSlot(id, 2),Bag[id][slot][kiekis]);
+		}
+		case ITEM::kulkossm: {  if( PlayerHaveWeaponInSlot(id, 4))
+						SetPlayerAmmo(id,PlayerWeaponInSlot(id, 4),Bag[id][slot][kiekis]);
+		}
+		case ITEM::kulkoss: {  if( PlayerHaveWeaponInSlot(id, 3))
+						SetPlayerAmmo(id,PlayerWeaponInSlot(id, 3),Bag[id][slot][kiekis]);
+		}
+		case ITEM::kulkosr: {  if( PlayerHaveWeaponInSlot(id, 5))
+						SetPlayerAmmo(id,PlayerWeaponInSlot(id, 5),Bag[id][slot][kiekis]);
+		}
+		case ITEM::kulkosa: {  if( PlayerHaveWeaponInSlot(id, 6))
+						SetPlayerAmmo(id,PlayerWeaponInSlot(id, 6),Bag[id][slot][kiekis]);
+		}
+		case ITEM::kulkosb: {  if( PlayerHaveWeaponInSlot(id, 7))
+						SetPlayerAmmo(id,PlayerWeaponInSlot(id, 7),Bag[id][slot][kiekis]);
+		}
+	}
+	if(GetBagWeight(id) > MAX_BAG_WEIGHT)
+	{
+		ToggleControll(id, JUMP, 0);
+		ToggleControll(id, SPRINT, 0);
+	}
+	return 1;
+}
+
+function::PlayerWeaponInSlot(pid, slot)
+{
+	new wepid, ammo;
+	GetPlayerWeaponData(pid, slot, wepid, ammo);
+	if( wepid != 0) return wepid;
+	return 0;
+}
+
+function::PlayerHaveWeaponInSlot(pid, slot)
+{
+
+	new wepid, ammo;
+	GetPlayerWeaponData(pid, slot, wepid, ammo);
+	if( wepid != 0) return 1;
+	return 0;
+}
+
+function::getItemPrice(slot[e_bag])
+{
+	new iKaina = ItemInfo[ slot[item] ][item_kaina];
+
+	for(new i; i != eBonus; ++i)
+	{
+		iKaina += slot[effect][i] * 10;
+	}
+/*
+	if(flag_get(slot[item_flag], DMG_2)) fKaina += (cfKaina * 0.2);
+	if(flag_get(slot[item_flag], DMG_5)) fKaina += (cfKaina * 0.3);
+	if(flag_get(slot[item_flag], DMG_10)) fKaina += (cfKaina * 0.5);
+	if(flag_get(slot[item_flag], DMG_15)) fKaina += (cfKaina * 0.6);
+
+	if(flag_get(slot[item_flag], HP_50)) fKaina += (cfKaina * 0.2);
+	if(flag_get(slot[item_flag], HP_100)) fKaina += (cfKaina * 0.3);
+	if(flag_get(slot[item_flag], HP_200)) fKaina += (cfKaina * 0.5);
+	if(flag_get(slot[item_flag], HP_350)) fKaina += (cfKaina * 0.6);
+
+	if(flag_get(slot[item_flag], GET_DAMAGE_5)) fKaina += (cfKaina * 0.2);
+	if(flag_get(slot[item_flag], GET_DAMAGE_10)) fKaina += (cfKaina * 0.3);
+
+	if(flag_get(slot[item_flag], CRITICAL_2)) fKaina += (cfKaina * 0.2);
+	if(flag_get(slot[item_flag], CRITICAL_5)) fKaina += (cfKaina * 0.3);
+	if(flag_get(slot[item_flag], CRITICAL_10)) fKaina += (cfKaina * 0.5);
+*/
+
+	return iKaina;
+}
+
+function::getFreeSlot(id[][e_bag])
+{
+	for(new i; i < MAX_ITEM; ++i)
+		if(id[i][item] == 0)
+			return i;
+	return 0;
+}
+
+function::getFreeBagSlot(id)
+{
+	for(new i; i < MAX_ITEM; ++i)
+		if(Bag[id][i][item] == 0)
+			return i;
+	return -1;
+}
+
+function::swapSlots(slot1[e_bag], slot2[e_bag])
+{
+	new temp[ e_bag ];
+	slotcpy(temp, slot1);
+	slotcpy(slot1, slot2);
+	slotcpy(slot2, temp);
+}
+
+function::swapBagSlots(id, slot1, slot2)
+{
+	new tmp[e_bag];
+	slotcpy(tmp, Bag[id][slot1]);
+	slotcpy(Bag[id][slot1], Bag[id][slot2]);
+	slotcpy(Bag[id][slot2], tmp);
+}
+
+function::insertToSlot(slot[][e_bag], slotid, info[e_bag])
+{
+	for(new i = MAX_ITEM-1; i > slotid; i--)
+		slotcpy(slot[i], slot[i-1]);
+
+	slotcpy(slot[slotid], info);
+}
+
+function::insertToBagSlot(id, slot, info[e_bag])
+{
+	for(new i = MAX_ITEM-1; i > slot; i--)
+		slotcpy(Bag[id][i], Bag[id][i-1]);
+
+	slotcpy(Bag[id][slot], info);
+}
+
+function::clearSlot(slot[e_bag])
+{
+	slot[item] = 0;
+	slot[kiekis] = 0;
+	slot[item_info] = flag_item:0;
+	
+	for(new i; i != eBonus; ++i)
+	{
+		slot[effect][i] = 0;
+	}
+
+	//slot[item_flag] = flag_bonus:0;
+}
+
+function::clearBagSlot(id, slot)
+{
+	Bag[id][slot][item] = 0;
+	Bag[id][slot][kiekis] = 0;
+	Bag[id][slot][item_info] = flag_item:0;
+	
+	for(new i; i != eBonus; ++i)
+	{
+		Bag[id][slot][effect][i] = 0;
+	}
+
+	//Bag[id][slot][item_flag] = flag_bonus:0;
+}
+
+function::RemoveItem(pid, itemid, amount)
+{
+	new const slot = findItemInBag(pid, itemid);
+	if(slot != -1)
+		RemoveItemFromSlot(pid, slot, amount);
+}
+
+function::RemoveItemFromSlot(pid, slotid, amount)
+{
+	new const itemid = bag[slotid][item];
+	if( amount == -1 || bag[slotid][kiekis] <= amount)
+	{
+		clearBagSlot(pid, slotid);
+		for(new i = slotid; i < MAX_ITEM-1; ++i)
+		{
+			slotcpy(bag[i], bag[i + 1]);
+		}
+		switch(itemid)
+		{
+			case ITEM::raktai_m: 
+			{
+				setVehicleParamsForPlayer(pinfo[carid], pid, 0, 1);
+			}
+
+			case ITEM::raktai_mech_car:
+			{
+				foreach(new veh : masinos[0]) // MECHANIKØ MAÐINOS
+					if( vehicle.bool.get(getVehicleFromSampID(veh), fSpyna)) setVehicleParamsForPlayer(veh, pid, 0, 1);
+					else setVehicleParamsForPlayer(veh, pid, 0, 0);
+			}
+
+			case ITEM::raktai_pd_car:
+			{
+				foreach(new veh : masinos[1]) // POLICIJOS MAÐINOS
+					if( vehicle.bool.get(getVehicleFromSampID(veh), fSpyna)) setVehicleParamsForPlayer(veh, pid, 0, 1);
+					else setVehicleParamsForPlayer(veh, pid, 0, 0);
+			}
+
+			case ITEM::raktai_med_car:
+			{
+				foreach(new veh : masinos[2]) // MEDIKØ MAÐINOS
+					if( vehicle.bool.get(getVehicleFromSampID(veh), fSpyna)) setVehicleParamsForPlayer(veh, pid, 0, 1);
+					else setVehicleParamsForPlayer(veh, pid, 0, 0);
+			}
+
+			case ITEM::raktai_taxi_car:   
+			{
+				foreach(new veh : masinos[3]) // TAXI MAÐINOS
+					if( vehicle.bool.get(getVehicleFromSampID(veh), fSpyna)) setVehicleParamsForPlayer(veh, pid, 0, 1);
+					else setVehicleParamsForPlayer(veh, pid, 0, 0);
+			}
+
+			case ITEM::raktai_fire_car:
+			{
+				foreach(new veh : masinos[4]) // UGNIAGESIØ MAÐINOS
+					if( vehicle.bool.get(getVehicleFromSampID(veh), fSpyna)) setVehicleParamsForPlayer(veh, pid, 0, 1);
+					else setVehicleParamsForPlayer(veh, pid, 0, 0);
+			}
+
+			case ITEM::raktai_wash_car:
+			{
+				foreach(new veh : masinos[5]) // VALYTOJØ MAÐINOS
+					if( vehicle.bool.get(getVehicleFromSampID(veh), fSpyna)) setVehicleParamsForPlayer(veh, pid, 0, 1);
+					else setVehicleParamsForPlayer(veh, pid, 0, 0);
+			}
+
+			case ITEM::raktai_fura:
+			{
+				foreach(new veh : masinos[6]) // FÛRISTØ MAÐINOS
+					if( vehicle.bool.get(getVehicleFromSampID(veh), fSpyna)) setVehicleParamsForPlayer(veh, pid, 0, 1);
+					else setVehicleParamsForPlayer(veh, pid, 0, 0);
+			}
+
+			case ITEM::raktai_krov:
+			{
+				foreach(new veh : masinos[7]) // KROVININËS MAÐINOS
+					if( vehicle.bool.get(getVehicleFromSampID(veh), fSpyna)) setVehicleParamsForPlayer(veh, pid, 0, 1);
+					else setVehicleParamsForPlayer(veh, pid, 0, 0);
+			}
+
+			case ITEM::kastetas..ITEM::vibro2: 	// GINKLAI
+			{
+				removePlayerWeapon(pid, GetWeaponFromItem(itemid));
+			}
+
+			case ITEM::kulkosp..ITEM::kulkosb: 	// AMMO
+			{
+				removePlayerWeapon(pid, PlayerWeaponInSlot(pid, itemid - (ITEM::kulkosp) + 2));
+			}
+		}
+
+	} else {
+
+		switch(itemid)
+		{
+			case ITEM::kulkosp..ITEM::kulkosb:	SetPlayerAmmo(pid, PlayerWeaponInSlot(pid, itemid - (ITEM::kulkosp) + 2), bag[slotid][kiekis]);
+		}
+		bag[slotid][kiekis] -= amount;
+	}
+	if(GetBagWeight(pid) <= MAX_BAG_WEIGHT)
+	{
+		ToggleControll(pid, JUMP, 1);
+		ToggleControll(pid, SPRINT, 1);
+	}
+}
+
+func hideItemInfoBag(pid)
+{
+	PlayerTextDrawHide(pid, ibag[64]);
+}
+
+func showItemInfoBag(pid, slot)
+{
+	if(!bag[slot][item] || !bag[slot][kiekis])
+	{
+		//PlayerTextDrawSetString(pid, ibag[64], f("%s~n~~n~%s", ItemInfo[bag[slot][item]][item_name], ItemInfo[bag[slot][item]][item_about]));
+
+	} else {
+
+		new iteminfotext[256];
+
+		strcat(iteminfotext, ItemInfo[bag[slot][item]][item_name]);
+		if(bag[slot][effect][ibPlus])
+			strcat(iteminfotext, f(" +~y~%i~w~", bag[slot][effect][ibPlus]));
+
+		strcat(iteminfotext, "~n~~n~");
+		strcat(iteminfotext, ItemInfo[bag[slot][item]][item_about]);
+		strcat(iteminfotext, "~n~");
+
+		
+		if(bag[slot][effect][ibHp])
+			(iteminfotext, f("~n~+ Gyvybingumas ~y~%i~w~", bag[slot][effect][ibHp]*10));
+		
+		if(bag[slot][effect][ibCritical])
+			(iteminfotext, f("~n~+ Kritine zala ~y~%i~w~", bag[slot][effect][ibCritical]));
+		
+		if(bag[slot][effect][ibFistDmgGive])
+			(iteminfotext, f("~n~+ Ranku zala ~y~%i~w~", bag[slot][effect][ibFistDmgGive]));
+		
+		if(bag[slot][effect][ibPistolDmgGive])
+			(iteminfotext, f("~n~+ Pistoletu zala ~y~%i~w~", bag[slot][effect][ibPistolDmgGive]));
+		
+		if(bag[slot][effect][ibSmgDmgGive])
+			(iteminfotext, f("~n~+ Smg zala ~y~%i~w~", bag[slot][effect][ibSmgDmgGive]));
+		
+		if(bag[slot][effect][ibShotgunDmgGive])
+			(iteminfotext, f("~n~+ Shotgun zala ~y~%i~w~", bag[slot][effect][ibShotgunDmgGive]));
+		
+		if(bag[slot][effect][ibRifleDmgGive])
+			(iteminfotext, f("~n~+ Automatu zala ~y~%i~w~", bag[slot][effect][ibRifleDmgGive]));
+		
+		if(bag[slot][effect][ibAwpDmgGive])
+			(iteminfotext, f("~n~+ Awp zala ~y~%i~w~", bag[slot][effect][ibAwpDmgGive]));
+		
+		if(bag[slot][effect][ibBadGunsDmgGive])
+			(iteminfotext, f("~n~+ Nelegaliu ginklu zala ~y~%i~w~", bag[slot][effect][ibBadGunsDmgGive]));
+		
+		if(bag[slot][effect][ibFistDmgTake])
+			(iteminfotext, f("~n~+ Apsauga nuo ranku ~y~%i~w~", bag[slot][effect][ibFistDmgTake]));
+		
+		if(bag[slot][effect][ibPistolDmgTake])
+			(iteminfotext, f("~n~+ Apsauga nuo pistoletu ~y~%i~w~", bag[slot][effect][ibPistolDmgTake]));
+		
+		if(bag[slot][effect][ibSmgDmgTake])
+			(iteminfotext, f("~n~+ Apsauga nuo smg ~y~%i~w~", bag[slot][effect][ibSmgDmgTake]));
+		
+		if(bag[slot][effect][ibShotgunDmgTake])
+			(iteminfotext, f("~n~+ Apsauga nuo shotgun ~y~%i~w~", bag[slot][effect][ibShotgunDmgTake]));
+		
+		if(bag[slot][effect][ibRifleDmgTake])
+			(iteminfotext, f("~n~+ Apsauga nuo rifle ~y~%i~w~", bag[slot][effect][ibRifleDmgTake]));
+		
+		if(bag[slot][effect][ibAwpDmgTake])
+			(iteminfotext, f("~n~+ Apsauga nuo awp ~y~%i~w~", bag[slot][effect][ibAwpDmgTake]));
+		
+		if(bag[slot][effect][ibBadGunsDmgTake])
+			(iteminfotext, f("~n~+ Apsauga nuo nelegaliu ginklu ~y~%i~w~", bag[slot][effect][ibBadGunsDmgTake]));
+		
+		if(bag[slot][effect][ibEnergy])
+			(iteminfotext, f("~n~+ Istverme ~y~%i~w~", bag[slot][effect][ibEnergy]));
+		
+		if(bag[slot][effect][ibJump])
+			(iteminfotext, f("~n~+ Suolio stiprumas ~y~%i~w~", bag[slot][effect][ibJump]));
+		
+		if(bag[slot][effect][ibFireDmg])
+			(iteminfotext, f("~n~+ Apsauga nuo ugnies ~y~%i~w~", bag[slot][effect][ibFireDmg]));
+		
+		if(bag[slot][effect][ibExp])
+			(iteminfotext, f("~n~+ Patirties uz veiksma ~y~%i~w~", bag[slot][effect][ibExp]));
+		
+		if(bag[slot][effect][ibGangInfluence])
+			(iteminfotext, f("~n~+ Itaka gaujos zonoms ~y~%i~w~", bag[slot][effect][ibGangInfluence]));
+		
+		if(bag[slot][effect][ibSuccessRate])
+			(iteminfotext, f("~n~+ Patvarumas tobulinimams ~y~%i~w~", bag[slot][effect][ibSuccessRate]));
+		
+		if(bag[slot][effect][ibCraftingSuccessRate])
+			(iteminfotext, f("~n~+ Sekme kuriant ~y~%i~w~", bag[slot][effect][ibCraftingSuccessRate]));
+
+		PlayerTextDrawSetString(pid, ibag[64], iteminfotext);
+		PlayerTextDrawShow(pid, ibag[64]);
+	}
+
+	return 1;
+}
+
+func hide_bag(pid)
+{
+	player.bool.off(pid, bBagOpen);
+	for(new i = 0; i < 65; ++i)
+		PlayerTextDrawHide(pid, ibag[i]);
+	HidePlayerProgressBar(pid, get.BagTalpa[pid]);
+}
+
+stock load_bag(pid,side = 0, reloadall = 1) // kkk
+{
+	hide_bag(pid);
+	player.bool.on(pid, bBagOpen);
+
+	new fitem = 0, n = 12, j = 0;
+
+	if(reloadall)
+		UpdateAmmo(pid);
+
+	switch(side)
+	{
+		case 0: fitem = 0;
+		case 1: fitem = LoadBagNext(pid);
+		case 2: fitem = LoadBagPrev(pid);
+		case 3: fitem = GetCurrentPage(pid);
+	}
+
+	if(reloadall)
+	{
+		PlayerTextDrawSetString(pid, ibag[5], "naudoti");
+		PlayerTextDrawSetString(pid, ibag[11],f("%i", baguse[pageid]+1));
+		PlayerTextDrawShow(pid, ibag[11]);
+			
+		baguse[last_clicked_textdraw_row] = PlayerText:-1;
+		baguse[selecteditem] = PlayerText:-1;
+		slcslot = -1;
+		for(new i; i < 13; ++i)
+			baguse[bagedit:i] = -1;
+	}
+
+	for(new i = 0; i < 12; ++i)
+	{
+		if(i == 3 && pinfo[darbas] != CRAFTER)
+		{
+			continue;
+		}
+		PlayerTextDrawShow(pid, ibag[i]);
+	}	
+//	PlayerTextDrawShow(pid, ibag[64]);
+	
+	if(GetBagWeight(pid) <= MAX_BAG_WEIGHT)
+	{
+		ToggleControll(pid, JUMP, 1);
+		ToggleControll(pid, SPRINT, 1);
+	
+	} else {
+
+		ToggleControll(pid, JUMP, 0);
+		ToggleControll(pid, SPRINT, 0);
+	}
+	ShowPlayerProgressBar(pid, get.BagTalpa[pid]);
+	if( baguse[pageid] == 0)
+		PlayerTextDrawHide(pid, ibag[10]);
+	else
+		PlayerTextDrawShow(pid, ibag[10]);
+	if( baguse[pageid]+1 == GetMaxPages(pid))
+		PlayerTextDrawHide(pid, ibag[9]);
+	else
+		PlayerTextDrawShow(pid, ibag[9]);
+	/*	for(new i = fitem; i < talpa && j < 13; ++i)
+		{*/
+	/*	for(new idx=fitem, i=0; idx < vector_capacity(zBag[pid]) && j < 13; idx++)
+		{*/
+
+	for(new idx = fitem, i; idx < MAX_ITEM && j < 13; idx++)
+	{
+		tryagain:
+		i = bag[idx][item];
+		if( i == 0) continue;
+		if(!bag[idx][kiekis])
+		{
+			RemoveItemFromSlot(pid, idx, -1);
+			goto tryagain;
+		}
+		baguse[bagedit:j] = idx;
+		j++;
+
+		if( flag_get(bag[idx][item_info], IS_INUSE) )
+			PlayerTextDrawColor( pid, ibag[n], COLOR_OK);
+		else
+			PlayerTextDrawColor( pid, ibag[n], -1);
+
+		PlayerTextDrawBoxColor( pid, ibag[n], COLOR_BAG_DEFAULT);
+
+		PlayerTextDrawSetString(pid,ibag[n], ItemInfo[i][item_name]);
+		PlayerTextDrawShow(pid, ibag[n]);
+			n++;
+		PlayerTextDrawSetString(pid,ibag[n], f("%i",bag[idx][kiekis]));
+		PlayerTextDrawShow(pid, ibag[n]);
+			n++;
+		PlayerTextDrawSetString(pid,ibag[n], f("%.1fkg",float(getBagSlotWeight(pid, idx)) / 1000.0 ));
+		PlayerTextDrawShow(pid, ibag[n]);
+			n++;
+		PlayerTextDrawSetString(pid,ibag[n], f("%i", getItemPrice(bag[idx])));
+		PlayerTextDrawShow(pid, ibag[n]);
+			n++;
+	}
+	if( ! player.flag.get(pid, fFirstBag))
+	{
+		showTip(pid, TIP_USE_ITEM);
+		player.flag.on(pid, fFirstBag);
+	}
+}

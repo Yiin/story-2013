@@ -1,0 +1,938 @@
+/*
+
+
+
+
+
+
+
+
+
+                     Story of Cities
+
+                        SOCKETS
+
+
+
+
+
+
+
+
+*/
+
+function::servcon_load()
+{
+      print("servcon: paleidziamas socket serveris...");
+      socket_server = socket_create(TCP);
+ 
+      if(is_socket_valid(socket_server))
+      {
+            socket_set_max_connections(socket_server, MAX_PLAYERS);
+            socket_listen(socket_server, 5284);
+            printf("servcon: socket serveris paleistas ant %d port'o", 5284);
+      }
+}
+
+// client & server (udp)
+Callback::onUDPReceiveData(Socket:id, data[], data_len, remote_client_ip[], remote_client_port)
+{
+
+}
+// client only (tcp)
+Callback::onSocketAnswer(Socket:id, data[], data_len) // called when socket_connect() has been used and the server sends data
+{
+
+}
+Callback::onSocketClose(Socket:id)
+{
+
+}
+
+// server only (tcp)
+Callback::onSocketReceiveData(Socket:id, remote_clientid, data[], data_len) // called when a remote client sends data
+{
+   static prefix, params[256];
+   sscanf(data, "is[256]", prefix, params); // ]
+
+   static ip[16];
+   get_remote_client_ip(id,remote_clientid,ip);
+   new const pid = map_get(MAP_IP, IntToStr(remote_clientid));
+
+   printf("SocketReceiveData from player(%i, ip: %s, id: %i) :: %s", pid, ip, remote_clientid, data);
+
+   if(!IsPlayerConnected(pid)) return 1;
+
+   if(prefix == LOGIN)
+   {
+      //Objects(pid);
+      SetPlayerTeam(pid, 1);
+
+      TextDrawHideForPlayer(pid, Init2);
+      TextDrawHideForPlayer(pid, Init3);
+      TextDrawHideForPlayer(pid, Init4);
+      //showLogin(pid);
+      logo_appear(pid);
+      sql_query(sqlHandle, F("SELECT id FROM zaidejai WHERE vardas = '%s'", GetPlayerNameEx( pid )), QUERY_CACHED | QUERY_THREADED, "checkForAccount", "ri", pid);
+
+      return 1;
+   }
+   else if(pid != INVALID_PLAYER_ID)
+   switch(prefix)
+   {
+      case BALL_THROW:
+      {
+         infoMsg(pid, "Paðokai");
+         return 1;
+      }
+      case QUESTS_LIST:
+      {
+         QUEST::ShowMenu(pid);
+         return 1;
+      }
+      case WOOD_BAR_FINISH:
+      {
+         if(ptemp[kertamas_medis] != -1)
+         {
+            new const i = ptemp[kertamas_medis];
+            PLAYER::Freeze(pid, false, KERTA_MEDI);
+
+            switch(objects[gTree(i)][obj_other_info][obj_state])
+            {
+               case OBJ_STATE_NORMAL:
+               {
+                  objects[gTree(i)][obj_other_info][obj_counting] = strval(params);
+                  if(objects[gTree(i)][obj_other_info][obj_counting] <= 0)
+                  {
+                     DestroyDynamicObject(objects[gTree(i)][obj_id]);
+                     objects[gTree(i)][obj_id] = CreateDynamicObject(MEDIS_KRITES, medziai[i][mX], medziai[i][mY], medziai[i][mZ]+0.5, 0, 0, random(360));
+                     destroyDynamicArea(objects[gTree(i)][obj_other_ids][obj_area_id]);
+                     objects[gTree(i)][obj_other_ids][obj_area_id] = CreateDynamicSphere(medziai[i][mX], medziai[i][mY], medziai[i][mZ], 10);
+                     objects[gTree(i)][obj_other_info][obj_counting] = 300;
+                     objects[gTree(i)][obj_other_info][obj_state] = OBJ_STATE_ONGROUND;
+                     Streamer_Update(pid);
+
+                  } else {
+
+                     infoMsg(pid, "Medþio liko: %i", strval(params));
+                  }
+               }
+               case OBJ_STATE_ONGROUND:
+               {
+                  objects[gTree(i)][obj_other_info][obj_counting] = strval(params);
+                  if(objects[gTree(i)][obj_other_info][obj_counting] <= 0)
+                  {
+                     DestroyDynamicObject(objects[gTree(i)][obj_id]);
+                     objects[gTree(i)][obj_id] = CreateDynamicObject(14872, medziai[i][mX], medziai[i][mY], medziai[i][mZ]-0.2, 0,0,0);
+                     destroyDynamicArea(objects[gTree(i)][obj_other_ids][obj_area_id]);
+                     objects[gTree(i)][obj_other_ids][obj_area_id] = CreateDynamicSphere(medziai[i][mX], medziai[i][mY], medziai[i][mZ], 5);
+                     objects[gTree(i)][obj_other_info][obj_state] = OBJ_STATE_FINAL;
+                     infoMsg(pid, "Medþio nebëra.");
+                     object.flag.off(gTree(i), fIsActive);
+                     Streamer_Update(pid);
+
+                  } else {
+
+                     infoMsg(pid, "Medþio liko: %i", strval(params));
+                  }
+               }
+            }
+         }           
+      }
+      case KEY_M:
+      {
+         SelectObject(pid);
+      }
+      case IS_CAR_IN_WATER:
+      {
+         static vehicleid, check;
+         sscanf(params, "ii", vehicleid, check);
+         infoMsg(0, "%%%%i = %i", check);
+         if(!check)
+         {
+            new const i = vehicleid;
+            startFire(car[i][_x555], car[i][_y555], car[i][_z555]-1.3);
+            car[i][_x555]+=2;
+            startFire(car[i][_x555], car[i][_y555], car[i][_z555]-1.3);
+            car[i][_y555]+=1;
+            startFire(car[i][_x555], car[i][_y555], car[i][_z555]-1.3);
+            updateMap(GAISRININKAS);
+         }
+      }
+      case MECH_BAR_FINISH:
+      {
+         notification2(pid,"Sutvarkyta !");
+         switch(get.fix[pid])
+         {
+            case FIX_VARIKLIS:
+            {
+               ++car[get.clickedVeh[pid]][repair_times];
+               vehicle.error.off(get.clickedVeh[pid], gEngine);
+               checkKeys(get.clickedVeh[pid]);
+            }
+            case FIX_PADANGOS:
+            {
+               static Panels, Doors, Lights, Tires;
+               getVehicleDamageStatus(get.clickedVeh[pid], Panels, Doors, Lights, Tires);
+               updateVehicleDamageStatus(get.clickedVeh[pid], Panels, Doors, Lights, 0b0000);
+
+               vehicle.error.off(get.clickedVeh[pid], gTires);
+            }
+            case FIX_BRAKES:
+            {
+               vehicle.error.off(get.clickedVeh[pid], gBrakes);
+            }
+            case FIX_FUEL:
+            {
+               vehicle.error.off(get.clickedVeh[pid], gFuel);
+            }
+            case FIX_PLUG:
+            {
+               vehicle.error.off(get.clickedVeh[pid], gPlug);
+            }
+         }
+         PLAYER::Freeze(pid, false, TVARKO);
+      }
+      case CLICKONVEH1:
+      { 
+         new const vehicleid = strval(params);
+         new const veh = getVehicleFromSampID(vehicleid);
+         //notification(pid, f("click 1 - %i", vehicleid));
+         set.clickedVeh[pid] = veh;
+         if(pinfo[darbas] == MECHANIKAS && !PLAYER::IsFreezed(pid, TVARKO_GARAZE) && !PLAYER::IsFreezed(pid, TVARKO))
+         {
+            if(car[veh][car_status] == cRepair)
+            {
+               if(applyChecks(pid, cTvarkoGaraze)) return 1;
+               gt[0] = EOS;
+               strcat(gt, f(C_SOC"Maðina: "C_Y"%s", GetVehicleName(vehicleid)));
+               strcat(gt, f(C_SOC"\nBûklë: "C_Y"%i%%", car[veh][repair_status]));
+               inline Response(ID, did, response, listitem, string:txt[])
+               {
+                  #pragma unused ID, did, listitem, txt
+                  if(response)
+                  {
+                     PLAYER::Freeze(pid, true, TVARKO_GARAZE);
+                     inline timer()
+                     {
+                        if(car[veh][repair_status] >= 100)
+                        {
+                           aGarazas[eRepairVehicle] = INVALID_VEHICLE_ID;
+                           PLAYER::Freeze(pid, false, TVARKO_GARAZE);
+
+                        } else {
+
+                           static keys, unused;
+                           GetPlayerKeys(pid, keys, unused,unused);
+                           if(keys & KEY_FIRE)
+                           {
+                              showRepairBar(pid, ++car[veh][repair_status]);
+                              ++pinfo[repair_fixing];
+                           }
+                        }
+                     }
+                     set.repairT[pid] = setTimer(using inline timer, 200+200*car[veh][repair_times], true);
+                  }
+               }
+               showDialog(pid, using inline Response, DIALOG_STYLE_MSGBOX, " ", gt, "Taisyti", "Uþdaryti");
+
+            } else {
+
+               dialog_fix_list:
+               static Panels, Doors, Lights, Tires;
+               getVehicleDamageStatus(veh, Panels, Doors, Lights, Tires);
+               inline main_dialog(ID, did, response, listitem, string:txt[])
+               {
+                  #pragma unused ID, did, listitem
+                  if(response)
+                  {
+                     if(strfind(txt, "Taisyti variklá") != -1)
+                     {
+                        static Float:hp;
+                        getVehicleHealth(veh, hp);
+                        set.fix[pid] = FIX_VARIKLIS;
+                        set.fix_lvl[pid] = floatround(hp / 100)+car[get.clickedVeh[pid]][repair_times];
+                        PLAYER::Freeze(pid, true, TVARKO);
+                        notification2(pid, "tvarkai varikli.");
+                     }
+                     else if(strfind(txt, "Pakeisti padangas.") != -1)
+                     {
+                        set.fix[pid] = FIX_PADANGOS;
+
+                        switch(Tires)
+                        {
+                           case 0b0001,0b0010,0b0100,0b1000:
+                           {
+                              set.fix_lvl[pid] = 1;
+                              PLAYER::Freeze(pid, true, TVARKO);
+                              notification2(pid, "Tvarkai padanga.");
+                           }
+                           case 0b0011,0b0101,0b1001,0b0110,0b1010,0b1100:
+                           {
+                              set.fix_lvl[pid] = 2;
+                              PLAYER::Freeze(pid, true, TVARKO);
+                              notification2(pid, "Tvarkai dvi padangas.");
+                           }
+                           case 0b0111,0b1101,0b1011,0b1110:
+                           {
+                              set.fix_lvl[pid] = 3;
+                              PLAYER::Freeze(pid, true, TVARKO);
+                              notification2(pid, "Tvarkai tris padangas.");
+                           }
+                           default:
+                           {
+                              set.fix_lvl[pid] = 5;
+                              PLAYER::Freeze(pid, true, TVARKO);
+                              notification2(pid, "Tvarkai visas padangas.");
+                           }
+                        }
+                     }
+                     else if(strfind(txt, "Pakeisti stabdþius") != -1)
+                     {
+                        set.fix[pid] = FIX_BRAKES;
+                        set.fix_lvl[pid] = 2;
+                        PLAYER::Freeze(pid, true, TVARKO);
+                        notification2(pid, "tvarkai stabdzius.");
+                     }
+                     else if(strfind(txt, "Tvarkyti degalø bakà") != -1)
+                     {
+                        set.fix[pid] = FIX_FUEL;
+                        set.fix_lvl[pid] = 2;
+                        PLAYER::Freeze(pid, true, TVARKO);
+                        notification2(pid, "tvarkai degalu baka.");
+                     }
+                     else if(strfind(txt, "Pakeisti uþdegimo þvakes") != -1)
+                     {
+                        set.fix[pid] = FIX_PLUG;
+                        set.fix_lvl[pid] = 3;
+                        PLAYER::Freeze(pid, true, TVARKO);
+                        notification2(pid, "tvarkai uzdegimo zvakes.");
+                     }
+                     else if(strfind(txt, "Pilti degalus.") != -1)
+                     {
+                        RemoveItem(pid, ITEM::degalu_bakelis, 1);
+                        if(car[veh][degalai] + 20 <= fuel(getVehicleModel(veh)))
+                        {
+                           car[veh][degalai] += 20;
+                           notification2(pid, "Pripylei +~y~20~w~ l degalu");
+
+                        } else {
+
+                           car[veh][degalai] += fuel(getVehicleModel(veh)) - car[veh][degalai];
+                           notification2(pid, F("Pripylei +~y~%i~w~ l degalu", fuel(getVehicleModel(veh) - car[veh][degalai])));
+                        }
+                     }
+                     else
+                     {
+                        goto dialog_fix_list;
+                     }
+                  }
+               }
+               format(gt, sizeof gt, C_SOC"%s\n ", GetVehicleName(vehicleid));
+               if(vehicle.error.get(veh, gEngine))
+               {
+                  strcat(gt, "\n\t"C_DOT C_SOC" Taisyti variklá.");
+               }
+               if(Tires != 0b0000)
+               {
+                  strcat(gt, "\n\t"C_DOT C_SOC" Pakeisti padangas.");
+               }
+               if(vehicle.error.get(veh, gBrakes))
+               {
+                  strcat(gt, "\n\t"C_DOT C_SOC" Pakeisti stabdþius.");
+               }
+               if(vehicle.error.get(veh, gFuel))
+               {
+                  strcat(gt, "\n\t"C_DOT C_SOC" Tvarkyti degalø bakà.");
+               }
+               if(vehicle.error.get(veh, gPlug))
+               {
+                  strcat(gt, "\n\t"C_DOT C_SOC" Pakeisti uþdegimo þvakes.");
+               }
+               if(car[veh][degalai] < fuel(getVehicleModel(veh)) && IsItemInBag(pid, ITEM::degalu_bakelis))
+               {
+                  strcat(gt, "\n \n"C_DOT C_SOC" Pilti degalus.");
+               }
+               showDialog(pid, using inline main_dialog, DIALOG_STYLE_LIST, GetVehicleName(vehicleid), gt, "Rinktis", "Uþdaryti");
+            }
+         }
+         return 1;
+      }
+      case CLICKONVEH2:
+      {
+         if( IsPlayerInRangeOfVehicle(pid,strval(params),6))
+         {
+            new const vehid = getVehicleFromSampID(strval(params));
+            inline car_menu(__id, did, response, listitem, string:input[])
+            {
+               #pragma unused __id, did, listitem
+               if(response)
+               {
+                  if(strfind(input, "Atrakinti") != -1 || strfind(input, "Uþrakinti") != -1)
+                  {
+                     switch(car[vehid][car_tipas])
+                     {
+                        case 0:
+                        {
+                           if( !vehicle.bool.get(vehid, fSpyna))
+                           {
+                              vehicle.bool.on(vehid, fSpyna);
+                              notification(pid, "Uzrakinai masina");
+                              foreach(new i : Player)
+                                 if( i != pid ) setVehicleParamsForPlayer(vehid, i, 0, 1);
+                                 
+                           } else {
+
+                              vehicle.bool.off(vehid, fSpyna);
+                              notification(pid, "Atrakinai masina");
+                              foreach(new i : Player)
+                                 setVehicleParamsForPlayer(vehid, i, 0, 0);
+                           }
+                        }
+                        case MECHANIKAS:
+                        {
+                           if( !vehicle.bool.get(vehid, fSpyna))
+                           {
+                              vehicle.bool.on(vehid, fSpyna);
+                              notification(pid, "Uzrakinai masina");
+                              foreach(new i : Player)
+                                 if( !IsItemInBag(i, ITEM::raktai_mech_car)) setVehicleParamsForPlayer(vehid, i, 0, 1);
+                                 else setVehicleParamsForPlayer(vehid, i, 0, 0);
+                                 
+                           } else {
+
+                              vehicle.bool.off(vehid, fSpyna);
+                              notification(pid, "Atrakinai masina");
+                              foreach(new i : Player)
+                                 setVehicleParamsForPlayer(vehid, i, 0, 0);
+                           }
+                        }
+                        case PD:
+                        {
+                           if( !vehicle.bool.get(vehid, fSpyna) )
+                           {
+                              vehicle.bool.on(vehid, fSpyna);
+                              notification(pid, "Uzrakinai masina");
+                              foreach(new i : Player)
+                                 if( !IsItemInBag(i, ITEM::raktai_pd_car)) setVehicleParamsForPlayer(vehid, i, 0, 1);
+                                 else setVehicleParamsForPlayer(vehid, i, 0, 0);
+                                 
+                           } else {
+
+                              vehicle.bool.off(vehid, fSpyna);
+                              notification(pid, "Atrakinai masina");
+                              foreach(new i : Player)
+                                 setVehicleParamsForPlayer(vehid, i, 0, 0);
+                           }
+                        }
+                        case MEDIKAS:
+                        {
+                           if( !vehicle.bool.get(vehid, fSpyna) )
+                           {
+                              vehicle.bool.on(vehid, fSpyna);
+                              notification(pid, "Uzrakinai masina");
+                              foreach(new i : Player)
+                                 if( !IsItemInBag(i, ITEM::raktai_med_car)) setVehicleParamsForPlayer(vehid, i, 0, 1);
+                                 else setVehicleParamsForPlayer(vehid, i, 0, 0);
+                                 
+                           } else {
+
+                              vehicle.bool.off(vehid, fSpyna);
+                              notification(pid, "Atrakinai masina");
+                              foreach(new i : Player)
+                                 setVehicleParamsForPlayer(vehid, i, 0, 0);
+                           }
+                        }
+                        case GAISRININKAS:
+                        {
+                           if( !vehicle.bool.get(vehid, fSpyna) )
+                           {
+                              vehicle.bool.on(vehid, fSpyna);
+                              notification(pid, "Uzrakinai masina");
+                              foreach(new i : Player)
+                                 if( !IsItemInBag(i, ITEM::raktai_fire_car)) setVehicleParamsForPlayer(vehid, i, 0, 1);
+                                 else setVehicleParamsForPlayer(vehid, i, 0, 0);
+                                 
+                           } else {
+
+                              vehicle.bool.off(vehid, fSpyna);
+                              notification(pid, "Atrakinai masina");
+                              foreach(new i : Player)
+                                 setVehicleParamsForPlayer(vehid, i, 0, 0);
+                           }
+                        }
+                        case VALYTOJAS:
+                        {
+                           if( !vehicle.bool.get(vehid, fSpyna) )
+                           {
+                              vehicle.bool.on(vehid, fSpyna);
+                              notification(pid, "Uzrakinai masina");
+                              foreach(new i : Player)
+                                 if( !IsItemInBag(i, ITEM::raktai_wash_car)) setVehicleParamsForPlayer(vehid, i, 0, 1);
+                                 else setVehicleParamsForPlayer(vehid, i, 0, 0);
+                              
+                           } else {
+
+                              vehicle.bool.off(vehid, fSpyna);
+                              notification(pid, "Atrakinai masina");
+                              foreach(new i : Player)
+                                 setVehicleParamsForPlayer(vehid, i, 0, 0);
+                           }
+                        }
+                        case FURISTAS:
+                        {
+                           if(getVehicleModel(vehid) == CAR_FURA)
+                           {
+                              if( !vehicle.bool.get(vehid, fSpyna) )
+                              {
+                                 vehicle.bool.on(vehid, fSpyna);
+                                 notification(pid, "Uzrakinai masina");
+                                 foreach(new i : Player)
+                                    if( !IsItemInBag(i, ITEM::raktai_fura)) setVehicleParamsForPlayer(vehid, i, 0, 1);
+                                    else setVehicleParamsForPlayer(vehid, i, 0, 0);
+                                 
+                              } else {
+
+                                 vehicle.bool.off(vehid, fSpyna);
+                                 notification(pid, "Atrakinai masina");
+                                 foreach(new i : Player)
+                                    setVehicleParamsForPlayer(vehid, i, 0, 0);
+                              }
+
+                           } else {
+
+                              if( !vehicle.bool.get(vehid, fSpyna) )
+                              {
+                                 vehicle.bool.on(vehid, fSpyna);
+                                 notification(pid, "Uzrakinai masina");
+                                 foreach(new i : Player)
+                                    if( !IsItemInBag(i, ITEM::raktai_krov)) setVehicleParamsForPlayer(vehid, i, 0, 1);
+                                    else setVehicleParamsForPlayer(vehid, i, 0, 0);
+                                 
+                              } else {
+
+                                 vehicle.bool.off(vehid, fSpyna);
+                                 notification(pid, "Atrakinai masina");
+                                 foreach(new i : Player)
+                                    setVehicleParamsForPlayer(vehid, i, 0, 0);
+                              }
+                           }
+                        }
+                     }  
+                  }
+                  else if(strfind(input, "Bagaþinë") != -1)
+                  {
+                     if( !vehicle.bool.get(vehid, fSpyna) )
+                     {
+                        if(!vehicle.bool.get(vehid, fTrunkInUse))
+                        {
+                           if(applyChecks(pid, cTrunk)) return 1;
+                           load_trunk(vehid, pid);
+                        }
+                     }
+                  }
+                  else if(strfind(input, "Pilti degalus") != -1)
+                  {
+                     pcd[pid] = vehid;
+                     PLAYER::Freeze(pid, true, DEGALAI);
+                     player.bool.on(pid,bPilaDegalus);
+                  }
+               }
+            }
+            format(gt, sizeof gt, C_SOC"%s\n ");
+            if(!checkKeys(vehid, pid))
+            {
+               if(vehicle.bool.get(vehid, fSpyna))
+                  strcat(gt, "\n\t"C_DOT C_SOC"Atrakinti.");
+               else
+                  strcat(gt, "\n\t"C_DOT C_SOC"Uþrakinti.");
+            }
+            if(VehicleInfo[car[vehid][car_model]-400][vTrunkSize])
+               strcat(gt, "\n\t"C_DOT C_SOC"Bagaþinë.");
+            static coords<1>;
+            getVehiclePos(vehid, coords<1>);
+            for(new i; i < sizeof degalines; ++i)
+               if(GDBP(coords<1>, degalines[i][0], degalines[i][1], degalines[i][2]) < 6)
+               {
+                  strcat(gt, "\n\t"C_DOT C_SOC"Pilti degalus.");
+                  break;
+               }
+
+            showDialog(pid, using inline car_menu, DIALOG_STYLE_LIST, GetVehicleName(getVehicle(vehid)), gt, "Rinktis", "Atðaukti");
+         }
+         return 1;
+      }
+      case SPRINT_UPDATE:
+      {
+         new Float:xd, kk;
+         sscanf(data, "if", kk, xd);
+         fset.max_sprint[pid] = xd;
+         return 1;
+      }
+      case FISHING_FAILED:
+      {
+         notification(pid, "Zuvis paspruko");
+         PLAYER::Freeze(pid, false, ZVEJOJA);
+         return 1;
+      }
+      case FISHING_CATCH:
+      {
+         PLAYER::Freeze(pid, false, ZVEJOJA);
+         new const ITEM::FISH = random((ITEM::maistas_upetakis) - (ITEM::maistas_eserys) + 1) + (ITEM::maistas_eserys);
+         AddItem(pid, ITEM::FISH, 1);
+         inmind(pid, F("%s, puiku!", GetItemName(ITEM::FISH)));
+         return 1;
+      }
+      case BAG:
+      {
+         //if(player.flag.get(pid, fSurakintas)) return inmind(pid, "Ah.. Mano rankos surakintos..");
+         if(applyChecks(pid, cBag)) return 1;
+         load_bag(pid, 3);
+         SelectTextDraw(pid, COLOR_SELECT);
+         return 1;
+      }
+      case ZMENU:
+      {
+         show_menu(pid);
+         menu_pmenu(pid);
+         return 1;
+      }
+      case ENGINEON:
+      {
+         new const vehid = getPlayerVehicleID(pid);
+         
+         notification(pid, "variklis ~g~uzvestas");
+         engineon(vehid);
+
+         return 1;
+      }
+      case ENGINEBAR:
+      {
+         if(GetPlayerState(pid) != PLAYER_STATE_DRIVER) return 1;
+         new const vehid = GetPlayerVehicleID(pid);
+         new const veh = getVehicleFromSampID(vehid);
+         switch(car[veh][car_tipas])
+         {
+            case MECHANIKAS:
+            if( !IsItemInBag(pid, ITEM::raktai_mech_car))
+            {
+               notification(pid, "Neturi sios masinos rakteliu.");
+               return 1;
+            }
+            case PD:
+            if( !IsItemInBag(pid, ITEM::raktai_pd_car))
+            {
+               notification(pid, "Neturi sios masinos rakteliu.");
+               return 1;
+            }
+            case MEDIKAS:
+            if( !IsItemInBag(pid, ITEM::raktai_med_car))
+            {
+               notification(pid, "Neturi sios masinos rakteliu.");
+               return 1;
+            }
+            case TAXI:
+            if( !IsItemInBag(pid, ITEM::raktai_taxi_car))
+            {
+               notification(pid, "Neturi sios masinos rakteliu.");
+               return 1;
+            }
+            case GAISRININKAS:
+            if( !IsItemInBag(pid, ITEM::raktai_fire_car))
+            {
+               notification(pid, "Neturi sios masinos rakteliu.");
+               return 1;
+            }
+            case VALYTOJAS:
+            if( !IsItemInBag(pid, ITEM::raktai_wash_car))
+            {
+               notification(pid, "Neturi sios masinos rakteliu.");
+               return 1;
+            }
+            case FURISTAS:
+            if(getVehicleModel(veh) == CAR_FURA)
+            {
+               if( !IsItemInBag(pid, ITEM::raktai_fura))
+               {
+                  notification(pid, "Neturi sios masinos rakteliu.");
+                  return 1;
+               }
+
+            } else {
+
+               if( !IsItemInBag(pid, ITEM::raktai_krov))
+               {
+                  notification(pid, "Neturi sios masinos rakteliu.");
+                  return 1;
+               }
+            }           
+         }
+         if( vehicle.error.get(veh, gEngine) ) return 1;
+         if( car[veh][car_savininkas] && pinfo[DBID] != car[veh][car_savininkas])
+         {
+            notification(pid, "Neturi sios masinos rakteliu.");
+            return 1;
+         }
+         if( ! vehicle.bool.get(veh, fVariklis))
+         {
+            if( car[veh][degalai] < 1)
+            {
+               notification(pid, "Nera degalu.");
+               engineoff(veh);
+
+            } else {
+
+               soc(pid, ENGINEBAR);
+            }
+            return 1;
+
+         } else {
+
+            notification(pid, "variklis ~w~~r~uzgesintas");
+            engineoff(veh);
+            return 1;
+         }
+      }
+      case DC:
+      {
+         socket_close_remote_client(id, remote_clientid);
+         return 1;
+      }
+      case CLICKON1:
+      {
+         OnPlayerClickPlayer_Mouse1(pid, strval(params));
+      }
+
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+
+
+      case CLICKON2:
+      {
+         new const _id = strval(params);
+         if(pid == _id) return 1;
+         inline xd(xd_pid, dialogid, response, listitem, string:inputtext[])
+         {
+            #pragma unused xd_pid, dialogid, listitem
+            if(response)
+            {
+               if(strfind(inputtext, "Informacija") != -1) notification(pid, "Info");
+               else if(strfind(inputtext, "Mainytis") != -1) notification(pid, "Mainytis");
+               else if(strfind(inputtext, "Draugas") != -1) notification(pid, "Draugas");
+               else if(strfind(inputtext, "Atleisti ið darbo") != -1)
+               {
+                  inline warning(warning_pid, warning_dialogid, warning_response, warning_listitem, string:warning_inputtext[])
+                  {
+                     #pragma unused warning_pid, warning_dialogid, warning_listitem, warning_inputtext
+                     if(warning_response)
+                     {
+                        leaveJob(pid);
+
+                        notification(_id, "Tu ismestas is darbo");
+                        notification(pid, f("Atleidai %s is darbo", GetPlayerNameEx(_id)));
+                  
+                     } else {
+                  
+                        goto show_again;
+                     }
+                     showDialog(pid, using inline warning, DIALOG_STYLE_MSGBOX, GetPlayerNameEx(_id), f("Ar tikrai nori ismesti %s is darbo?", GetPlayerNameEx(_id)), "Taip", "Ne");
+                  
+                  }
+               }
+               else if(strfind(inputtext, "Kviesti á darbà") != -1)
+               {
+                  inline sutikimas(sutikimas_pid, sutikimas_dialogid, sutikimas_response, sutikimas_listitem, string:sutikimas_inputtext[])
+                  {
+                     #pragma unused sutikimas_pid, sutikimas_dialogid, sutikimas_listitem, sutikimas_inputtext
+                     if(sutikimas_response)
+                     {
+                        pInfo[_id][darbas] = pinfo[direktorius];
+                        notification(_id, "Tu priimtas i darba.");
+                        notification(pid, f("%s isidarbino", GetPlayerNameEx(_id)));
+
+                     } else {
+
+                        inmind(_id, "Aèiû, bet atsisakysiu ðio pasiûlymo.");
+                     }
+                  }
+                  showDialog(_id, using inline sutikimas, DIALOG_STYLE_MSGBOX, GetPlayerNameEx(pid), "Esi kvieèiamas á darbà, ar sutinki dirbti?", "Taip", "Ne");
+               }
+               else if(strfind(inputtext, "Noriu prisijungti prie gaujos") != -1)
+               {
+                  inline sutikimas(iid, did, response1, listitem1, string:txt[])
+                  {
+                     #pragma unused iid, did, txt, listitem1
+                     if(response1)
+                     {
+                        joinGang(pid, _id);
+
+                     } else {
+
+                        notification(pid, "tavo prasymas buvo atmestas.");
+                     }
+                  }
+                  showDialog(_id, using inline sutikimas, DIALOG_STYLE_MSGBOX, F("Patirtis:%i  %s", pinfo[patirtis], GetPlayerNameEx(pid)), "Noriu prisijungti prie gaujos.", "Priimti", "Nepriimti");
+               }
+               else if(strfind(inputtext, "Kviesti á gaujà") != -1)
+               {
+                  inline sutikimas(iid, did, response1, listitem1, string:txt[])
+                  {
+                     #pragma unused iid, did, txt, listitem1
+                     if(response1)
+                     {
+                        joinGang(_id, pid);
+
+                     } else {
+
+                        notification(pid, F("~y~%s~w~ atsisake prisijungti prie gaujos", GetPlayerNameEx(_id)));
+                     }
+                  }
+                  showDialog(_id, using inline sutikimas, DIALOG_STYLE_MSGBOX, "Kvietimas á gaujà", F("%s kvieèia tave prisijungti prie gaujos \"%s\". %s", GetPlayerNameEx(pid), pinfo[gauja][g_name], (pInfo[_id][gauja]==pInfo[_id][DBID])?("Tavo gauja automatiðkai bus panaikinta ir visi nariai iðmesti."):("Automatiðkai paliksi savo dabartinæ gaujà.")), "Prisijungti", "Atsisakyti");
+               }
+               else if(strfind(inputtext, "Praneðti medikams") != -1)
+               {
+                  if(pInfo[_id][death_state] == DEATH_STATE_INACTIVE)
+                  {
+                     pInfo[_id][death_state] = DEATH_STATE_ACTIVE;
+                     infoMsg(pid, "Aèiû uþ iðkvietimà, medikai atvyksta.");
+                     updateMap(MEDIKAS);
+
+                     PLAYER::GiveExp(pid, 3);
+
+                  } else if(pInfo[_id][death_state] == DEATH_STATE_ACTIVE) {
+
+                     infoMsg(pid, "%s jau yra uþregistruotas mûsø sàraðe.", GetPlayerNameEx(_id));
+                  }
+               }
+               else if(strfind(inputtext, "Skelbti karà") != -1)
+               {
+                  inline resp(id1, did1, response1, listitem1, string:tekst1[])
+                  {
+                     #pragma unused id1, did1, listitem1, tekst1
+                     if(response1)
+                     {
+                        inline resp2(id2, did2, sutiko, listitem2, string:str2[])
+                        {
+                           #pragma unused id2, did2, listitem2, str2
+                           if(sutiko)
+                           {
+                              vector_push_back(vGangWar+_id, pinfo[gauja]);
+                              vector_push_back(vGangWar+pid, pInfo[_id][gauja]);
+
+                              foreach(new i : Player)
+                              {
+                                 if(pinfo[gauja] == pInfo[i][gauja])
+                                 {
+                                    notification2(i, F("Gauja ~y~%s~w~ patvirtino kara !", pInfo[_id][gauja][g_name]));
+                                    updateMarkersForPlayer(i);
+                                 
+                                 } else if(pInfo[_id][gauja] == pInfo[i][gauja]) {
+
+                                    notification2(i, F("Sutikote kariauti su gauja ~y~%s~w~.", pinfo[gauja][g_name]));
+                                 }
+                              }
+                           
+                           } else {
+
+                              foreach(new i : Player)
+                              {
+                                 if(pinfo[gauja] == pInfo[i][gauja])
+                                 {
+                                    notification2(i, F("Gauja ~y~%s~w~ atmete karo siulyma.", pInfo[_id][gauja][g_name]));
+
+                                 } else if(pInfo[_id][gauja] == pInfo[i][gauja]) {
+
+                                    notification2(i, F("Nesutikote kariauti su gauja ~y~%s~w~.", pinfo[gauja][g_name]));
+                                 }
+                              }
+                           }
+                        }
+                        format(gt, sizeof gt, C_SOC"Gauja "C_Y"%s"C_SOC" skelbia jums karà ! Ar garbingai priimsi ðá iððûká, \nar bailiai atmesi, tavo valia rinktis !", pinfo[gauja][g_name]);
+                        strcat(gt, "{ff0000}SVARBU !\n");
+                        strcat(gt,C_SOC"\nSutikus kariauti, laimës ta gauja, kuri pirmoji nuþudys tiek ");
+                        strcat(gt,"\nprieðininkø, kiek savo gaujoje turi nariø. Pavyzdþiui, jeigu tavo \n");
+                        strcat(gt,"gaujoje yra 30 nariø, o prieðininkø gaujoje - 40, tai norëdamas laimëti,\n");
+                        strcat(gt,"turi nuþudyti 30 prieðininkø (tiek kiek pas save turi nariø), o jie \n");
+                        strcat(gt,"norëdami laimëti turi nuþudyti 40 jûsiðkiø (nes pas juos yra 40 nariø).\n");
+                        strcat(gt,"\n{ff0000}KARO EIGA\n ");
+                        strcat(gt,C_SOC"\nNuþudþius prieðininkà gausi maþiau gaudomumo lygio negu áprastai,\n");
+                        strcat(gt,"taip pat gausi +3 patirties. Mirus nuo prieðininko rankos ar ginklo, prarasi\n");
+                        strcat(gt,"-2 patirties.");
+                        showDialog(_id, using inline resp2, DIALOG_STYLE_MSGBOX, "{ff0000}Gaujø karas", gt, "Sutinkti", "Atmesti");
+                     }
+                  }
+                  format(gt, sizeof gt, C_SOC"Skelbi karà gaujai "C_Y"%s"C_SOC" !\n ", pInfo[_id][gauja][g_name]);
+                  strcat(gt, "{ff0000}SVARBU !\n");
+                  strcat(gt,C_SOC"\nJeigu jie sutiks kariauti, laimës ta gauja, kuri pirmoji nuþudys tiek ");
+                  strcat(gt,"\nprieðininkø, kiek savo gaujoje turi nariø. Pavyzdþiui, jeigu tavo \n");
+                  strcat(gt,"gaujoje yra 30 nariø, o prieðininkø gaujoje - 40, tai norëdamas laimëti,\n");
+                  strcat(gt,"turi nuþudyti 30 prieðininkø (tiek kiek pas save turi nariø), o jie \n");
+                  strcat(gt,"norëdami laimëti turi nuþudyti 40 jûsiðkiø (nes pas juos yra 40 nariø).\n ");
+                  strcat(gt,"\n{ff0000}KARO EIGA\n ");
+                  strcat(gt,C_SOC"\nNuþudþius prieðininkà gausi maþiau gaudomumo lygio negu áprastai,\n");
+                  strcat(gt,"taip pat gausi +3 patirties. Mirus nuo prieðininko rankos ar ginklo, prarasi\n");
+                  strcat(gt,"-2 patirties.");
+                  showDialog(pid, using inline resp, DIALOG_STYLE_MSGBOX, "{ff0000}Gaujø karas", gt, "Skelbti", "Atðaukti");
+               }
+            }
+         }
+         
+         show_again:
+         format(gt, sizeof gt, C_Y"%s\n ", GetPlayerNameEx(_id));
+         if(pinfo[direktorius])
+         {
+            if( pinfo[direktorius] == pInfo[_id][darbas] )
+            {
+               strcat(gt, "\n\t"C_DOT C_SOC"Atleisti ið darbo.");
+            
+            } else if(! pInfo[_id][darbas]) {
+
+               strcat(gt, "\n\t"C_DOT C_SOC"Kviesti á darbà.");
+            }
+         }
+         strcat(gt, "\n\t"C_DOT C_SOC"Noriu prisijungti prie gaujos.");
+
+         if(pinfo[gauja] == pinfo[DBID])
+         {
+            strcat(gt, "\n\t"C_DOT C_SOC"Kviesti á gaujà.");
+         }
+         if(player.flag.get(pid, fMirsta))
+         {
+            strcat(gt, "\n\t"C_DOT C_SOC"Praneðti medikams.");
+         }
+         if(!getWar(pid, _id) && pinfo[gauja] == pinfo[DBID] && pInfo[_id][gauja] == pInfo[_id][DBID])
+         {
+            new const Result:r = sql_query(sqlHandle, f("SELECT COUNT(*) FROM zaidejai WHERE gauja = '%i'", pinfo[gauja]), QUERY_CACHED);
+            new const Result:r2 = sql_query(sqlHandle, f("SELECT COUNT(*) FROM zaidejai WHERE gauja = '%i'", pInfo[_id][gauja]), QUERY_CACHED);
+            if(sql_get_field_assoc_int(r, "COUNT(*)") > 9 && sql_get_field_assoc_int(r2, "COUNT(*)") > 9)
+            {
+               strcat(gt, "\n ""\n\t"C_DOT C_SOC"Skelbti karà.");
+            }
+         }
+
+         showDialog(pid, using inline xd, DIALOG_STYLE_LIST, GetPlayerNameEx(_id), gt, "Uþdaryti");
+
+         return 1;
+      }
+   }
+   return 1;
+}
+
+Callback::onSocketRemoteConnect(Socket:id, remote_client[], remote_clientid) // called when a remote client connects to our socket server
+{
+   printf("%i %s %i", _:id, remote_client, remote_clientid);
+
+   new const pid = map_get(MAP_IP, remote_client);
+   if(IsPlayerConnected(pid))
+   {
+      map_remove(MAP_IP, remote_client);
+      map_insert(MAP_IP, IntToStr(remote_clientid), pid);
+      pTemp[pid][socket] = remote_clientid;
+      socket_sendto_remote_client(id, remote_clientid, f("soc_ok %i", pid));
+   }
+}
+
+Callback::onSocketRemoteDisconnect(Socket:id, remote_clientid) // called when a remote client disconnects from our socket server
+{
+   printf("dc - %i %i", _:id, remote_clientid);
+}

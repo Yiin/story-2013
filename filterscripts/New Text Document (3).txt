@@ -1,0 +1,70 @@
+public OnPlayerRequestClass( playerid, classid )
+{
+		TextDrawShowForPlayer(playerid, Time), TextDrawShowForPlayer(playerid, Date);
+    	if( !pInfo[ playerid ][ logged ] )
+		{
+		TogglePlayerSpectating( playerid, true );
+
+		new
+		    Query[ 256 ];
+
+		format( Query, 256, "SELECT id FROM `profiliai` WHERE Name = '%s' LIMIT 1", GET_NAME( playerid ) );
+		mysql_query( Query );
+		mysql_store_result( );
+
+		if( mysql_num_rows( ) == 1 )
+		{
+		    new
+				idx = mysql_fetch_int( );
+
+			format( Query, 256, "SELECT Security FROM `profiliai` WHERE Name = '%s' LIMIT 1", GET_NAME( playerid ) );
+			mysql_query( Query );
+			mysql_store_result( );
+			if( mysql_fetch_int( ) == 1 )
+			{
+			    format( Query, 256, "SELECT IP from `profiliai` WHERE Name = '%s' LIMIT 1", GET_NAME( playerid ) );
+			    mysql_query( Query );
+			    mysql_store_result( );
+			    new
+					opIP[ 17 ],
+			        pIP[ 17 ];
+
+				mysql_fetch_row_format( opIP );
+				GetPlayerIp( playerid, pIP, 17 );
+				if( !strcmp( opIP, pIP, true ) )
+				{
+				    pInfo[ playerid ][ id ] = idx;
+				    ShowPlayerDialog( playerid, 1, DIALOG_STYLE_PASSWORD, "{42D4FC}Prison{00B6E8}Break {FF0000}• PRISIJUNGIMAS", "{FFFFFF}Sveikas sugr??es(-usi),\n \n\
+					Tikim?s, kad laikas serveryje neprailgs,\no bus kupinas nuotyki¸, bet prie? tai turite prisijungti.\n \n\
+					{DBDBDB}?emiau ?veskite savo profilio slapta?od?:", "T¿sti", "A?i?, ne" );
+				}
+				else
+				{
+					ShowPlayerDialog( playerid, 4, DIALOG_STYLE_MSGBOX, "{42D4FC}Prison{00B6E8}Break {FF0000}• KLAIDA", "{FF0000}IP APSAUGA!\n \n\
+					{FFFFFF}Atsipra?ome, bet j?s {FF0000}negalite{FFFFFF} prisijungti prie ?ito profilio su ?ituo IP.\n\
+					?is vartotojas savo profilyje yra aktyvav¿s {F0F719}IP apsaugos{FFFFFF} galimyb¿.\n \n{DBDBDB}Jei j?s esate ?io profilio savininkas pra?ome j?s¸ prisijungti\n\
+					i? kompiuterio kuris buvo naudotas u?registruojant ?? profil?.", "I?eiti", "" );
+				}
+			}
+			else
+			{
+			    pInfo[ playerid ][ id ] = idx;
+		    	ShowPlayerDialog( playerid, 1, DIALOG_STYLE_PASSWORD, "{42D4FC}Prison{00B6E8}Break {FF0000}• PRISIJUNGIMAS", "{FFFFFF}Sveikas sugr??es(-usi),\n \n\
+				Tikim?s, kad laikas serveryje neprailgs,\no bus kupinas nuotyki¸, bet prie? tai turite prisijungti.\n \n\
+				{DBDBDB}?emiau ?veskite savo profilio slapta?od?:", "T¿sti", "A?i?, ne" );
+			}
+		}
+		else
+		    ShowPlayerDialog( playerid, 0, DIALOG_STYLE_PASSWORD, "{42D4FC}Prison{00B6E8}Break {FF0000}• REGISTRACIJA", "{FFFFFF}Labas,\n \n\
+			Malonu, kad pasirinkai {42D4FC}new{00B6E8}mode {FFFFFF}server?.\nTa?iau, nor?damas(-a) ?ia ?aisti j?s turite u?siregistruoti.\n \n\
+			{DBDBDB}?emiau ?veskite savo sugalvot? slapta?od?:", "T¿sti", "A?i?, ne" );
+
+		mysql_free_result( );
+		} else {
+			// Skino pasirinkimo kodas.
+		}
+		SetPlayerPos( playerid, 1958.3783, 1343.1572, 15.3746 );
+		SetPlayerCameraPos( playerid, 1958.3783, 1343.1572, 15.3746 );
+		SetPlayerCameraLookAt( playerid, 1958.3783, 1343.1572, 15.3746 );
+		return 1;
+}

@@ -1,0 +1,264 @@
+/*
+
+
+
+
+
+
+
+
+
+                     Story of Cities
+
+                        NPCs
+
+
+
+
+
+
+
+
+*/
+
+func ConnectNPCs()
+{
+   npc[oldwood_kasininke] = npc.Create("Brigita");
+   npc.Spawn(npc[oldwood_kasininke], 193, 207.4219,-225.0295,13723.3955);
+   npc.SetAngle(npc[oldwood_kasininke], 131.5113);
+   //SetPlayerName(npc[oldwood_kasininke], "Brigita");
+   
+   npc[pd_npc] = npc.Create("Ieva");
+   npc.Spawn(npc[pd_npc], 141, 621.1249,-592.9822,3000.3079);
+   npc.SetAngle(npc[pd_npc], 7.3026);
+   //SetPlayerName(npc[pd_npc], "Ieva");
+
+   npc[akra_virejas] = npc.Create("Jonas");
+   npc.Spawn(npc[akra_virejas], 168, 2276.6758,78.3659,6714.2671);
+   npc.SetAngle(npc[akra_virejas], 271.3676);
+   //SetPlayerName(npc[akra_virejas], "Jonas");
+
+   npc[akra_baras] = npc.Create("Karolina");
+   npc.Spawn(npc[akra_baras], 298, 2269.4695,78.0428,6714.2603);
+   npc.SetAngle(npc[akra_baras], 98.3434);
+   //SetPlayerName(npc[akra_baras], "Karolina");
+
+   npc[akra_gunshop] = npc.Create("Rokas");
+   npc.Spawn(npc[akra_gunshop], 241, 2270.4949,65.0913,6714.2490);
+   npc.SetAngle(npc[akra_gunshop], 274.3548);
+   //SetPlayerName(npc[akra_gunshop], "Rokas");
+
+   npc[akra_foodstore] = npc.Create("Elena");
+   npc.Spawn(npc[akra_foodstore], 225, 2251.5774,68.7429,6714.2627);
+   npc.SetAngle(npc[akra_foodstore], 179.9803);
+   //SetPlayerName(npc[akra_foodstore], "Elena");
+
+   npc[akra_clothes] = npc.Create("Dovile");
+   npc.Spawn(npc[akra_clothes], 168, 2265.1292,68.5330,6714.2490);
+   npc.SetAngle(npc[akra_clothes], 183.5265);
+   //SetPlayerName(npc[akra_clothes], "Dovilë");
+
+   npc[spawn_shop] = npc.Create("Jessica");
+   npc.Spawn(npc[spawn_shop], 215, 692.5636,-436.1428,10.1359);
+   npc.SetAngle(npc[spawn_shop], 177.4822);
+   //SetPlayerName(npc[spawn_shop], "Jessica");
+
+   npc[med][0] = npc.Create("Rasa");
+   npc.Spawn(npc[med][0], 216, 1254.3636,300.1051,9105.4209);
+   npc.SetAngle(npc[med][0], 98.4101);
+   //SetPlayerName(npc[med][0], "Rasa");
+
+   npc[med][1] = npc.Create("Marija");
+   npc.Spawn(npc[med][1], 216, 1256.6935,305.1800,9105.4209);
+   npc.SetAngle(npc[med][1], 345.3784);
+   //SetPlayerName(npc[med][1], "Marija");
+
+   npc[med][2] = npc.Create("Edita");
+   npc.Spawn(npc[med][2], 216, 1255.9347,273.1926,9105.4209);
+   npc.SetAngle(npc[med][2], 114.2649);
+   //SetPlayerName(npc[med][2], "Edita");
+
+   npc[med][3] = npc.Create("Agne");
+   npc.Spawn(npc[med][3], 216, 1260.0231,321.7253,9105.4209);
+   npc.SetAngle(npc[med][3], 336.3318);
+   //SetPlayerName(npc[med][3], "Agnë");
+
+   npc[med][4] = npc.Create("Deimante");
+   npc.Spawn(npc[med][4], 216, 1236.7806,272.5699,9105.4209);
+   npc.SetAngle(npc[med][4], 216.4518);
+   //SetPlayerName(npc[med][4], "Deimantë");
+
+   npc[med][5] = npc.Create("Akvile");
+   npc.Spawn(npc[med][5], 216, 1238.6578,287.4771,9105.4209);
+   npc.SetAngle(npc[med][5], 176.9947);
+   //SetPlayerName(npc[med][5], "Akvilë");
+
+   npc[med][6] = npc.Create("Jonas");
+   npc.Spawn(npc[med][6], /*179*/8, 1238.6578,287.4771,9105.4209);
+   npc.SetAngle(npc[med][6], 176.9947);
+   //SetPlayerName(npc[med][6], "Jonas");
+
+//   npc[med_mokytoja] = npc.Create("Regina");
+//   npc.Spawn(npc[med_mokytoja], 89, 1238.6578,287.4771,9105.4209);
+//   npc.SetAngle(npc[med_mokytoja], 176.9947);
+   //SetPlayerName(npc[med_mokytoja], "Regina");
+}
+
+func ClickOnNPC(pid, id)
+{
+// SendClientMessage(pid, -1, "Player is NPC");
+// if(2 <= GetWeaponSlot(GetPlayerWeapon(pid)) <= 7) return 1;
+
+   if(id == npc[pd_npc])
+   {
+      JOB::POLICIJA::ProcessNpc(pid);
+
+   } else if(id == npc[med_mokytoja])
+   {
+      OnPlayerText(id, "Su storais nekalbu.");
+      return 1;
+   
+   } else for(new i; i < 7; ++i)
+   {
+      if(id == npc[med][i])
+      {
+         OnPlayerText(id, "Praðau netrukdyti.");
+         return 1;
+      }
+   }
+   if(id == npc[spawn_shop])
+   {
+      if(applyChecks(pid, cShop)) return 1;
+      load_shop(shop_spawn, pid);
+      SelectTextDraw(pid, COLOR_SELECT);
+      return 1;
+   
+   } else if(id == npc[akra_clothes])
+   {
+      if(applyChecks(pid, cShop)) return 1;
+      load_shop(shop_clothes, pid);
+      SelectTextDraw(pid, COLOR_SELECT);
+      return 1;
+
+   } else if(id == npc[akra_gunshop])
+   {
+      if(applyChecks(pid, cShop)) return 1;
+      load_shop(shop_gunshop, pid);
+      SelectTextDraw(pid, COLOR_SELECT);
+      return 1;
+
+   } else if(id == npc[akra_foodstore])
+   {
+      if(applyChecks(pid, cShop)) return 1;
+      load_shop(shop_foodstore, pid);
+      SelectTextDraw(pid, COLOR_SELECT);
+      return 1;
+
+   } else if(id == npc[akra_baras])
+   {
+      if(applyChecks(pid, cShop)) return 1;
+      load_shop(shop_baras, pid);
+      SelectTextDraw(pid, COLOR_SELECT);
+      return 1;
+
+   } else if(id == npc[gun_dealer])
+   {
+      if(applyChecks(pid, cShop)) return 1;
+      load_shop(shop_dealer, pid);
+      SelectTextDraw(pid, COLOR_SELECT);
+      return 1;
+   }
+   return 1;
+}
+
+public::UpdateDealer()
+{
+   new tm<tmTime>;
+   localtime(time(), tmTime);
+
+   if(21 > tmTime[tm_hour] >= 19)
+   {
+      if(npc[gun_dealer] != INVALID_PLAYER_ID)
+      {
+         npc.Destroy(npc[gun_dealer]);
+         npc[gun_dealer] = INVALID_PLAYER_ID;
+      }
+
+      new i = random(sizeof gunDealerSpawn);
+
+      npc[gun_dealer] = npc.Create("Anonimas");
+      npc.Spawn(npc[gun_dealer], random(2)?28:29, gunDealerSpawn[i][0], gunDealerSpawn[i][1], gunDealerSpawn[i][2]);
+      for(i = 0; i != _:talpa; ++i)
+      {
+         switch(talpa:i)
+         {
+            case ITEM::deagle..ITEM::awp:
+            {
+               if( ! random(2))
+               {
+                  AddItemToShop(shop_dealer, i, 2 + random(10));
+               }
+            }
+            case ITEM::kulkosp..ITEM::kulkosa:
+            {
+               if( random(3) )
+               {
+                  AddItemToShop(shop_dealer, i, 300 + random(400));
+               }
+            }
+         }
+      }
+
+   } else if(tmTime[tm_hour] == 21 && npc[gun_dealer] != INVALID_PLAYER_ID) {
+
+      npc.Destroy(npc[gun_dealer]);
+      npc[gun_dealer] = INVALID_PLAYER_ID;
+   }
+}
+
+public FCNPC_OnCreate(npcid)
+{
+   return 1;
+}
+
+public FCNPC_OnSpawn(npcid)
+{
+   return 1;
+}
+
+public FCNPC_OnRespawn(npcid)
+{
+   return 1;
+}
+
+public FCNPC_OnDeath(npcid, killerid, weaponid)
+{
+   return 1;
+}
+
+public FCNPC_OnReachDestination(npcid)
+{
+   return 1;
+}
+
+public FCNPC_OnVehicleEntryComplete(npcid, vehicleid, seat)
+{
+   return 1;
+}
+
+public FCNPC_OnVehicleExitComplete(npcid)
+{
+   return 1;
+}
+
+public FCNPC_OnTakeDamage(npcid, damagerid, weaponid, bodypart, Float:health_loss)
+{
+   FCNPC_SetHealth(npcid, 100);
+   return 1;
+}
+/*
+public FCNPC_OnFinishPlayback(npcid)
+{
+   return 1;
+}
+*/

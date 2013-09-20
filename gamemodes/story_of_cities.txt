@@ -1,0 +1,81 @@
+[center][img=http://i.imgur.com/JyZbgi5.png][/center]
+
+[i][font='trebuchet ms', helvetica, sans-serif]Ði istorija tikrai ne pasaka ir juo labiau ne iðgalvotas mitas. Viskas prasidëjo dar 2012m vasarà, kai netikëtai likimo ákvëpta, uþgimë idëja. Tà dienà ávyko stebuklas, kuriam jau nuo pat pradþiø buvo lemta iðsiskirti. Sunku pasakyti, kas buvo viso to pradininkas, ar kas buvo ðios idëjos kalvis, jei gerai pamenu, tuomet buvome dviese. Du, ið paþiûros paprasti ir nuo kitø nei kiek nesiskiriantys þmonës. Sunku pasakyti, kà tada kiekvienas mûsø galvojo, aiðku buvo tik vienà, likimas áþiebë mumyse norà atlikti kaþkà nepaprasto. Laikui bëgant idëja taip ir liko teorine stebuklo dalimi, o visa kita buvo tik tuðèios svajos, iliuzijos, vadinkit tai kaip tik norit. Galbût viskas taip ir bûtø uþgesæ, taèiau likimas su mumis nebuvo linkæs juokauti. Gal tai ir atsitiktinumas, o gal taip jau turëjo bûti sudëliota ið pradþiø, taèiau radome tai, ko mums trûko. Ne, tai buvo ne dar viena tuðèia teorinë idëja ar nauja svaja. Tai buvo treèiasis raitelis iðgelbëtojas, kuris visas mûsø vizijas gebëjo paversti realybe. Taigi, dabar esame trys, panaðûs, taèiau skirtingi, skirtingi, taèiau to paèio siekio asmenybës, siekianèios ágyvendinti tai, kas buvo likimo pavesta. Nors visa tai tik þaidimas, virtuali realybë, taèiau nei vienas ið mûsø nesuvaldëme savo ðirdyje ugnies stengtis dël idëjos daugiau, nei kiti. Noras buvo toks stiprus, kad darbai kilo vienas po kito. Ilgai laukti nereikëjo, kol mûsø vis minima idëja buvo pakrikðtyta [b]Story Of Cities[/b] vardu. Nuo to laiko dykynës ágavo prasmæ, keliai sujungë miestelius, kuriems tiesiog buvo lemta kilti ir tobulëti. Nuo tada vëjas vis reèiau pakeldavo á virðø beprasmæ dulkæ, kuri trukdë miesteliams alsuoti gyvybe. [b]Story Of Cities[/b] tapo vieta, á kurià buriasi þmonës, norintis skleisti gyvybæ, kovoti ir lieti prakaità ðio stebuklo labui. [b]Èia tikrai ne istorijos pabaiga, tai tik naujojo etapo pradþia, kuri laukia prisijungianèio tavæs...[/b][/font][/i]
+
+
+
+ 
+[center][size=5][font='trebuchet ms', helvetica, sans-serif][b]Kas tas[/b][/font][color=#ffa500][i][font='trebuchet ms', helvetica, sans-serif][b] [/b][/font][/i][/color][color=#cc9966][i][font='trebuchet ms', helvetica, sans-serif][b]Story of Cities[/b][/font][/i][/color][color=#ffa500][i][font='trebuchet ms', helvetica, sans-serif][b] [/b][/font][/i][/color][font='trebuchet ms', helvetica, sans-serif][b]?[/b][/font][/size][/center]
+[center] [/center]
+[center][size=3][size=4]Tai [b]SA-MP[/b] projektas ir bûsimas serveris, kurio þaidimo stilius yra orientuotas á [b]real life[/b] ir [b]rpg[/b]. Real life ðiame serveryje nëra be proto didelis, todël nusipirkti duonos ir sviesto norint susitepti sumuðtiná ir pavalgyti nereikës. O nereikës todël, kad mes siekiame þaidimà padaryti ádomø þaisti, o ne atkartoti tai, kà darote bûdami ne prie pc. Taip pat didelæ þaidimo dalá sudaro rpg þaidimø elementai, kurie reikalingi norint suteikti prasmës þaidimui, atverti platesnes galimybes bei subalansuoti þaidimo ekonomikà, kuri paprastai sa-mp real life serveriuose sukasi tik ant maðinø, namø, ir ið oro atsirandanèiø litø ið bizniø kas 20min.[/size][/size][/center]
+[center] [/center]
+[center][size=5][b]Kuom [font='trebuchet ms', helvetica, sans-serif][color=#cc9966]Story of Cities[/color][/font] yra geresnis negu serveris, kuriame þaidþiu ðiuo metu?[/b][/size][/center]
+[center] [/center]
+[center]Visø pirma norëèiau paklausti kokius tikslus turi tame serveryje? Spëju, kad nusipirkti maðinà, namà, bizná, turëti gerà darbà, gauti drk, priþiûrëtojo statusà. Pabandysiu panagrinëti kiekvienà ið jø.[/center]
+[LIST]
+[*]Maðinà ásigyti gali jeigu ne pirmà dienà, tai bent jau per pirmas 3 dienas be didesniø problemø. Ji reikalinga kad nereiktø bëgioti po visà mapà arba kad bûtø lengviau erzinti mentus ir nuo jø pabëgti. Daþniausiai jas gali turëti tik 2 (o kitur iðvis tik 1).
+ [/*]
+[*]Namas. Jis reikalingas... kam? Vienuose serveriuose gali laikyti ginklus namie, kituose narkotikus laikyti arba auginti, ir praktiðkai visuose namas reikalingas be þodþiø pasakyti "að turiu pinigø ir esu mldc".
+ [/*]
+[*]Biznis. x lt per kaþkiek min. Jeigu turi pakankamai pinigø, ir nori be jokios rizikos jø turëti dar daugiau, perki bizná. Tai tiesiog pinigø gaminimo maðina, kurios dëka visi gali bûti milijonieriai.
+ [/*]
+[*]Darbas. Geriausias darbas daugeliui aiðku yra teisësauga, nes jame daugiausiai veiklos ir nemokami ginklai. Kituose darbuose praktiðkai nëra kà veikti, ir pildydami anketas bûsimieji direktoriai tiesiog verkia prie klausimo "kà naujo áneðtum á ðá darbà?".
+[LIST]
+[*]Kà veikia mechanikai? Tampo maðinas á kma.[/*]
+[*]Kà veikia dyleriai? Vaikðto po miestà ir "Kam ginklu, kam zoles?? /sms v_p".[/*]
+[*]Kà veikia baikeriai? Èia vpð darbas skaitos? xD[/*]
+[*]Medikai? "/gydyti v_p"., "Oj jis vipas ir pats pasigydë.. nu tiek to, einu su car pavaþinët".[/*]
+[*]Fûristai - ið oro atsirandanèiø prekiø veþiojimas vis á tas paèias vietas kur tos prekës ir dingsta. Veþi prekes á niekur, ir lenktyniauji su bendradarbiais kieno rida didesnë.[/*]
+[*]Taxi. Vaþinëji ir ieðkai naujokø kurie neþino kur kas randas.[/*]
+[*]Gauja, kuriai priklausai daþniausiai kai neturi darbo. Apsimetinëji kad gauja labai rimta ir su daug taisykliø, ir praktiðkai vienintelë konkurencija tarp gaujø yra "kas daugiau sunervuos mentus?".[/*]
+[/LIST]
+[/*]
+[*]Direktorius, kuris gali dalinti algas ir priimti / iðmesti darbuotojus. Bûnant direktoriumi galima uþsidirbti daugybæ pinigø tiek þaidime, tiek realiame gyvenime (nelegaliais bet toleruojamais bûdais). Surengus keletà priëmimø ið anketø ir po savaitës - dviejø buvomo direktoriumi, praktiðkai visi supranta koks tai monotoniðkas darbas. Anketos, treniruotës, algos. Paávairinimui direktoriai susigalvoja visokiø taðkø sistemø, ir tik sau uþsitraukia dar daugiau nuobodaus darbo viskà tikrinant :(
+ [/*]
+[*]Gauti priþiûrëtojà. Kam reikalingas priþiûrëtojas? Tam kad serverio savininkams nereiktø daryti tø darbø ir viskas greièiau vyktø. Yra sàþiningø þaidëjø kurie gauna tokius postus, ir yra kurie tik nori "daugiau ir daugiau", nes viskà kitkà serveryje jau yra pasiekæ. Todël serveryje tokiuose svarbiuose dalykuose kaip ban/unban atsirada korupcija, kuri þiauriai trukdo sàþiningam ir maloniam þaidimui. Taip ir prasideda "narø" era.[/*]
+[/LIST]
+[center][color=#cc9966][b]Story of Cities[/b][/color] serveryje mes ðiuos dalykus ne patobulinom, o pastatëm visiðkai naujai.[/center]
+[LIST]
+[*]Maðina. Tiksliau [b]TRANSPORTO PRIEMONËS[/b]. Kuriø gali turëti tiek, kiek iðgali nusipirkti. Kurios gali gesti, kurias gali tobulinti, kuriø pasirinkimas yra didþiulis (ðiuo metu 91 transporto priemonë). Jø kainos svyruoja nuo [b]10'000[/b] lt iki [b]300'000[/b] lt.
+ [/*]
+[*]Namas. Kurio interjerà gali susidëlioti kaip tik nori, kuriame gali laikyti kà tik nori ir kiek nori, kuriame gali miegoti norëdamas atgauti energijà, iðsikepti pagautas þuvis, perdaþyti sienas lubas ar grindis kaip tik nori. Namo vertæ kuri pats já tobulindamas.
+ [/*]
+[*]Verslai, kuriuose veiklà gali susigalvoti pats. Nusipirk patalpas, uþregistruok ámonæ, o jos veikla priklauso tik nuo tavæs. Gali priiminëti darbuotojus, pirkti ámonei transportà, uþsisakinëti prekes ir valdyti ámonës fondà. Turëdamas verslà gali bankrutuoti per akimirkà arba klestëti visame þaidime. Viskas tavo rankose.
+ [/*]
+[*]Darbai. Soc'e nëra darbo, kuris bûtø tik dël skaièiaus. Jie visi yra didelë þaidimo dalis, ir jeigu kuris nors darbas neatlieka savo uþduoèiø, tai jauèiasi visame serveryje.
+[LIST]
+[*]Mechanikai yra atsakingi uþ visas þaidimo maðinas ir jø gedimus, tiek darbines, tiek asmenines. Þaidime yra visa aibë galimø maðinø gedimø, kurie taip pat neatsiranda ið oro. Jeigu esi megëjas driftinti gatvëmis ar braiþyt saules, padangas keisti teks labai daþnai. Taip pat nerekomenduojama ðokinëti nuo kalnø ar rampø, nes gali prakiurti degalø bakas, ir degalai baigsis greièiau negu tai pastebësi. Taip pat staigiai stabdant gali sugesti stabdþiai, o maðinà sudauþius ji uþsidegs, ir degs tol, kol gaisrinë jà uþgesins. Maðina taip ir liks stovëti, be galimybës jà uþvesti iki kol mechanikai privaþiuos ir sutvarkys variklá. Sutvarkius variklá, maðina jau galës vaþiuoti, taèiau dar porà smûgiø ir ji uþsidegs vël, todël reikës susitarti su mechaniku, kad jis tavo maðinà nutemptø iki mechanikø garaþo, kad jà ten sutvarkytø tie, kas yra viduje. Kuo daugiau kartø maðina buvo uþsidegusi, tuo ilgiau jà teks taisyti mechanikams, tad po 4-5 avarijø nenustebk, kad mechanikai atsisakys tvarkyti tavo maðinà (nebent aiðku neblogai jiems sumokësi). Mechanikø garaþe taip pat gali praeiti technikinæ maðinos apþiûrà, ir jeigu maðina yra tvarkinga, technikinës galiojimas bus pratæstas dar 1 savaitæ. Nebus mechanikø - nebus sveikø maðinø.
+ [/*]
+[*]Dyleriai? Èia net ne darbas.. Dyleriø vaidmená þaidime atlieka þaidëjø [u][b]gaujos [/b][/u]ir [b]mafijos[/b]. Bûdamas gaujoje turi priëjimà prie ginklø pardavëjø, kurie yra atsitiktinëse vietose atsirandantys [b]NPC[/b] (NPC þaidime yra panaudoti daug plaèiau negu bet kokiam kitam SA-MP serveryje. Jie yra pardavëjai, dyleriai, direktoriø sekretorës ir net kai kuriø darbø darbuotojai, kurie duoda naudingø patarimø ir paprastos pagalbos).
+ [/*]
+[*]Gaujos þaidime turi didþiulæ átakà ginklø ir pinigø srityje. Gaujà gali turëti bet kuris þaidëjas ir jos ákûrimas (aktyvacija) nieko nekainuoja. Bûdamas gaujos vadu (t.y. jos ákûrëju) gali priimti neribotà kieká nariø, nustatyti gaujos pavadinimà, skelbti karus kitoms gaujoms ir laimëjus gauti daug patirties taðkø, arba skelbti taikas kitoms gaujoms ir padëti joms kariauti. Þaidime yra tik keletas (ðiuo metu 3, ateityje bus ~6) gaujø teritorijos, ir kurià nors uþëmæs gauni priëjimà prie smulkios ginklø kontrabandos, teritorijos tobulinimo ir gaujos skin'o pasirinkimo.
+ [/*]
+[*]Medikai. Þaidime niekada nemirsi GTA mirtimi. Likus 0 hp ir sukritus ant þemës ten ir lieki gulëti. Tuomet gauni pasirinkimà kà nori daryti, keliauti iðkarto á ligoninæ (kurioje gydymas uþtrukti gali maþiausiai 15min), ar laukti medikø. Pasirinkus laukti medikø, medikai minimape pamato naujà þmogø kuris mirðta - tave. Atvaþiavæs medikas (arba medikë :)) gali tave atgaivinti vietoje, ir laukti keliolikos minuèiø ligoninëje neprireiks. taip pat medikai gauna daugiausiai vaistø nuo ávairiø negalavimø (skausmo, kraujavimo, etc), ir tai juos daro visada reikalingus.
+ [/*]
+[*]Fûristai prekes pasiima ið sandëliø ir pagal serverio, direktoriø ir verslø savininkø uþsakymus jas iðveþioja ten kur uþsakyta. Nusipirkus maðinà, fûristai gauna uþsakymà jà atveþti á garaþà. Fûristai atlieka paprastà, bet labai svarbø darbà, nes jie atveþa prekes ir baldus á parduotuves ir verslus, nusipirktas maðinas þaidëjams á garaþus, ginklus ir amunicijà policijai, vaistus medikams, árankius ir maðinø dalis mechanikams ir degalus á degalines.
+ [/*]
+[*]Taksi darbuotojai mato visus iðkvietimus ir detalià statistikà apie tai, kiek kiekvienas keleivis turi susimokëti uþ paslaugas. Taksi paslaugos yra nepigios (nuo 5lt/km), tad aktyviai dirbant gali uþsidirbti nemaþai pinigø. Taksi direktorius gali matyti kiek keleiviø kiekvienas darbuotojas yra nuveþæs ir koká atstumà jis su keleiviais yra pravaþinëjæs. Taip pat jis gali pirkti naujas maðinas bei jas spalvinti. Taksi yra labai pelningas darbas jeigu esi aktyvus ir geras vairuotojas.
+ [/*]
+[*]Gaisrinë, kuri kituose serveriuose yra darbas be pakvietimo ir be veiklos, èia þaidime yra vienas ið svarbiausiø darbø, kuris yra atsakingas uþ gaisrus, kurie kyla itin daþnai. Pagrindinis gaisrø ðaltinis - suduþusios maðinos. Ugnis þaidime yra labai pavojinga, nes uþsidegæs gali mirti per keletà sekundþiø. Taip pat nuo jos uþsidega ir automobiliai, todël kuo greièiau ugná uþgesinsi, tuo daugiau patirties gausi.[/*]
+[/LIST]
+[/*]
+[*]Direktoriai þaidime turi labai daug darbo kontrolës galimybiø bei [u]mato visà svarbiausià informacijà apie kiekvienà darbuotojà[/u]. Direktoriai turi galimybæ valdyti darbo fondà labai plaèiai:Taip pat direktoriai turi galimybæ kurti rangus ir priskirinëti juos darbuotojams. Kiekvienas rangas turi turëti savo pavadinimà ir aprangos id vaikinams bei merginoms.
+[LIST]
+[*]Pirkti daiktus reikalingus darbuotojams (PD - ginklai, Medikai - vaistai, ...).[/*]
+[*]Pirkti geresná darbiná transportà.[/*]
+[*]Parduoti dabartiná darbiná transportà.[/*]
+[*]Mokëti algas darbuotojams
+[LIST]
+[*]Visiems prisijungusiems darbuotojams[/*]
+[*]Visiems darbuotojams[/*]
+[*]Kiekvienam darbuotojui atskirai[/*]
+[/LIST]
+[/*]
+[/LIST]
+[/*]
+[*][b]Daiktai ir þaidëjo inventorius. [/b]Na ðio dalyko niekur kitur nëra, tad nëra ir su kuo lyginti, taèiau prisiminkit mmorpg þaidimus, ir tikrai sutiksit, kad daiktai þaidime atlieka ápatingai svarbø vaidmená, praktiðkai visa ekonomika stovi vien ant jø. Tai þinodamas, perkëliau ðià ádëjà á sampà, ir taip atsirado inventoriaus sistema. Savo inventoriuje (kuprinëje) gali laikyti visokiausius daiktus, bei þinoma - juos naudoti. Gali gauti shotgun'à, bet neturëdamas jo kulkø ðaudyti negalësi. Gavæs kulkas - galësi. Jas visas iððaudæs - [b]ginklo neprarasi[/b]. Tiesiog kuprinëje nebebus to ginklo kulkø. Daiktø ávairovë yra labai plati. Kuprinëje gali laikyti ir naudoti maistà, vaistus, ginklus, raktus, drabuþius (kepures, kelnes, akinius, liemenes, ...), juvelyrikà (þiedus, pakabukus, amuletus, ...), gërimus, ávairias dalis ir medþiagas, skirtas daiktams [b]kurti [/b]ir juos [b]tobulinti[/b]. Vienas maloniausiø dalykø susiijæs su daiktais yra jø tobulinimas. Tikrai taip, kiekvienà ginklà, rûbà ar juvelyrikà galima patobulinti, ir jie ágaus papildomø efektø, pavyzdþiui ginklø þalos padidinimas, gaunamos þalos sumaþinimas, energijos padidinimas, maksimalaus gyvybiø skaièiaus padidinimas, ðuolio stiprumas ir daugybë kitø. Taèiau daiktø su efektais þaidime daug nepamatysi, todël turëdamas patobulintà ginklà gali neabejoti jo verte - jis tikrai brangus. Daiktus ásigyti galima parduotuvëse, pasigaminti patiems ið medþiagø ir daliø arba pirkti ið kitø þmoniø. Taip pat juos galima laikyti maðinos bagaþinëje, pardavinëti parduotuvëse (ne tik pirkti).[/*]
+[*]Priþiûrëtojø rinkimai serveryje nëra numatomi ir nebus, iki kol viskà suspëjam padaryti patys. [/*]
+[*]Adminø þaidime taip pat nebus, nes nëra rimtø argumentø kam jie gali bûti reikalingi, kai sobeitas neveikia, o nuo kitais ðûdai puikiai susitvarko pati sistema.[/*]
+[*]Vipai neturës galimybiø healintis ir teleportuotis, [b]BET [/b]jie turës daugiau galimybiø þaidime, priëjimà prie vip daiktø, pigesniø prekiø bei gaunamos patirties bonusø. Þaisti bûnant vipu bus daug maloniau, taèiau valdþios prieð kitus þaidëjus jie neturës.[/*]
+[/LIST]
+[b]Bus pildoma. ;)[/b]

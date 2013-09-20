@@ -1,0 +1,403 @@
+/*
+
+
+
+
+
+
+
+
+
+							Story of Cities
+
+								VEHICLES
+
+
+
+
+
+
+
+
+*/
+
+func vehToRemont(const id)
+{
+	printf("aGarazas[eRepairVehicle] = %i", aGarazas[eRepairVehicle]);
+	if(aGarazas[eRepairVehicle] == INVALID_VEHICLE_ID)
+	{
+		aGarazas[eRepairVehicle] = id;
+		car[id][car_status] = cRepair;
+		setVehiclePos(id, pos_mech_in_taisykla);
+		inline timer() setVehicleZAngle(id, 88.3634);
+		setTimer(using inline timer, 200, false);
+		print("setPos");
+
+	} else {
+
+		vector_push_back(vRepairList, id);
+		despawnVehicle(id);
+		print("deSpawn");
+	}
+}
+
+func getVehiclePrice(i)
+{
+	new galutine_kaina = floatround(Float:VehicleInfo[ car[i][car_model] -400 ][vPrice] * 0.9);
+	if(vehicle.error.get(i, gEngine))
+		galutine_kaina -= 1200;
+	if(vehicle.error.get(i, gBrakes)) galutine_kaina -= 300;
+	else galutine_kaina -= car[i][gBrakes_status] / 2;
+
+	if(vehicle.error.get(i, gTires)) galutine_kaina -= 400;
+	else galutine_kaina -= car[i][gTires_status] / 2;
+
+	if(vehicle.error.get(i, gFuel)) galutine_kaina -= 300;
+	else galutine_kaina -= car[i][gFuel_status];
+	if(vehicle.error.get(i, gPlug)) galutine_kaina -= 100;
+	if(vehicle.error.get(i, gSankaba)) galutine_kaina -= 500;
+	// px kainos bðk ið oro, bet svarbu kad bûtø nuostolinga maðinà dauþyti
+	return galutine_kaina;
+}
+
+func findcarslot()
+{
+	for(new i = 1; i < MAX_VEHICLES; ++i)
+	{
+		if(car[i][car_id] == INVALID_VEHICLE_ID && !vehicle.bool.get(i, fIsDespawned))
+			return i;
+	}
+	return -1;
+}
+
+func checkVehicle(id)
+{
+	return (IsValidVehicle(car[id][car_id]))?(1):(0);
+}
+
+stock createVehicle(modelid, Float:x, Float:y, Float:z, Float:r, c1 = -1, c2 = -1, respawndelay = -1, _fuel = 0, text[]="", text_color = -1, tipas = 0, Float:rrida = 0.0, bool:locked = true, _lock_code = 0)
+{
+//	sql_query(sqlHandle, F("INSERT INTO masinos (tipas, plateNR, savininkas, m_tune, m_data) VALUES ('%i','%s','0','','%i %f %f %f %f %i 0.0 1000.0 1 1 0 0 0 0 0 1 0 0 0')", tipas, text, modelid, x,y,z,r,_fuel), QUERY_NONE);
+	new const id = findcarslot();
+	if(id == -1) return INVALID_VEHICLE_ID;
+	if(c1 == -1 && !tipas) c1 = random(255);
+	if(c2 == -1 && !tipas) c2 = random(255);
+	car[id][car_id] = CreateVehicle(modelid, x,y,z,r,c1,c2,respawndelay);
+	if car[id][car_id] == INVALID_VEHICLE_ID *then return INVALID_VEHICLE_ID;
+	sampVehicles[car[id][car_id]] = id;
+	if(locked)
+		vehicle.bool.on(id, fSpyna);
+	else
+		vehicle.bool.off(id, fSpyna);
+
+	if(tipas)
+	{
+		Iter_Add(masinos[tipas-1],id);
+	}
+
+	car[id][car_model] = modelid;
+	car[id][car_tipas] = tipas;
+	car[id][car_x] = x;
+	car[id][car_y] = y;
+	car[id][car_z] = z;
+	car[id][car_r] = r;
+	car[id][car_color1] = c1;
+	car[id][car_color2] = c2;
+	car[id][degalai] = _fuel;
+	car[id][rida] = rrida;
+	car[id][lock_code] = _lock_code;
+	car[id][car_label] = Create3DTextLabel(text, text_color, x,y,z,30, 0, 1);
+	strcpy(car[id][plate_number], text);
+	car[id][car_label_color] = text_color;
+	car[id][gedimai] = 0;
+	GetVehicleModelInfo(modelid, VEHICLE_MODEL_INFO_SIZE, x,y,z);
+	Attach3DTextLabelToVehicle(car[id][car_label], car[id][car_id],0,-y/2,0);
+
+	if(modelid == CAR_PD)
+	{
+		new const tmp = CreateDynamicSphere(0,0,0,40);
+		vector_push_back(vArea_SlowDown, tmp);
+		vector_push_back(vArea_Vehicle, car[id][car_id]);
+		AttachDynamicAreaToVehicle(tmp, car[id][car_id]);
+	}
+	return id;
+}
+
+func despawnVehicle(id)
+{
+	if(!vehicle.bool.get(id, fIsDespawned) && IsValidVehicle(car[id][car_id]))
+	{
+		#define veh car[id]
+		vehicle.bool.on(id, fIsDespawned);
+
+		if(vehicle.bool.get(id, fIsOnFire))
+		{
+			for(new i; i != MAX_FIRES; ++i)
+			{
+				if(fire[i][3] == id)
+				{
+					killFire(i);
+					break;
+				}
+			}
+		}
+
+		sampVehicles[car[id][car_id]] = INVALID_VEHICLE_ID;
+		DestroyVehicle(veh[car_id]);
+		Delete3DTextLabel(car[id][car_label]);
+		KillTimer(timer_car_fuel[id]);
+		if(veh[car_model] == CAR_PD)
+		{
+			new const find = vector_find(vArea_Vehicle, veh[car_id]);
+			if(find != -1 && vector_index_exists(vArea_SlowDown, find))
+			{
+				new const area_ = vector_get(vArea_SlowDown, find);
+				destroyDynamicArea(area_);
+				vector_remove(vArea_SlowDown, find);
+				vector_remove(vArea_Vehicle, find);
+			}
+		}
+		veh[car_id] = INVALID_VEHICLE_ID;
+		#undef veh
+		return 1;
+	}
+	return 0;
+}
+
+func spawnVehicle(id)
+{
+	// WTF IS THIS
+	//if(IsValidVehicle(car[id][car_id]))
+	//{
+	//	DestroyVehicle(car[id][car_id]);
+	//}
+	#define veh car[id]
+	vehicle.bool.off(id, fIsDespawned);
+	veh[car_id] = CreateVehicle(veh[car_model], veh[car_x], veh[car_y], veh[car_z], veh[car_r], -1, -1, -1);
+	if(veh[car_id] == INVALID_VEHICLE_ID) return;
+	sampVehicles[veh[car_id]] = id;
+	veh[car_label] = Create3DTextLabel(veh[plate_number], veh[car_label_color], veh[car_x], veh[car_y], veh[car_z],30, 0, 1);
+	new coords<1>;
+	GetVehicleModelInfo(veh[car_model], VEHICLE_MODEL_INFO_SIZE, coords<1>);
+	Attach3DTextLabelToVehicle(veh[car_label], veh[car_id],0,-_y1/2,0);
+	if(veh[car_model] == CAR_PD)
+	{
+		new const tmp = CreateDynamicSphere(veh[car_x], veh[car_y], veh[car_z],40);
+		vector_push_back(vArea_SlowDown, tmp);
+		vector_push_back(vArea_Vehicle, veh[car_id]);
+		AttachDynamicAreaToVehicle(tmp, veh[car_id]);
+	}
+	#undef veh
+	checkKeys(id);
+}
+
+func killVehicle(id)
+{
+	if(car[id][car_id] == INVALID_VEHICLE_ID) return 0;
+
+	if(getVehicleModel(id) == CAR_PD)
+	{
+		new const find = vector_find(vArea_Vehicle, car[id][car_id]);
+		if(find != -1 && vector_index_exists(vArea_SlowDown, find))
+		{
+			new const area_ = vector_get(vArea_SlowDown, find);
+			destroyDynamicArea(area_);
+			vector_remove(vArea_SlowDown, find);
+			vector_remove(vArea_Vehicle, find);
+		}
+	}
+
+	if(vehicle.bool.get(id, fIsOnFire))
+	{
+		for(new i; i != MAX_FIRES; ++i)
+		{
+			if(fire[i][3] == id)
+			{
+				killFire(i);
+			}
+		}
+	}
+
+	destroyVehicle(id);
+	sampVehicles[car[id][car_id]] = INVALID_VEHICLE_ID;
+	KillTimer(timer_car_fuel[id]);
+	vehicle.bool.off(id, fIsDespawned);
+	car[id][car_id] = INVALID_VEHICLE_ID;
+	car[id][car_tipas] = 0;
+	car[id][car_model] = 0;
+	car[id][degalai] = 0;
+	car[id][lock_code] = 0;
+	car[id][gBrakes_status] = 0;
+	car[id][gTires_status] = 0;
+	car[id][gFuel_status] = 0;
+	car[id][gPlug_status] = 0;
+	car[id][car_timer_damage] = 0;
+	Delete3DTextLabel(car[id][car_label]);
+
+	sql_query(sqlHandle, F("DELETE FROM masinos WHERE id = %i", car[id][car_DBID]), QUERY_NONE);
+	return 1;
+}
+
+stock generatePlateNumber(pid)
+{
+	static sk[8];
+	static Result:r;
+	do
+	{
+		format(sk,sizeof(sk),"%c%c%c:%i%i%i",(65+random(26)),(65+random(26)),(65+random(26)),random(10),random(10),random(10));
+		
+		r = sql_query(sqlHandle, F("SELECT id FROM masinos WHERE plateNR = '%s'", sk), QUERY_CACHED);
+
+	} while (sql_num_rows(r));
+	return sk;
+}
+
+func LoadVehicles(pid)
+{
+	new model,Float:cx,Float:cy,Float:cz,Float:cr,cf,Float:crida,Float:hp,c1,c2,cflags,Panels,Doors,Lights,Tires,Status, Burning, Repair, Repair_times,Tech;
+	new const Result:v = sql_query(sqlHandle, 
+		f("SELECT * FROM masinos WHERE savininkas = %i", pinfo[DBID]), 
+		QUERY_CACHED
+	);
+	pinfo[carid] = INVALID_VEHICLE_ID;
+
+
+	static buffer[MAX_ITEM][200];
+	static snf[16];
+
+	if(sql_num_rows(v)) do
+	{
+		sql_get_field_assoc(v, "m_data", gt);
+
+		sscanf(gt, "iffffigfiiiiiiiiiiii", model,Float:cx,Float:cy,Float:cz,Float:cr,cf,Float:crida,Float:hp,c1,c2,cflags,Panels,Doors,Lights,Tires,Status,Burning, Repair, Repair_times, Tech);
+		print(gt);
+		printf("repair = %i ? %i", Repair, cRepair);
+		if(Status == cOkay || Status == cCrashed)
+		{
+			print("status OK");
+			pinfo[carid] = createVehicle(model, cx,cy,cz,cr,c1,c2, ._fuel = cf, .rrida = crida, .text = " ");
+
+			if(pinfo[carid] != INVALID_VEHICLE_ID)
+			{
+				car[ pinfo[carid] ][ car_savininkas ] = pinfo[DBID];
+				car[ pinfo[carid] ][ car_DBID ] = sql_get_field_assoc_int(v, "id");
+				car[ pinfo[carid] ][ car_flags ] = cflags;
+				car[ pinfo[carid] ][ car_status] = Status;
+				car[ pinfo[carid] ][ burning_started] = Burning;
+				car[ pinfo[carid] ][ repair_status ] = Repair;
+				car[ pinfo[carid] ][ repair_times ] = Repair_times;
+				car[ pinfo[carid] ][ technikine ] = Tech;
+				setVehicleHealth(pinfo[carid], hp);
+				sql_get_field_assoc(v, "m_tune", gt); 
+				sscanf(gt, "a<i>[14]",car[pinfo[carid]][tune]);
+
+				for(new j; j < 14; ++j)
+					addVehicleComponent(pinfo[carid], car[pinfo[carid]][tune][e_tune:j]);
+				updateVehicleDamageStatus(pinfo[carid], Panels, Doors, Lights, Tires);
+
+				sql_get_field_assoc(v, "bagazine", gt);
+
+				format(snf, sizeof snf, "p</>a<i>[%i]", eBonus+2);
+				sscanf(gt, "p<|>a<s[200]>["#MAX_ITEM"]", buffer);
+				for(new i; i != MAX_ITEM; ++i)
+				{
+					sscanf(buffer[i], snf, trunk[ pinfo[carid] ][i]);
+				}
+
+				break;
+			}
+		
+		} else if(Status == cRepair) {
+
+			print("status REPAIR");
+			new const tmpV = createVehicle(model, cx,cy,cz,cr,c1,c2, ._fuel = cf, .rrida = crida, .text = " ");
+
+			if(tmpV != INVALID_VEHICLE_ID)
+			{
+				car[ tmpV ][ car_savininkas ] = pinfo[DBID];
+				car[ tmpV ][ car_DBID ] = sql_get_field_assoc_int(v, "id");
+				car[ tmpV ][ car_flags ] = cflags;
+				car[ tmpV ][ car_status] = Status;
+				car[ tmpV ][ burning_started] = Burning;
+				car[ tmpV ][ repair_status ] = Repair;
+				car[ tmpV ][ repair_times ] = Repair_times;
+				car[ tmpV ][ technikine ] = Tech;
+				setVehicleHealth(tmpV, hp);
+				sql_get_field_assoc(v, "m_tune", gt); 
+				sscanf(gt, "a<i>[14]",car[tmpV][tune]);
+
+				for(new j; j < 14; ++j)
+					addVehicleComponent(tmpV, car[tmpV][tune][e_tune:j]);
+				updateVehicleDamageStatus(tmpV, Panels, Doors, Lights, Tires);
+
+				sql_get_field_assoc(v, "bagazine", gt);
+				format(snf, sizeof snf, "p</>a<i>[%i]", eBonus+2);
+				sscanf(gt, "p<|>a<s[200]>["#MAX_ITEM"]", buffer);
+				for(new i; i != MAX_ITEM; ++i)
+				{
+					sscanf(buffer[i], snf, trunk[ pinfo[carid] ][i]);
+				}
+
+				vehToRemont(tmpV);
+			}
+		}
+	}
+	while(sql_next_row(v));
+}
+
+func LoadVehicle(id)
+{
+	new model,Float:cx,Float:cy,Float:cz,Float:cr,cf,Float:crida,Float:hp,c1,c2,cflags,Panels,Doors,Lights,Tires,Status, Burning, Repair,Repair_times,Tech;
+	new const Result:v = sql_query(sqlHandle, 
+		f("SELECT * FROM masinos WHERE id = %i", id), 
+		QUERY_CACHED
+	);
+	static buffer[MAX_ITEM][200];
+	static snf[16];
+	static PLATE[8];
+	new returnValue = INVALID_VEHICLE_ID;
+
+	if(sql_num_rows(v))
+	{
+		infoMsg(0, "num_rows");
+		sql_get_field_assoc(v, "m_data", gt);
+		sql_get_field_assoc(v, "plateNR", PLATE);
+
+		sscanf(gt, "iffffigfiiiiiiiiiiii", model,Float:cx,Float:cy,Float:cz,Float:cr,cf,Float:crida,Float:hp,c1,c2,cflags,Panels,Doors,Lights,Tires,Status,Burning, Repair,Repair_times,Tech);
+
+		//if(Status == cOkay || Status == cCrashed)
+		{
+			returnValue = createVehicle(model, cx,cy,cz,cr,c1,c2, ._fuel = cf, .rrida = crida, .text = PLATE);
+
+			if(returnValue != INVALID_VEHICLE_ID)
+			{
+				car[ returnValue ][ car_savininkas ] = sql_get_field_assoc_int(v, "savininkas");
+				car[ returnValue ][ car_DBID ] = id;
+				car[ returnValue ][ car_flags ] = cflags;
+				car[ returnValue ][ car_status] = Status;
+				car[ returnValue ][ burning_started] = Burning;
+				car[ returnValue ][ repair_status ] = Repair;
+				car[ returnValue ][ repair_times ] = Repair_times;
+				car[ returnValue ][ technikine ] = Tech;
+				car[ returnValue ][ car_tipas ] = sql_get_field_assoc_int(v, "tipas");
+				setVehicleHealth(returnValue, hp);
+				sql_get_field_assoc(v, "m_tune", gt); 
+				sscanf(gt, "a<i>[14]",car[returnValue][tune]);
+
+				for(new j; j < 14; ++j)
+					addVehicleComponent(returnValue, car[returnValue][tune][e_tune:j]);
+				updateVehicleDamageStatus(returnValue, Panels, Doors, Lights, Tires);
+
+				sql_get_field_assoc(v, "bagazine", gt);
+
+				format(snf, sizeof snf, "p</>a<i>[%i]", eBonus+2);
+				sscanf(gt, "p<|>a<s[200]>["#MAX_ITEM"]", buffer);
+				for(new i; i != MAX_ITEM; ++i)
+				{
+					sscanf(buffer[i], snf, trunk[ returnValue ][i]);
+				}
+			}
+		}
+	}
+	return returnValue;
+}

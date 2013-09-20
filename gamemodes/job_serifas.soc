@@ -1,0 +1,1060 @@
+/*
+
+
+
+
+
+
+
+
+
+							Story of Cities
+
+								POLICE
+
+
+
+
+
+
+
+
+*/
+
+JOB::POLICIJA::ProcessNpc(pid)
+{
+	LABEL::Main:
+
+	new const id = npc[pd_npc];
+
+	inline pd_talk(idd, did, response, listitem, string:inputtext[])
+	{
+		#pragma unused idd, did, listitem
+		if(response)
+		{
+			if(strfind(inputtext, "Sumokëti baudà") != -1)
+			{
+				if(get.money[pid] < (pInfo[pid][wanted] * 10))
+				{
+					pInfo[pid][wanted] -= PLAYER::GetMoney(pid) / 10;
+					UpdateWanted(pid);
+					del.money[pid];
+					PLAYER::GiveMoney(pid, 0);
+					inmind(id, "Neturi uþtektinai pinigø sumokëti visai baudos sumai, todël vis dar esi ieðkomas.", pid);
+			
+				} else {
+				
+					ClearWanted(pid, 1);
+					PLAYER::GiveMoney(pid, - (pInfo[pid][wanted] * 10));
+					inmind(id, "Sumokëjai visà baudà, esi laisvas.", pid);
+				}
+			}
+			else if(strfind(inputtext, "Pasiduoti savanoriðkai") != -1)
+			{
+
+				toTheJail(pid, true);
+			}
+			else if(strfind(inputtext, "Darbo fondas") != -1)
+			{
+				d_fondas:
+				head(gt, "Ðiuo metu fonde yra "C_Y"%i"C_SOC" lt.", darbai[PD][dFondas]);
+				newrow(gt, "Pirkti ginklus.");
+				newrow(gt, "Pirkti amunicijà.");
+				newrow(gt, "Pirkti maðinas.");
+				newline(gt);
+				newrow(gt, "Mokëti algas.");
+
+				inline fondas_response(idd1, did1, response1, listitem1, string:text1[])
+				{
+					#pragma unused idd1, did1, listitem1
+					if(response1)
+					{
+						if(checkrow(text1, "Mokëti algas"))
+						{
+							algu_mokejimas:
+							head(gt, "Algø mokëjimas.");
+							
+							new const Result:r = sql_query(sqlHandle, 
+
+								f("SELECT COUNT(id) FROM zaidejai WHERE darbas = %i", PD),
+								QUERY_CACHED
+
+							);
+
+							new sqlCount = sql_get_field_assoc_int(r, "COUNT(id)");
+							if(sqlCount)
+								newrow(gt, "Mokëti visiems darbuotojams. (%i)", sqlCount);
+
+							new count; foreach(new i : Player) if(pInfo[i][darbas] == PD) ++count;
+							if(count)
+								newrow(gt, "Mokëti prisijungusiems darbuotojams (%i)", count),
+								newrow(gt, "Mokëti pasirinktam darbuotojui.");
+
+							if(!sqlCount && !count)
+								newrow(gt, "Darbuotojø nëra.");
+
+							inline moketi(idd2, did2, response2, listitem2, string:text2[])
+							{
+								#pragma unused idd2, did2, listitem2
+								if(response2)
+								{
+									if(checkrow(text2, "prisijungusiems"))
+									{
+										new const alga = darbai[PD][dFondas] / count;
+										inline sutikimas(iss, sis, response3, listitem3, string:text3[])
+										{
+											#pragma unused iss, sis, listitem3, text3
+											if(response3)
+											{
+												foreach(new i : Player)
+												{
+													if(pInfo[i][darbas] == PD)
+													{
+														darbai[PD][dFondas] -= alga; // jeigu lygiai neissidalina, fonde liks pora litu
+														PLAYER::GiveMoney(i, alga);
+														infoMsg(i, "Direktorius tau iðmokëjo %i lt algos.", alga);
+													}
+												}
+												notification2(pid, "Alga sekmingai ismoketa visiems prisijungusiems darbuotojams.");
+
+											} else {
+
+												goto algu_mokejimas;
+											}
+										}
+										head(gt, "Kiekvienas prisijungæs darbuotojas gaus "C_Y"%i"C_SOC" lt.\nAr mokëti algas?", alga);
+										showDialog(pid, using inline sutikimas, DIALOG_STYLE_MSGBOX, gt, "Taip", "Atgal");
+
+									} else if(checkrow(text2, "visiems")) {
+
+										new const alga = darbai[PD][dFondas] / count;
+										inline sutikimas(iss, sis, response3, listitem3, string:text3[])
+										{
+											#pragma unused iss, sis, listitem3, text3
+											if(response3)
+											{
+												darbai[PD][dFondas] -= alga * sqlCount; // jeigu lygiai neissidalina, fonde liks pora litu
+												sql_query(sqlHandle, 
+
+													f("UPDATE zaidejai SET `pinigai` = `pinigai` + '%i' WHERE darbas = %i", alga, PD),
+													QUERY_THREADED
+												);
+												notification2(pid, "Alga sekmingai ismoketa visiems darbuotojams.");
+
+											} else {
+
+												goto algu_mokejimas;
+											}
+										}
+
+									} else if(checkrow(text2, "pasirinktam")) {
+
+										playerlist:
+										head(gt, "Pasirink kuriam prisijungusiam darbuotojui nori iðmokëti algà:");
+										foreach(new i : Player)
+										{
+											if(pInfo[i][darbas] == PD)
+											{
+												newrow(gt, "%s", GetPlayerNameEx(i));
+											}
+										}
+										inline pasirinkimas(iss, sis, response3, listitem3, string:text3[])
+										{
+											#pragma unused iss, sis, listitem3
+											if(response3)
+											{
+												strdel(text3, 0, 3);
+												gmoketi:
+												new selectedPlayer;
+												sscanf(text3, "u", selectedPlayer);
+												if(selectedPlayer != INVALID_PLAYER_ID)
+												{
+													inline moketi_alga(iss4, sis4, response4, listitem4, string:text4[])
+													{
+														#pragma unused iss4, sis4, listitem4
+														if(response4)
+														{
+															if(isnull(inputtext))
+															{
+																goto gmoketi;
+
+															} else {
+
+																new const alga = strval(text4);
+																if(0 < alga < darbai[PD][dFondas])
+																{
+																	darbai[PD][dFondas] -= alga;
+																	PLAYER::GiveMoney(selectedPlayer, alga);
+																	infoMsg(selectedPlayer, "Direktorius tau iðmokëjo %i lt algos.", alga);
+																	notification2(pid, "Alga sekmingai ismoketa.");
+
+																} else {
+
+																	goto gmoketi;
+																}
+															}
+
+														} else {
+
+															goto playerlist;
+														}
+													}
+													showDialog(pid, using inline moketi_alga, DIALOG_STYLE_INPUT, " ", f(C_SOC"Kokià algà nori iðmokëti ðiam darbuotojui? (max "C_Y"%i"C_SOC" lt)", darbai[PD][dFondas]), "Mokëti", "Atgal");
+
+												} else {
+
+													goto algu_mokejimas;
+												}
+											}
+										}
+										showDialog(pid, using inline pasirinkimas, DIALOG_STYLE_LIST, " ", gt, "Rinkis", "Atgal");
+
+									} else goto algu_mokejimas;
+
+								} else {
+
+									goto d_fondas;
+								}
+							}
+							showDialog(pid, using inline moketi, DIALOG_STYLE_LIST, " ", gt, "Rinktis", "Atgal");
+
+						} else if(checkrow(text1, "Pirkti ginklus")) {
+
+
+
+						} else if(checkrow(text1, "Pirkti amunicijà")) {
+
+
+
+						} else if(checkrow(text1, "Pirkti maðinas")) {
+
+
+
+						} else goto d_fondas;
+
+					} else {
+
+						goto LABEL::Main;
+					}
+				}
+				showDialog(pid, using inline fondas_response, DIALOG_STYLE_LIST, " ", gt, "Rinktis", "Atgal");
+			}
+			else if(strfind(inputtext, "Darbuotojø tvarkymas") != -1)
+			{
+				pd_darbuotojai:
+				new name[MAX_PLAYER_NAME];
+				new const Result:r = sql_query(sqlHandle, F("SELECT * FROM zaidejai WHERE darbas = %i", pinfo[direktorius]), QUERY_CACHED);
+				new const rows = sql_num_rows(r);
+
+				inline darbuotojai_list(top_id, top_did, top_response, top_listitem, string:top_text[])
+				{
+					#pragma unused top_id, top_did, top_listitem
+					if(top_response)
+					{
+						strdel(top_text, 0, 3);
+						strdel(top_text, strfind(top_text, " "), strlen(top_text));
+						info_d:
+						infoMsg(pid, "%s", top_text);
+						new const Result:r1 = sql_query(sqlHandle, F("SELECT * FROM zaidejai WHERE vardas = '%s'", top_text), QUERY_CACHED);
+
+						if(sql_num_rows(r1))
+						{
+							new const dbid = sql_get_field_assoc_int(r1, "id");
+							new const laikas_snd = sql_get_field_assoc_int(r1, "t_today");
+							new const laikas_sav = sql_get_field_assoc_int(r1, "t_week");
+
+							new tvardas[24],szBuf[24];
+							sql_get_field_assoc(r1, "vardas", tvardas);
+
+							new online;
+
+							sscanf(tvardas, "u", online);
+
+							inline info_response(iid, idid, iresponse, ilistitem, string:itext[])
+							{
+								#pragma unused iid, idid, ilistitem
+								if(iresponse)
+								{
+									if(strfind(itext, "Rangas") != -1)
+									{
+										choose_rank:
+										format(gt, sizeof gt, C_SOC"Skirti þaidëjui naujà rangà:\n ");
+
+										for(new i; !isnull(rangai[PD][i][r_name]); ++i)
+										{
+											strcat(gt, f("\n\t"C_DOT C_SOC" %s", rangai[PD][i][r_name]));
+										}
+
+										inline rank_select(id1, did1, response1, listitem1, string:txt1[])
+										{
+											#pragma unused id1, did1, txt1
+											if(response1)
+											{
+												if(listitem1 < 2)
+												{
+													goto choose_rank;
+												
+												} else {
+
+													sscanf(tvardas, "u", online);
+													if(online != INVALID_PLAYER_ID)
+													{
+														pInfo[online][darbas][rangas] = listitem1 - 2;
+														notification2(online, F("Direktorius paskyre tau nauja ranga: ~y~%s", getRangName(online)));
+														notification2(pid, "Rangas sekmingai paskirtas.");
+														updatePlayer(online);
+
+													} else {
+
+														sql_query(sqlHandle, F("UPDATE zaidejai SET rangas = %i WHERE vardas = %s", listitem1 - 2, tvardas), QUERY_THREADED);
+														notification2(pid, "Rangas sekmingai paskirtas.");
+													}
+													goto info_d;
+												}
+
+											} else {
+
+												goto info_d;
+											}
+										}
+										showDialog(pid, using inline rank_select, DIALOG_STYLE_LIST, itext, gt, "Skirti", "Atgal");
+									}
+									else if(strfind(itext, "Aktyvumas") != -1)
+									{
+										new h,m,s;
+
+										format(gt, sizeof gt, C_SOC"%s aktyvumas:\n ", tvardas);
+
+										if(online != INVALID_PLAYER_ID)
+											secToTime(pinfo[darbas][time_today], h,m,s);
+										else
+											secToTime(laikas_snd, h,m,s);
+										strcat(gt, f("\n\t"C_DOT C_SOC" Praþaidë ðiandien: "C_Y"%ih %imin", h,m));
+										
+										if(online != INVALID_PLAYER_ID)
+											secToTime(pinfo[darbas][time_week], h,m,s);
+										else
+											secToTime(laikas_sav, h,m,s);
+										strcat(gt, f("\n\t"C_DOT C_SOC" Praþaidë ðià savaitæ: "C_Y"%ih %imin", h,m));
+
+										inline fakeresponse(id2, did2, response2, listitem2, string:txt2[])
+										{
+											#pragma unused id2, did2, response2, listitem2, txt2
+											goto info_d;
+										}
+										showDialog(pid, using inline fakeresponse, DIALOG_STYLE_LIST, itext, gt, "Atgal", "");
+									}
+									else if(strfind(itext, "Darbuotojo statistika") != -1)
+									{
+										
+									}
+									else if(strfind(itext, "Atleisti ið darbo") != -1)
+									{
+										new const clickedplayerid = getPIDFromDBID(dbid);
+
+										if(clickedplayerid != INVALID_PLAYER_ID)
+										{
+											leaveJob(clickedplayerid);
+										
+										} else {
+
+											leaveJob(.dbid = dbid);
+										}
+										goto LABEL::Main;
+									}
+								
+								} else {
+
+									goto pd_darbuotojai;
+								}
+							}
+
+
+							/*
+									Kiek isbuvo siandiena
+									Kiek isbuvo sia savaite.
+									Kiek Suemes per visa laika
+									Kiek suemes per siandiena.
+									Rangas.
+									Idarbintas
+							*/
+							new tm<tmTime>;
+							localtime(Time:sql_get_field_assoc_int(r1, "darbas_joined"), tmTime);
+							strftime(szBuf, sizeof(szBuf), "%Y-%m-%d", tmTime);
+
+							format(gt, sizeof gt, C_Y"%s"C_SOC"\n ", tvardas);
+							strcat(gt, f("\n\t"C_DOT C_SOC" Dirba nuo: "C_Y"%s", szBuf));
+							strcat(gt, f("\n\t"C_DOT C_SOC" Rangas: "C_Y"%s", rangai[PD][sql_get_field_assoc_int(r1, "rangas")][r_name]));
+							newrow(gt, "Aktyvumas.");
+							newrow(gt, "Darbuotojo statistika.");
+
+							strcat(gt, f("\n\n\t"C_DOT C_SOC" Atleisti ið darbo."));
+
+							showDialog(pid, using info_response, DIALOG_STYLE_LIST, " ", gt, "Rinktis", "Atgal");
+
+						} else {
+
+							goto pd_darbuotojai;
+						}
+
+					} else {
+
+						goto LABEL::Main;
+					}
+				}
+
+				format(gt, sizeof gt, C_Y"Darbuotojai (%s):\n ", (rows)?(IntToStr(rows)):("nëra"));
+				if(!rows)
+				{
+					newrow(gt, "Darbuotojø nëra.");
+					
+				} else {
+
+					for(new i; i < rows; ++i, sql_next_row(r))
+					{
+						sql_get_field_assoc(r, "vardas", name);
+						new mid;
+						sscanf(name, "u", mid);
+						strcat(gt, f("\n\t"C_DOT C_SOC" %s %s", name, IsPlayerConnected(mid)?("[ "C_G"ON"C_SOC" ]"):("")));
+					}
+				}
+				showDialog(pid, using inline darbuotojai_list, DIALOG_STYLE_LIST, inputtext, gt, "Rinktis", "Atgal");
+			}
+			else if(strfind(inputtext, "Rangø tvarkymas") != -1)
+			{
+				rank_manage:
+				format(gt, sizeof gt, C_SOC"Rangø tvarkymas\n ");
+				newrow(gt, "Pridëti naujà rangà.");
+				newrow(gt, "Iðtrinti visus rangus.");
+
+				strcat(gt, "\n \n\t"C_SOC" Visi rangai:");
+				if( isnull(rangai[PD][0][r_name] ))
+				{
+					newrow(gt, "Nëra jokiø rangø.");
+
+				} else {
+
+					for(new i; i != 30 && !isnull(rangai[PD][i][r_name]); ++i)
+					{
+						strcat(gt, f("\n\t"C_DOT C_SOC" %s", rangai[PD][i][r_name]));
+					}
+				}
+				inline rank_response(id1, did1, response1, listitem1, string:text1[])
+				{
+					#pragma unused id1, did1
+					if(response1)
+					{
+						if(listitem1 >= 6)
+						{
+							// jei paspaudþia ant rango
+							new const xid = listitem1 - 6;
+
+							LABEL::manage_rank:
+							head(gt, "%s", rangai[PD][xid][r_name]);
+							newrow(gt, "Iðtrinti rangà.");
+							newrow(gt, "Priskirti rangà darbuotojui.");
+
+							inline manage_rank(id2, did2, re2, li2, string:in2[])
+							{
+								#pragma unused id2, did2, li2
+								if(re2)
+								{
+									if(checkrow(in2, "Iðtrinti rangà"))
+									{
+
+
+									} else if(checkrow(in2, "Priskirti rangà")) {
+
+
+
+									} else {
+
+										goto LABEL::manage_rank;
+									}
+
+								} else {
+
+									goto rank_manage;
+								}
+							}
+							showDialog(pid, using inline manage_rank, DIALOG_STYLE_LIST, " ", gt, "Rinktis", "Atgal");
+
+						} else {
+
+							if(strfind(text1, "Pridëti naujà rangà") != -1)
+							{
+								new index = -1;
+								for(new j; j != 30; ++j)
+								{
+									if( isnull(rangai[PD][j][r_name]))
+									{
+										index = j;
+										break;
+									}
+								}
+								if(index == -1)
+								{
+									// jeigu jau pasiektas maksimalus rangø skaièius
+									notification2(pid, "Maksimalus rangu skaicius pasiektas.");
+									goto rank_manage;
+
+								} else {
+
+									goto_rank_name:
+									inline rank_name(id2, did2, response2, listitem2, string:text2[])
+									{
+										#pragma unused id2, did2, listitem2
+										if(response2)
+										{
+											sql_escape_string(sqlHandle, text2, text2);
+											new find, find2;
+											do
+											{
+												find = strfind(text2, "/");
+												if(find != -1)
+													strdel(text2, find, find);
+												find2 = strfind(text2, "|");
+												if(find2 != -1)
+													strdel(text2, find2, find2);
+											}
+											while(find != -1 && find2 != -1);
+											if(isnull(text2))
+											{
+												goto goto_rank_name;
+
+											} else {
+
+												goto_skin_v:
+
+												format(gt, sizeof gt, C_SOC"Pasirink ðio rango vaikinø aprangà.\n ");
+												for(new i; JOB::GetSkin(PD, VAIKINAS, i); ++i)
+												{
+													strcat(gt, f("\n\t"C_DOT C_SOC"%i", JOB::GetSkin(PD, VAIKINAS, i)));
+												}
+
+												inline rank_skin_v(id3, did3, response3, listitem3, string:text3[])
+												{
+													#pragma unused id3, did3, text3
+													if(response3)
+													{
+														new const skin_v = listitem3 - 2;
+														if(skin_v >= 0)
+														{
+															goto_skin_m:
+
+															format(gt, sizeof gt, C_SOC"Pasirink ðio rango merginø aprangà.\n ");
+															for(new i; JOB::GetSkin(PD, MERGINA, i); ++i)
+															{
+																strcat(gt, f("\n\t"C_DOT C_SOC"%i", JOB::GetSkin(PD, MERGINA, i)));
+															}
+															inline rank_skin_m(id4, did4, response4, listitem4, string:text4[])
+															{
+																#pragma unused id4, did4, text4
+																if(response4)
+																{
+																	new const skin_m = listitem4 - 2;
+																	if(skin_m >= 0)
+																	{
+																		format(rangai[PD][index][r_name], 24, text2);
+																		rangai[PD][index][r_skin_v] = skin_v;
+																		rangai[PD][index][r_skin_m] = skin_m;
+																		printf("rangas %s sukurtas sëkmingai", rangai[PD][index][r_name]);
+																		notification2(pid, F("Rangas (%s) sukurtas sekmingai.", rangai[PD][index][r_name]));
+																		goto rank_manage;
+
+																	} else {
+
+																		goto goto_skin_m;
+																	}
+
+																} else {
+
+																	goto goto_skin_v;
+																}
+															}
+															showDialog(pid, using inline rank_skin_m, DIALOG_STYLE_LIST, "3/3", gt, "Sukurti", "Atgal");
+
+														} else {
+
+															goto goto_skin_v;
+														}
+
+													} else {
+
+														goto goto_rank_name;
+													}
+												}
+												showDialog(pid, using inline rank_skin_v, DIALOG_STYLE_LIST, "2/3", gt, "Toliau", "Atgal");
+											}
+
+										} else {
+
+											goto rank_manage;
+										}
+									}
+									showDialog(pid, using inline rank_name, DIALOG_STYLE_INPUT, "1/3", "Ávesk rango pavadinimà.", "Toliau", "Atgal");
+								}
+							}
+							else if(strfind(text1, "Iðtrinti visus rangus") != -1)
+							{
+								inline rusure(id2, did2, response2, listitem2, string:text2[])
+								{
+									#pragma unused id2, did2, listitem2, text2
+									if(response2)
+									{
+										for(new i; i != 30; ++i)
+										{
+											rangai[PD][i][r_name][0] = EOS;
+											rangai[PD][i][r_skin_m] = 0;
+											rangai[PD][i][r_skin_v] = 0;
+										}
+										notification2(pid, "Rangai istrinti.");
+										goto rank_manage;
+
+									} else {
+
+										goto rank_manage;
+									}
+								}
+								showDialog(pid, using inline rusure, DIALOG_STYLE_MSGBOX, text1, "Ar tikrai nori iðtrinti visus rangus?", "Taip", "Atgal");
+							} else goto rank_manage;
+						}
+
+					} else {
+
+						goto pd_main_dialog;
+					}
+				}
+				showDialog(pid, using inline rank_response, DIALOG_STYLE_LIST, " ", gt, "Rinktis", "Atgal");
+			}
+			else if(strfind(inputtext, "Maðinø tvarkymas") != -1)
+			{
+				car_sarasas:
+				head(gt, "Maðinø sàraðas:");
+				new inx;
+				new cars[MAX_VEHICLES];
+				for(new i; i != MAX_VEHICLES; ++i)
+				{
+					if(car[i][car_tipas] == PD)
+					{
+						cars[inx++] = i;
+						if(vehicle.bool.get(i, fIsDespawned))
+						{
+							newrow(gt, C_GREY"%s", GetVehicleNameByModel(car[i][car_model]));
+						
+						} else {
+
+							newrow(gt, C_SOC"%s", GetVehicleNameByModel(car[i][car_model]));
+						}
+					}
+				}
+				inline car_manage(id1, did1, response1, listitem1, string:text1[])
+				{
+					#pragma unused id1, did1, text1
+					if(response1)
+					{
+						if(listitem1 > 1)
+						{
+							showVeh:
+							new const xin = cars[listitem1 - 2];
+							new statusas[32];
+							switch(car[xin][car_status])
+							{
+								case cGarage: statusas = "Garaþe";
+								case cOkay: statusas = "Naudojama";
+								case cCrashed: statusas = "Suduþusi";
+								case cNeedsRepair: statusas = "Reikalingas remontas";
+								case cRepair: statusas = "Remontuojama";
+								default: statusas = "Neþinomas";
+							}
+							head(gt, "%s", GetVehicleNameByModel(car[xin][car_model]));
+
+							newrow(gt, "Parduoti maðinà uþ %i", getVehiclePrice(xin));
+							if(car[xin][car_status] == cCrashed || car[xin][car_status] == cNeedsRepair)
+								newrow(gt, "Remontuoti.");
+							if(car[xin][car_status] == cOkay || car[xin][car_status] == cCrashed)
+								newrow(gt, "Rodyti þemëlapyje.");
+							if(pinfo[rubinai] >= 10)
+								newrow(gt, "Graþinti á garaþà.");
+
+							inline veiksmas(id2, did2, re2, li2, string:in2[])
+							{
+								#pragma unused id2, did2, li2
+								if(re2)
+								{
+									if(checkrow(in2, "Parduoti"))
+									{
+										inline check(id3, did3, re3, li3, string:in3[])
+										{
+											#pragma unused id3, did3, li3, in3
+											if(re3)
+											{
+												darbai[PD][dFondas] += getVehiclePrice(xin);
+												killVehicle(xin);
+
+											} else {
+
+												goto showVeh;
+											}
+										}
+										format(gt, sizeof gt, C_SOC"Ðià maðinà gali parduoti uþ "C_Y"%i"C_SOC" lt. (Pinigai keliaus á darbo fondà)", getVehiclePrice(xin));
+										showDialog(pid, using inline check, DIALOG_STYLE_MSGBOX, " ", gt, "Parduoti", "Atgal");
+
+									} else if(checkrow(in2, "Remontuoti"))
+									{
+
+
+									} else if(checkrow(in2, "Rodyti"))
+									{
+
+
+									} else goto showVeh;
+
+								} else {
+
+
+								}
+							}
+
+							newline(gt);
+							newrow(gt, "Informacija");
+							newrow(gt, "Numeriai: %s", car[xin][plate_number]);
+							newrow(gt, "Paskutinis vairavo: %s", car[xin][last_driver]);
+							newrow(gt, "Maðinos statusas: %s", statusas);
+							newline(gt);
+							newrow(gt, "Kita informacija");
+							newrow(gt, "Degalø kiekis: %i", car[xin][degalai]);
+							newrow(gt, "Rida: %.2f", car[xin][rida]);
+							if(vehicle.bool.get(xin, fIsOnFire))
+								newrow(gt, "Ðiuo metu dega.");
+
+							newline(gt);
+							newrow(gt, "Gedimai");
+							if(vehicle.error.get(xin, gEngine))
+								newrow(gt, "Neveikia variklis.");
+							if(vehicle.error.get(xin, gBrakes))
+								newrow(gt, "Neveikia stabdþiai.");
+							if(vehicle.error.get(xin, gTires))
+								newrow(gt, "Sprogusios padangos.");
+							if(vehicle.error.get(xin, gFuel))
+								newrow(gt, "Prakiuræs degalø bakas.");
+							if(vehicle.error.get(xin, gSankaba))
+								newrow(gt, "Sugedusi sankaba.");
+							if(!car[xin][gedimai])
+								newrow(gt, "Gedimø nëra.");
+
+							showDialog(pid, using inline veiksmas, DIALOG_STYLE_LIST, " ", gt, "Rinktis", "Atgal");
+
+						} else {
+
+							goto car_sarasas;
+						}
+
+					} else {
+
+						goto pd_main_dialog;
+					}
+				}
+				showDialog(pid, using inline car_manage, DIALOG_STYLE_LIST, " ", gt, "Rinktis", "Atgal");
+			}
+			else if(strfind(inputtext, "Perþiûrëti darbo statistikà") != -1)
+			{
+				
+				//
+			}
+			else if(strfind(inputtext, "Nuskaltëliai") != -1)
+			{
+				pd_online_wanted:
+				format(gt, sizeof gt, C_SOC"Visi nusikaltëliai:\n ");
+
+				new SK;
+				foreach(new i : Player)
+				{
+					if(pInfo[i][wanted] && IsPlayerConnected(i))
+					{
+						strcat(gt, f("\n\t"C_DOT C_Y" %s "C_W"( "C_Y"%i"C_W" )", GetPlayerNameEx(i), pInfo[i][wanted]));
+						++SK;
+					}
+				}
+
+				new Result:r = sql_query(sqlHandle, f("SELECT * FROM zaidejai WHERE wanted > 0 ORDER BY wanted DESC", pinfo[darbas]), QUERY_CACHED);
+				new const rows = sql_num_rows(r);
+
+				if(rows)
+				{
+					for(new i; i != rows; ++i, sql_next_row(r))
+					{
+						if(getPIDFromDBID(sql_get_field_assoc_int(r, "id")) == INVALID_PLAYER_ID)
+						{
+							new name[MAX_PLAYER_NAME];
+							sql_get_field_assoc(r, "vardas", name);
+							strcat(gt, f("\n\t"C_DOT C_W" %s"C_W" ( "C_Y"%i"C_W" )", name, sql_get_field_assoc_int(r, "wanted")));
+						}
+					}
+
+				} else if(!SK) {
+
+					newrow(gt, "Nusikaltëliø nëra.");
+				}
+
+				inline online_wanted(id1, did1, response1, listitem1, string:name[])
+				{
+					#pragma unused id1, did1
+					if(response1)
+					{           
+						new clickedplayerid;
+						strdel(name, 0, 3);
+						strdel(name, strfind(name, " "), sizeof(name));
+						sscanf(name, "u", clickedplayerid);
+						infoMsg(pid, "%s ( %i )", name, clickedplayerid);
+
+						if(listitem1 < 2 && !strcmp(name, "Nusikaltëliø"))
+						{
+							goto pd_online_wanted;
+						
+						} else {
+
+							if(clickedplayerid != INVALID_PLAYER_ID)
+							{
+								format(gt, sizeof gt, C_Y"%s"C_SOC"\n ", name);
+								strcat(gt, f("\n\t"C_DOT C_SOC" Ieðkomumo lygis: "C_Y"%i", pInfo[clickedplayerid][wanted]));
+								new tm<tmTime>, szBuf[24];
+								localtime(Time:pInfo[clickedplayerid][wanted_time], tmTime);
+								strftime(szBuf, sizeof(szBuf), "%Y-%m-%d", tmTime);
+								strcat(gt, f("\n\t"C_DOT C_SOC" Ieðkomas nuo: "C_Y"%s", szBuf));
+								strcat(gt, f("\n\t"C_DOT C_SOC" Nuþudymø skaièius: "C_Y"%i"C_SOC" (%i)", pInfo[clickedplayerid][last_kills], pInfo[clickedplayerid][kills]));
+								strcat(gt, f("\n\t"C_DOT C_SOC" Gauja: "C_Y"%s"C_SOC" (%s)", pInfo[clickedplayerid][gauja][g_name], pInfo[clickedplayerid][gauja]==pInfo[clickedplayerid][DBID]?("vadas"):("narys")));
+
+							} else {
+
+								r = sql_query(sqlHandle, F("SELECT * FROM zaidejai WHERE vardas = '%s'", name), QUERY_CACHED);
+								format(gt, sizeof gt, C_Y"%s"C_SOC"\n ", name);
+								strcat(gt, f("\n\t"C_DOT C_SOC" Ieðkomumo lygis: "C_Y"%i", sql_get_field_assoc_int(r, "wanted")));
+								new tm<tmTime>, szBuf[24];
+								localtime(Time:sql_get_field_assoc_int(r, "wanted_time"), tmTime);
+								strftime(szBuf, sizeof(szBuf), "%Y-%m-%d", tmTime);
+								strcat(gt, f("\n\t"C_DOT C_SOC" Ieðkomas nuo: "C_Y"%s", szBuf));
+								strcat(gt, f("\n\t"C_DOT C_SOC" Nuþudymø skaièius: "C_Y"%i"C_SOC" (%i)", sql_get_field_assoc_int(r, "last_kills"), sql_get_field_assoc_int(r, "kills")));
+								sql_get_field_assoc(r, "gauja_name", name);
+								strcat(gt, f("\n\t"C_DOT C_SOC" Gauja: "C_Y"%s"C_SOC" (%s)", name, sql_get_field_assoc_int(r, "gauja")==sql_get_field_assoc_int(r, "id")?("vadas"):("narys")));
+							}
+
+							inline wanted_info(id2, did2, response2, listitem2, string:inputtext2[])
+							{
+								#pragma unused id2, did2, response2, listitem2, inputtext2
+								goto pd_online_wanted;
+							}
+							showDialog(pid, using wanted_info, DIALOG_STYLE_LIST, " ", gt, "Atgal", "");
+						}
+					
+					} else {
+
+						goto pd_main_dialog;
+					}
+				}
+
+				showDialog(pid, using inline online_wanted, DIALOG_STYLE_LIST, inputtext, gt, "Rinktis", "Atgal");
+			}
+			else if(strfind(inputtext, "Bendradarbiai") != -1)
+			{
+				new const Result:r = sql_query(sqlHandle, F("SELECT * FROM zaidejai WHERE darbas = %i", pinfo[darbas]), QUERY_CACHED);
+				new const rows = sql_num_rows(r);
+
+				format(gt, sizeof gt, C_SOC"Visi bendradarbiai:\n ");
+
+				foreach(new i : Player)
+				{
+					if(pInfo[i][darbas] == PD)
+					{
+						strcat(gt, f("\n\t"C_DOT C_Y" %s", GetPlayerNameEx(i)));
+					}
+				}
+				for(new i; i != rows; ++i, sql_next_row(r))
+				{
+					if(getPIDFromDBID(sql_get_field_assoc_int(r, "id")) == INVALID_PLAYER_ID)
+					{
+						new name[MAX_PLAYER_NAME];
+						sql_get_field_assoc(r, "vardas", name);
+						strcat(gt, f("\n\t"C_DOT C_W" %s", name));
+					}
+				}
+				inline list(id1, did1, response1, listitem1, string:txt1[])
+				{
+					#pragma unused id1, did1, response1, listitem1, txt1
+					goto pd_main_dialog;
+				}
+				showDialog(pid, using inline list, DIALOG_STYLE_LIST, inputtext, gt, "Atgal");
+			}
+			else if(strfind(inputtext, "Iðeiti ið darbo") != -1)
+			{
+				inline r_u_sure(id1, did1, response1, listitem1, string:txt1[])
+				{
+					#pragma unused id1, did1, listitem1, txt1
+					if(response1)
+					{
+						leaveJob(pid);
+
+					} else {
+
+						goto pd_main_dialog;
+					}
+				}
+				showDialog(pid, using inline r_u_sure, DIALOG_STYLE_MSGBOX, inputtext, C_SOC"Ar tikrai nori palikti darbà?", "Taip", "Atgal");
+			}
+			else if(strfind(inputtext, "Ieðkomiausiøjø sàraðas") != -1)
+			{
+				inline top_ieskomi(top_id, top_did, top_response, top_listitem, string:top_text[])
+				{
+					#pragma unused top_id, top_did, top_listitem
+					if(top_response)
+					{
+						strdel(top_text, 0, 3);
+						strdel(top_text, strfind(top_text, " "), strlen(top_text));
+						infoMsg(pid, "%s", top_text);
+						new const Result:r1 = sql_query(sqlHandle, F("SELECT * FROM zaidejai WHERE vardas = '%s'", top_text), QUERY_CACHED);
+
+						if(sql_num_rows(r1))
+						{
+							new tvardas[24];
+							format(gt, sizeof gt, C_Y"%s"C_SOC"\n ", (sql_get_field_assoc(r1, "vardas", tvardas), tvardas));
+							strcat(gt, f("\n\t"C_DOT C_SOC" Ieðkomumo lygis: "C_Y"%i", sql_get_field_assoc_int(r1, "wanted")));
+							strcat(gt, f("\n\t"C_DOT C_SOC" Ieðkomas nuo: "C_Y"%i", sql_get_field_assoc_int(r1, "wanted_time")));
+							strcat(gt, f("\n\t"C_DOT C_SOC" Nuþudymø skaièius: "C_Y"%i"C_SOC" (%i)", sql_get_field_assoc_int(r1, "last_kills"), sql_get_field_assoc_int(r1, "kills")));
+							strcat(gt, f("\n\t"C_DOT C_SOC" Gauja: "C_Y"%s"C_SOC" (%s)", (sql_get_field_assoc(r1, "gauja_name", tvardas),tvardas), sql_get_field_assoc_int(r1, "gauja")==sql_get_field_assoc_int(r1, "id")?("vadas"):("narys")));
+
+							inline wanted_info(id2, did2, response2, listitem2, string:inputtext2[])
+							{
+								#pragma unused id2, did2, response2, listitem2, inputtext2
+								goto pd_top_wanted;
+							}
+							showDialog(pid, using wanted_info, DIALOG_STYLE_LIST, " ", gt, "Atgal", "");
+
+						} else {
+
+							goto pd_top_wanted;
+						}
+
+					} else {
+
+						goto LABEL::Main;
+					}
+				}
+				pd_top_wanted:
+				new num, name[MAX_PLAYER_NAME];
+				new const Result:r = sql_query(sqlHandle, "SELECT wanted, vardas FROM zaidejai WHERE wanted > 0 ORDER BY wanted DESC LIMIT 15", QUERY_CACHED);
+				new const rows = sql_num_rows(r);
+
+				format(gt, sizeof gt, C_Y"Ieðkomiausieji (%s):\n ", (rows)?(IntToStr(rows)):("nëra"));
+				if(!rows)
+				{
+					newrow(gt, "Ieðkomø nusikaltëliø nëra.");
+					
+				} else {
+
+					for(new i; i < rows; ++i, sql_next_row(r))
+					{
+						num = sql_get_field_assoc_int(r, "wanted");
+						sql_get_field_assoc(r,"vardas",name);
+						new mid;
+						sscanf(name, "u", mid);
+						strcat(gt, f("\n\t"C_DOT C_SOC" %s ("C_Y" %i "C_SOC") %s", name, num, IsPlayerConnected(mid)?("[ "C_G"ON"C_SOC" ]"):("")));
+					}
+				}
+				showDialog(pid, using inline top_ieskomi, DIALOG_STYLE_LIST, inputtext, gt, "Rinktis", "Atgal");
+			}
+		}
+	}
+
+	pd_main_dialog:
+
+	format(gt, sizeof gt, C_Y"%s"C_SOC", policija.\n \n", GetPlayerNameEx(id));
+
+	if(pinfo[wanted])
+	{
+		strcat(gt, f("\n\t"C_DOT C_SOC"Sumokëti baudà ::"C_Y" %i lt.", pinfo[wanted] * 10));
+		strcat(gt, "\n\t"C_DOT C_SOC"Pasiduoti savanoriðkai.");
+
+		strcat(gt, "\n ");
+	}
+	
+	if(pinfo[direktorius])
+	{
+		newrow(gt, "Darbo fondas.");
+		newrow(gt, "Darbuotojø tvarkymas.");
+		newrow(gt, "Maðinø tvarkymas.");
+		newrow(gt, "Rangø tvarkymas.");
+		newline(gt);
+	}
+	if(pinfo[direktorius] == PD || pinfo[darbas] == PD)
+	{
+		newrow(gt, "Perþiûrëti darbo statistikà.");
+		newrow(gt, "Nuskaltëliai.");
+	}
+	if(pinfo[darbas] == PD)
+	{
+		newrow(gt, "Bendradarbiai.");
+		newline(gt);
+		newrow(gt, "Iðeiti ið darbo.\n ");
+	}
+	newrow(gt, "Ieðkomiausiøjø sàraðas.");
+
+	showDialog(pid, using inline pd_talk, DIALOG_STYLE_LIST, GetPlayerNameEx(id), gt, "Pasirinkti", "Iðeiti");
+}
+
+JOB::POLICIJA::Surakinti(id1, id2)
+{
+	new Float:x, Float:y, Float:z;
+	GetPlayerPos(id1, x,y,z);
+	if( IsPlayerInRangeOfPoint(id2, 10,x,y,z) )
+	{
+		if(player.flag.get(id2, fSurakintas))
+		{
+			UnuseAttachInSlot(id2, SLOT_RIGHTHAND);
+			PLAYER::Freeze(id2, false, SURAKINTAS);
+			return 2;
+
+		} else {
+
+			UnuseAttachInSlot(id2, SLOT_RIGHTHAND);
+
+			new const skin_ = GetPlayerSkin(id2);
+			SetPlayerAttachedObject(id2, SLOT_RIGHTHAND, 19418, 6, gCuffSkinData[skin_][0], gCuffSkinData[skin_][1], gCuffSkinData[skin_][2], gCuffSkinData[skin_][3], gCuffSkinData[skin_][4], gCuffSkinData[skin_][5], gCuffSkinData[skin_][6], gCuffSkinData[skin_][7], gCuffSkinData[skin_][8]);
+			
+			PLAYER::Freeze(id2, true, SURAKINTAS);
+			return 1;
+		}
+
+	} else {
+
+		return 0;
+	}
+}
+
+JOB::POLICIJA::GiveWanted(pid, amount)
+{
+	if( amount < 0) return 1;
+	if(!pInfo[pid][wanted]) pInfo[pid][wanted_time] = gettime();
+	if( amount + pInfo[pid][wanted] > 150)
+	{
+		pInfo[pid][wanted] = 150;
+		UpdateWanted(pid);
+		return 1;
+	}
+	pInfo[pid][wanted] += amount;
+	UpdateWanted(pid);
+	updatePlayer(pid);
+	return 1;
+}
+
+JOB::POLICIJA::GiveWantedEx(id1, id2, amount)
+{
+	new Float:x, Float:y, Float:z;
+	GetPlayerPos(id2, x,y,z);
+	if( IsPlayerInRangeOfPoint(id1, 30, x,y,z) )
+	{
+		JOB::POLICIJA::GiveWanted(id2, amount);
+		return 1;
+	}
+	else 
+	return 0;
+}

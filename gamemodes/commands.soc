@@ -1,0 +1,1073 @@
+/*
+
+
+
+
+
+
+
+
+
+							Story of Cities
+
+								COMMANDS
+
+
+
+
+
+
+
+
+*/
+
+#define DEBUG_MODE
+
+#if defined DEBUG_MODE
+
+YCMD:skin(pid, params[], help)
+{
+	PLAYER::SetSkin(pid, .use_skin = strval(params));
+	return 1;
+}
+
+YCMD:cam(pid, params[], help)
+{
+	static Float:CCamPos[7][2][3] = {
+
+	  {{233.837921,-498.035156,44.880439},  	{241.919296,-503.177215,42.008056}  	},
+	  {{228.281188,40.731430,7.430503},     	{220.159942,35.167049,5.674664}     	},
+	  {{863.084289,-13.007917,76.346267},   	{865.383972,-21.453987,71.511474}   	},
+	  {{1454.927490,-305.930633,26.546848}, 	{1446.908447,-300.290557,24.576097} 	},
+	  {{2352.672363,-664.975036,136.689483},	{2357.546630,-658.185363,131.199325}	},
+	  {{1049.693359,522.506652,23.078781},  	{1045.958007,513.419555,21.215373}  	},
+	  {{591.365539,165.333572,19.570011},   	{600.623168,161.686508,18.572305}   	}
+
+	};
+	if(isnull(params))
+	{
+		SetCameraBehindPlayer(pid);
+
+	} else {
+
+		new const rand = strval(params);
+		SetPlayerCameraPos(pid, CCamPos[rand][0][0], CCamPos[rand][0][1], CCamPos[rand][0][2]);
+		setPlayerPosZ(pid,CCamPos[rand][0][0], CCamPos[rand][0][1], CCamPos[rand][0][2]+50);
+		SetPlayerCameraLookAt(pid, CCamPos[rand][1][0],CCamPos[rand][1][1],CCamPos[rand][1][2]);
+	}
+	return true;
+}
+
+YCMD:gototag(pid, params[], help)
+{
+	new coords<1>;
+	GetDynamicObjectPos(objects[gTag(strval(params))][obj_id], coords<1>);
+	return SetPlayerPos(pid, coords<1>);
+}
+
+YCMD:board(pid, params[], help)
+{
+	return NOTICE_BOARD::Show(pid);
+}
+
+YCMD:startw(pid, params[], help)
+{
+// if(GetVehicleModel(GetPlayerVehicleID(pid)) == VALYTOJAS)
+		startWash(pid);
+	return 1;
+}
+
+YCMD:stopw(pid, params[], help)
+{
+	stopWash(pid);
+	return 1;
+}
+
+YCMD:pausew(pid, params[], help)
+{
+	pauseWash(pid);
+	return 1;
+}
+
+YCMD:edit(playerid, params[], help)
+{
+	#pragma unused params, help
+
+	EditAttachedObject(playerid, SLOT_HEAD);
+	SendClientMessage(playerid, 0xFF0000FF, "Edition Started, please use the diskette when you are done");
+	UsingEDIT[playerid] = true;
+
+	return 1;
+}
+
+YCMD:pirkticar(pid, params[], help)
+{
+	if( ! player.bool.get(pid, bIsInCarShop))
+	{
+		show_vehicleShop(pid);
+	}
+
+	return 1;
+}
+
+YCMD:bball(pid, params[], help)
+{
+	soc(pid, BASKETBALL_ON);
+	TextDrawShowForPlayer(pid, g_crosshair);
+	bball[pid] = e_bball:0;
+	return 1;
+}
+
+YCMD:bball1(pid, params[], help)
+{
+	bball[pid] = e_bball:0;
+	player.bool.on(pid, bBasketBall);
+	player.bball.on(pid, bBall);
+	player.bball.on(pid, bBlokuoja);
+	return 1;
+}
+
+YCMD:bball2(pid, params[], help)
+{
+	bball[pid] = e_bball:0;
+	player.bool.on(pid, bBasketBall);
+	player.bball.on(pid, bBall);
+	player.bball.on(pid, bRun);
+	return 1;
+}
+
+YCMD:gaisrine(pid, params[], help)
+{
+	fade_setPlayerPos(pid, 787.3850097, -609.4959716, 5002.725097);
+	return 1;
+}
+
+YCMD:add_bot(pid, params[], help)
+{
+	#pragma unused help
+	new coords<>;
+	GetPlayerPos(pid, coords<>);
+	new id = npc.Create(f("npc_%i", GetTickCount()));
+	npc.Spawn(id, 200, coords<>);
+	pInfo[id][max_hp] = 500;
+	PLAYER::SetHealth(id, 500);
+	return 1;
+}
+
+YCMD:heal_bot(pid, params[], help)
+{
+	PLAYER::SetHealth(strval(params), 500);
+	return 1;
+}
+
+YCMD:direktorius(pid, params[], help)
+{
+	#pragma unused help
+	pinfo[direktorius] = strval(params);
+	return 1;
+}
+
+YCMD:darbas(pid, params[], help)
+{
+	#pragma unused help
+	JOB::Join(pid, strval(params));
+	return 1;
+}
+
+YCMD:nitro(pid, params[], help)
+{
+	if(IsPlayerInAnyVehicle(pid))
+	{
+		addVehicleComponent(getPlayerVehicleID(pid), 1010);
+	}
+	return 1;
+}
+
+YCMD:fire(pid, params[], help)
+{
+	new Float:x, Float:y,Float:z;
+	GetXYInFrontOfPlayer(pid, x,y,z,7);
+	startFire(x,y,z-1.5);
+	return 1;
+}
+
+YCMD:ligonine(pid, params[], help)
+{ 
+	#pragma unused params, help
+	fade_setPlayerPos(pid, 1264.5814,299.4047,19.9259);
+	return 1;
+}
+
+YCMD:ligonine2(pid, params[], help)
+{
+	#pragma unused params, help
+	setPlayerPos(pid, 1264.5814,299.4047,19.9259);
+	return 1;
+}
+
+YCMD:medikai(pid, params[], help)
+{
+	#pragma unused params, help
+	setPlayerPos(pid, 1235.7577, 302.0880, 9105.4209);
+	return 1;
+}
+
+YCMD:add_all_items(pid, params[], help)
+{
+	#pragma unused params, help
+	for(new i = 1; i < talpa; ++i)
+	{
+		AddItem(pid, i, random(10));
+	}
+	return 1;
+}
+
+YCMD:add_item(pid, params[], help)
+{
+	#pragma unused help
+
+	notification(pid, "ok");
+/*
+	new itemid, kiekis_;
+	sscanf(params, "ii", itemid, kiekis_);
+*/
+	extract params -> new itemid, kiekis_;
+
+	if( itemid >= talpa || itemid < 1)
+	{
+		notification(pid, "/add_item itemid kiekis");
+
+	} else {
+
+		AddItem(pid, itemid, kiekis_);
+	}
+	return 1;
+}
+
+YCMD:del_item(pid, params[], help)
+{
+	#pragma unused help
+	RemoveItem(pid, strval(params), -1);
+	return notification(pid, f("%s removed", ItemInfo[strval(params)][item_name]));
+}
+
+YCMD:unfreeze(pid, params[], help)
+{
+	#pragma unused params, help
+	PLAYER::Freeze(pid, false);
+	ClearAnimations(pid);
+	return 1;
+}
+
+YCMD:vw(pid, params[], help)
+{
+	#pragma unused help
+	SetPlayerVirtualWorld(pid, strval(params));
+	return 1;
+}
+
+YCMD:spawn(pid, params[], help)
+{
+	#pragma unused params, help
+	setPlayerPos(pid, 683.1002,-479.3609,16.3359);
+	Streamer_Update(pid);
+	return 1;
+}
+
+YCMD:fuel(pid, params[], help)
+{
+	#pragma unused params, help
+	car[getVehicleFromSampID(GetPlayerVehicleID(pid))][degalai] += 10;
+	return 1;
+}
+
+YCMD:pd(pid, params[], help)
+{
+	#pragma unused params, help
+	setPlayerPos(pid,-2064.3000488281, -342.5, 20494.900390625);
+	Streamer_Update(pid);
+	return 1;
+}
+
+YCMD:money(pid, params[], help)
+{
+	notification(pid, params);
+	PLAYER::GiveMoney(pid, strval(params));
+	return 1;
+}
+
+YCMD:carturgus(pid, params[], help)
+{
+	setPlayerPos(pid, 207.5, -220, 0.7);
+	Streamer_Update(pid);
+	return 1;
+}
+
+YCMD:carturgusv(pid, params[], help)
+{
+	setPlayerPos(pid, 206.11099243164, -222.29899597168, 13725.307617188);
+	Streamer_Update(pid);
+	return 1;
+}
+
+YCMD:w(pid, params[], help)
+{
+	if( strval(params) < 1) return 1;
+	if( strval(params) + pinfo[wanted] > 150)
+	{
+		pinfo[wanted] = 150;
+		UpdateWanted(pid);
+		return 1;
+	}
+	pinfo[wanted] += strval(params);
+	UpdateWanted(pid);
+	return 1;
+}
+
+YCMD:cw(pid, params[], help)
+{
+	pinfo[wanted] = 0;
+	UpdateWanted(pid);
+	return 1;
+}
+
+YCMD:savepos(pid, params[], help)
+{
+	new Float:pos[3], Float:angle,
+	File:saved_pos = fopen("/savedpositions.txt", io_append);
+
+	GetPlayerPos(playerid, pos[0], pos[1], pos[2]);
+	GetPlayerFacingAngle(playerid, angle);
+
+	fwrite(saved_pos, F("SetPlayerPos(pid, %f, %f, %f);\nSetPlayerAngle(pid, %f);\n", pos[0], pos[1], pos[2], angle));
+	fclose(saved_pos);
+
+	return 1;
+}
+
+YCMD:gps(pid, params[], help)
+{
+	/*if(!get.wash[pid])
+	{*/
+		show_menu(pid);
+		menu_gps(pid);
+// }
+
+	return 1;
+}
+
+YCMD:car(pid, params[], help)
+{
+	if(!strcmp(params, "taxii"))
+	{
+		new Float:gX,Float:gY,Float:gZ;
+		GetPlayerPos(pid,gX,gY,gZ);
+		new const taksii = createVehicle(CAR_TAXI, gX,gY,gZ, 0, -1, -1, 1000, fuel(CAR_TAXI),"Taksi",-1, TAXI);
+		Iter_Add(masinos[3],taksii);
+		vehicle.bool.off(taksii, fSpyna);
+		putPlayerInVehicle(pid, taksii, 0);
+		return 1;
+	}
+	new mid;
+	sscanf(params, "k<vehicle>", mid);
+	if(400 <= mid <= 611)
+	{
+		killVehicle(get.ccar[pid]);
+		new Float:gX,Float:gY,Float:gZ, m1;
+		GetPlayerPos(pid,gX,gY,gZ);
+		m1 = createVehicle(mid,gX-2,gY-2,gZ,0.0,-1,-1,-1,fuel(mid), "TEST", -1);
+		car[m1][degalai] = 30;
+		set.ccar[pid] = m1;
+		vehicle.bool.off(m1, fSpyna);
+		putPlayerInVehicle(pid, m1, 0);
+
+	} else {
+
+		infoMsg(pid, "/car [modelid/maðinos pavadinimas]");
+		infoMsg(pid, "Pvz.:");
+		infoMsg(pid, "/car elegy ; /car 562 ; /car 522 ; /car infernus");
+	}
+	return 1;
+}
+
+YCMD:gimmeatank(pid, params[], help)
+{
+	new coords<1>;
+	GetPlayerPos(pid, coords<1>);
+	new const tankas = createVehicle(432, coords<1>, 0, 0, 0, -1,fuel(432), "TEST", -1);
+	putPlayerInVehicle(pid, tankas, 0);
+	return 1;
+}
+
+YCMD:getstats(pid, params[], help)
+{
+	notification(pid, f("HP :: %.2f",PLAYER::GetHealth(pid)));
+	return 1;
+}
+
+YCMD:setstats(pid, params[], help)
+{
+	new Float:HP;
+	sscanf(params, "f", HP);
+	PLAYER::SetHealth(pid, HP);
+	notification(pid, f("new HP :: %.2f",PLAYER::GetHealth(pid)));
+	return 1;
+}
+
+YCMD:lol(pid, params[], help)
+{
+	setVehicleVelocity(getPlayerVehicleID(pid), 0, 0, 0);
+	//SetPlayerVelocity(pid, 100,100,50);
+	return 1;
+}
+
+YCMD:weather(pid, params[], help)
+{
+	SetPlayerWeather(pid, strval(params));
+	return 1;
+}
+
+YCMD:pause(pid, params[], help)
+{
+	applyAnimation(pid,"CRACK","crckidle2",10.0,1,0,0,1,60000,1);
+	return 1;
+}
+
+YCMD:pause2(pid, params[], help)
+{
+	applyAnimation(pid,"CRACK","crckidle2",1.0,0,0,0,1,0,1);
+	return 1;
+}
+
+YCMD:unpause(pid, params[], help)
+{
+	ClearAnimations(pid);
+	return 1;
+}
+
+YCMD:gunz(pid, params[], help)
+{
+	AddItem(pid, 34, 1);
+	AddItem(pid, 35, 1);
+	AddItem(pid, 36, 1);
+	AddItem(pid, 37, 1);
+	AddItem(pid, 38, 1);
+	AddItem(pid, 39, 1);
+
+	AddItem(pid, 64, 200);
+	AddItem(pid, 65, 200);
+	AddItem(pid, 66, 200);
+	AddItem(pid, 67, 200);
+
+	notification(pid, "Gunz");
+	return 1;
+}
+
+YCMD:heal(pid, params[], help)
+{
+	PLAYER::SetHealth(pid, isnull(params)?pinfo[max_hp]:floatstr(params));
+	notification(pid, F("HP :: %.2f", PLAYER::GetHealth(pid)));
+	if( IsPlayerInAnyVehicle(pid)) RepairVehicle(GetPlayerVehicleID(pid));
+	return 1;
+}
+
+YCMD:mech(pid, params[], help)
+{
+	setPlayerPos(pid, 106.47699737549, -144.75399780273, 2365.846923828 + 1);
+	Streamer_Update(pid);
+	return 1;
+}
+
+YCMD:garage(pid, params[], help)
+{
+	showGarage(pid);
+	/*
+	for(new i; i != 44; ++i)
+	{
+		TextDrawShowForPlayer(pid, g_garage[i]);
+	}
+	for(new i; i != 23; ++i)
+	{
+		PlayerTextDrawShow(pid, p_garage[i][pid]);
+	}*/
+	return 1;
+}
+
+YCMD:get(playerid, params[], help)
+{
+	new const id = strval(params);
+	if(IsPlayerNPC(id)) return notification(pid, "Apseisi ir be npc :)");
+	new coords<1>;
+	GetPlayerPos(pid, coords<1>);
+	SetPlayerPos(id, coords<1>);
+	return 1;
+}
+
+YCMD:to(playerid, params[], help)
+{
+	new const id = strval(params);
+	new coords<1>;
+	GetPlayerPos(id, coords<1>);
+	SetPlayerPos(pid, coords<1>);
+	return 1;
+}
+
+YCMD:deal(pid, params[], help)
+{
+	new i = random(sizeof gunDealerSpawn);
+
+	npc[gun_dealer] = npc.Create("Anonimas");
+	npc.Spawn(npc[gun_dealer], random(2)?28:29, gunDealerSpawn[i][0], gunDealerSpawn[i][1], gunDealerSpawn[i][2]);
+	SetPlayerPoint(pid, gunDealerSpawn[i][0], gunDealerSpawn[i][1], gunDealerSpawn[i][2]);
+	for(i = 0; i != _:talpa; ++i)
+	{
+		switch(talpa:i)
+		{
+			case ITEM::deagle..ITEM::awp:
+			{
+				if( ! random(2))
+				{
+					AddItemToShop(shop_dealer, i, 2 + random(10));
+				}
+			}
+			case ITEM::kulkosp..ITEM::kulkosa:
+			{
+				if( random(3) )
+				{
+					AddItemToShop(shop_dealer, i, 300 + random(400));
+				}
+			}
+		}
+	}
+	return 1;
+}
+
+YCMD:fillshop(pid, params[], help)
+{
+	for(new i; i < talpa; ++i)
+	{
+		switch(i)
+		{
+			case shop_spawn_prekes: AddItemToShop(shop_spawn, i, random(20)+1);
+			default: continue;
+		}
+	}
+	return 1;
+}
+
+YCMD:effect(pid, params[], help)
+{
+	new efc[eBonus];
+	new arr[eBonus][2];
+	new id;
+	sscanf(params, "ia<i>[52]", id, arr);
+
+	for(new i; i != eBonus; ++i)
+		efc[arr[i][0]] = arr[i][1];
+
+	AddItem(pid, id, 1, efc);
+
+	return true;
+}
+
+YCMD:testflags(pid, params[], help)
+{
+	if(ptemp[peffect][ibHp])
+		SendClientMessage(pid, -1, f("~n~+ Gyvybingumas ~y~%i~w~", ptemp[peffect][ibHp]*10));
+	
+	if(ptemp[peffect][ibCritical])
+		SendClientMessage(pid, -1, f("~n~+ Kritine zala ~y~%i~w~", ptemp[peffect][ibCritical]));
+	
+	if(ptemp[peffect][ibFistDmgGive])
+		SendClientMessage(pid, -1, f("~n~+ Ranku zala ~y~%i~w~", ptemp[peffect][ibFistDmgGive]));
+	
+	if(ptemp[peffect][ibPistolDmgGive])
+		SendClientMessage(pid, -1, f("~n~+ Pistoletu zala ~y~%i~w~", ptemp[peffect][ibPistolDmgGive]));
+	
+	if(ptemp[peffect][ibSmgDmgGive])
+		SendClientMessage(pid, -1, f("~n~+ Smg zala ~y~%i~w~", ptemp[peffect][ibSmgDmgGive]));
+	
+	if(ptemp[peffect][ibShotgunDmgGive])
+		SendClientMessage(pid, -1, f("~n~+ Shotgun zala ~y~%i~w~", ptemp[peffect][ibShotgunDmgGive]));
+	
+	if(ptemp[peffect][ibRifleDmgGive])
+		SendClientMessage(pid, -1, f("~n~+ Automatu zala ~y~%i~w~", ptemp[peffect][ibRifleDmgGive]));
+	
+	if(ptemp[peffect][ibAwpDmgGive])
+		SendClientMessage(pid, -1, f("~n~+ Awp zala ~y~%i~w~", ptemp[peffect][ibAwpDmgGive]));
+	
+	if(ptemp[peffect][ibBadGunsDmgGive])
+		SendClientMessage(pid, -1, f("~n~+ Nelegaliu ginklu zala ~y~%i~w~", ptemp[peffect][ibBadGunsDmgGive]));
+	
+	if(ptemp[peffect][ibFistDmgTake])
+		SendClientMessage(pid, -1, f("~n~+ Apsauga nuo ranku ~y~%i~w~", ptemp[peffect][ibFistDmgTake]));
+	
+	if(ptemp[peffect][ibPistolDmgTake])
+		SendClientMessage(pid, -1, f("~n~+ Apsauga nuo pistoletu ~y~%i~w~", ptemp[peffect][ibPistolDmgTake]));
+	
+	if(ptemp[peffect][ibSmgDmgTake])
+		SendClientMessage(pid, -1, f("~n~+ Apsauga nuo smg ~y~%i~w~", ptemp[peffect][ibSmgDmgTake]));
+	
+	if(ptemp[peffect][ibShotgunDmgTake])
+		SendClientMessage(pid, -1, f("~n~+ Apsauga nuo shotgun ~y~%i~w~", ptemp[peffect][ibShotgunDmgTake]));
+	
+	if(ptemp[peffect][ibRifleDmgTake])
+		SendClientMessage(pid, -1, f("~n~+ Apsauga nuo rifle ~y~%i~w~", ptemp[peffect][ibRifleDmgTake]));
+	
+	if(ptemp[peffect][ibAwpDmgTake])
+		SendClientMessage(pid, -1, f("~n~+ Apsauga nuo awp ~y~%i~w~", ptemp[peffect][ibAwpDmgTake]));
+	
+	if(ptemp[peffect][ibBadGunsDmgTake])
+		SendClientMessage(pid, -1, f("~n~+ Apsauga nuo nelegaliu ginklu ~y~%i~w~", ptemp[peffect][ibBadGunsDmgTake]));
+	
+	if(ptemp[peffect][ibEnergy])
+		SendClientMessage(pid, -1, f("~n~+ Istverme ~y~%i~w~", ptemp[peffect][ibEnergy]));
+	
+	if(ptemp[peffect][ibJump])
+		SendClientMessage(pid, -1, f("~n~+ Suolio stiprumas ~y~%i~w~", ptemp[peffect][ibJump]));
+	
+	if(ptemp[peffect][ibFireDmg])
+		SendClientMessage(pid, -1, f("~n~+ Apsauga nuo ugnies ~y~%i~w~", ptemp[peffect][ibFireDmg]));
+	
+	if(ptemp[peffect][ibExp])
+		SendClientMessage(pid, -1, f("~n~+ Patirties uz veiksma ~y~%i~w~", ptemp[peffect][ibExp]));
+	
+	if(ptemp[peffect][ibGangInfluence])
+		SendClientMessage(pid, -1, f("~n~+ Itaka gaujos zonoms ~y~%i~w~", ptemp[peffect][ibGangInfluence]));
+	
+	if(ptemp[peffect][ibSuccessRate])
+		SendClientMessage(pid, -1, f("~n~+ Patvarumas tobulinimams ~y~%i~w~", ptemp[peffect][ibSuccessRate]));
+	
+	if(ptemp[peffect][ibCraftingSuccessRate])
+		SendClientMessage(pid, -1, f("~n~+ Sekme kuriant ~y~%i~w~", ptemp[peffect][ibCraftingSuccessRate]));
+
+	return 1;
+}
+
+#endif
+
+//------------- OTHER
+
+YCMD:fix(pid, params[], help)
+{
+	if( GetPlayerPosZ(pid) < -5)
+	{
+		SetPlayerPosZ(pid, 5);
+		return 1;
+	}
+	if( IsPlayerInCircle(pid,160.18, -178.59, 15))
+	{
+		if( IsPlayerDriver(pid))
+		{
+			SetVehiclePos(GetPlayerVehicleID(pid),160.18, -183, 2);
+			notification(pid, "Fixed");
+		
+		} else {
+
+			setPlayerPos(pid, 160.18, -181, 2);
+			notification(pid, "Fixed");
+		}
+		return 1;
+	}
+	infoMsg(pid, "Jei radai klaidà, praneðk administracijai. Bus atlyginta.");
+	return 1;
+}
+
+YCMD:baigti(pid, params[], help)
+{
+	#pragma unused params, help
+	if(get.repairT[pid])
+	{
+		killTimer(get.repairT[pid]);
+		del.repairT[pid];
+		--aGarazas[ePeopleCount];
+      PLAYER::Freeze(pid, false, TVARKO_GARAZE);
+		notification2(pid, F("+~y~%i~w~ patirties.", pinfo[repair_fixing] / 100 * aGarazas[ePeopleCount]));
+		return 1;
+	}
+	if(PLAYER::IsFreezed(pid, TVARKO))
+	{
+		PLAYER::Freeze(pid, false, TVARKO);
+		return 1;
+	}
+	return notification(pid, "nera ko baigti.");
+}
+
+//------------- END OF OTHER
+
+//------------- ACTIVITIES
+
+YCMD:zvejoti(pid, params[], help)
+{
+	#pragma unused params, help
+	if(player.flag.get(pid, fSurakintas)) return inmind(pid, "Ah.. Mano rankos surakintos..");
+	if(player.flag.get(pid, fMirsta)) return inmind(pid, "Kai pasveiksiu reiks eiti paþvejot...");
+	if(IsPlayerInAnyVehicle(pid)) return inmind(pid, "Reiktø iðlipti ir paþvejoti..");
+
+	for(new i = 0; i < sizeof(fishingspot); ++i)
+		if( IsPlayerInCircle(pid, fishingspot[i][0], fishingspot[i][1], 30))
+		{
+			set.fspot[pid] = i;
+			PLAYER::Freeze(pid, true, ZVEJOJA);
+			return 1;
+		}
+	return notification(pid, "ant asfalto zuvys negyvena");
+}
+
+//------------- END OF ACTIVITIES
+
+//------------- MENTAI
+
+YCMD:stars(pid, params[], help)
+{
+	#pragma unused help
+	new wlvl, id;
+	sscanf(params, "ui", id, wlvl);
+	if(!JOB::POLICIJA::GiveWantedEx(pid, id, wlvl))
+		notification(pid, "nusikaltelis per toli.");
+	return 1;
+}
+
+//------------- END OF MENTAI
+
+//------------- GAUJA
+
+YCMD:gauja(pid,params[],help)
+{
+	infoMsg(pid, "gauja: %i  DBID: %i", pinfo[gauja], pinfo[DBID]);
+	
+	dialog_main:
+	new const Result:r1 = sql_query(sqlHandle, F("SELECT SUM(patirtis) FROM zaidejai WHERE gauja = %i", pinfo[DBID]), QUERY_CACHED);
+	new const kt_sum = sql_get_field_assoc_int(r1, "SUM(patirtis)");
+	new members = sql_num_rows(r1);
+
+	#define DIALOG_SHOW_MAIN; goto dialog_main;
+
+	inline dialoggauja(id, did, response, listitem, string:txt[])
+	{
+		#pragma unused id, did
+		if(response)
+		{
+			if( ! listitem && gaujosVadas(pid))
+			{
+				inline change_name(id1, did1, response1, listitem1, string:txt1[])
+				{
+					#pragma unused id1, did1, listitem1
+					if(response1)
+					{
+						if(1 < strlen(txt1) < 24)
+						{
+							//format(pinfo[gauja][g_name], 24, txt1);
+							GANG::SetName(pinfo[gauja], txt1);
+							infoMsg(pid, "Pavadinimas pakeistas sëkmingai!");
+							for(new i; i < gTag_count; ++i)
+							{
+								if(objects[gTag(i)][obj_other_ids][obj_gang_id] == pinfo[gauja])
+								{
+									Update3DTextLabelText(objects[gTag(i)][obj_other_ids][obj_text_id], COLOR_SOC, F("Teritorijà valdo '%s'", txt1));
+									destroyDynamicArea(objects[gTag(i)][obj_other_ids][obj_area_id]);
+									new coords<1>;
+									GetDynamicObjectPos(objects[gTag(i)][obj_id], coords<1>);
+									objects[gTag(i)][obj_other_ids][obj_area_id] = CreateDynamicCircle(_x1,_y1,50);
+								}
+							}
+							foreach(new i : Player)
+							{
+								if(pInfo[i][gauja] == pinfo[gauja])
+								{
+									notification2(i, F("Naujas gaujos pavadinimas: ~y~%s", txt1));
+								}
+							}
+							DIALOG_SHOW_MAIN;
+							
+						} else {
+
+							infoMsg(pid, "Pavadinimà turi sudaryti nuo 2 iki 24 simboliø.");
+							showDialog(pid, using inline change_name, DIALOG_STYLE_INPUT, " ", "Naujas gaujos pavadinimas:\n", "Keisti", "Atgal");
+						}
+
+					} else {
+
+						DIALOG_SHOW_MAIN;
+					}
+				}
+				showDialog(pid, using inline change_name, DIALOG_STYLE_INPUT, " ", "Naujas gaujos pavadinimas:\n", "Keisti", "Atgal");
+			}
+			else if(strfind(txt, "Prisijungæ nariai") != -1)
+			{
+				dialog_list:
+
+				new Result:r2 = sql_query(sqlHandle, F("SELECT * FROM zaidejai WHERE gauja = %i", pinfo[gauja]), QUERY_CACHED);
+				members = sql_num_rows(r2);
+
+				new name[MAX_PLAYER_NAME];
+
+				format(gt, sizeof gt, C_SOC"Prisijungæ gaujos nariai: %i/%i\n ", getMembers(pinfo[gauja]), members);
+
+				foreach(new i : Player)
+				{
+					if(pInfo[i][gauja] == pinfo[gauja])
+					{
+						strcat(gt, f("\n\t"C_DOT C_Y" %s", GetPlayerNameEx(i)));
+					}
+				}
+
+				for(new i; i != members; ++i, sql_next_row(r2))
+				{
+					sql_get_field_assoc(r2, "vardas", name);
+					if(getPIDFromDBID(sql_get_field_assoc_int(r2, "id")) == INVALID_PLAYER_ID)
+						strcat(gt, f("\n\t"C_DOT C_W" %s", name));
+				}
+				inline list(id2, did2, response2, listitem2, string:txt2[])
+				{
+					#pragma unused id2, did2
+					if(response2)
+					{
+						if(listitem2 >= 2)
+						{
+							strdel(txt2, 0, 3);
+							selectplayer:
+							r2 = sql_query(sqlHandle, F("SELECT * FROM zaidejai WHERE vardas = '%s'", txt2), QUERY_CACHED);
+
+							new const id_ = sql_get_field_assoc_int(r2, "id");
+							new const cid = getPIDFromDBID(id_);
+							new rep, rep_diff, hours,mins,secs, szBuf[24];
+							new tm<tmTime>;
+							infoMsg(pid, "player %i", cid);
+							if(cid == INVALID_PLAYER_ID)
+							{
+								// Gaunam þaidëjo patirtá
+								rep = sql_get_field_assoc_int(r2, "patirtis");
+								// Gaunam þaidëjo patirtá gautà bûnant gaujoje
+								rep_diff = sql_get_field_assoc_int(r2, "gauja_rep_diff");
+								// Gaunam kiek laiko þaidëjas yra gaujoje
+								secToTime(sql_get_field_assoc_int(r2, "gauja_join_time"), hours,mins,secs);
+								// Kada þaidëjas prisijungë prie gaujos
+								localtime(Time:sql_get_field_assoc_int(r2, "gauja_joined"), tmTime);
+								// Ir aiðku formatuojam datà.
+								strftime(szBuf, sizeof(szBuf), "%Y-%m-%d", tmTime);
+							
+							} else {
+
+								// Gaunam þaidëjo patirtá
+								rep = pInfo[cid][patirtis];
+								// Gaunam þaidëjo patirtá gautà bûnant gaujoje
+								rep_diff = pInfo[cid][gauja][g_rep_diff];
+								// Gaunam kiek laiko þaidëjas yra gaujoje
+								// laikas praleistas gaujoje = laikas praleistas gaujoje + ( dabartinis laikas - prisijungimo prie þaidimo laikas )
+								// Paverèiam á minutes and so on
+								secToTime(pInfo[cid][gauja][g_joinTime] + gettime() - pinfo[time_joined], hours,mins,secs);
+								// Kada þaidëjas prisijungë prie gaujos?
+								localtime(Time:PLAYER::GANG::GetJoined(pid), tmTime);
+								strftime(szBuf, sizeof(szBuf), "%Y-%m-%d", tmTime);
+							}
+
+							inline player_menu(id0, did0, response0, listitem0, string:text0[])
+							{
+								#pragma unused id0, did0, listitem0
+								if(response0)
+								{
+									if(strfind(text0, "Iðmesti ið gaujos") != -1)
+									{
+										if(cid == pid)
+										{
+											notification(pid, "Tu negali ismesti saves is gaujos.");
+										
+										} else {
+
+											if(IsPlayerConnected(cid))
+												leaveGang(cid);
+											else
+												kickFromGang(id_);
+
+											notification2(pid, F("%s ismestas is gaujos.", GetPlayerNameEx(cid)));
+										}
+
+										goto dialog_list;
+
+									} else {
+
+										goto selectplayer;
+									}
+								
+								} else {
+
+									goto dialog_list;
+								}
+							}
+							format(gt, sizeof gt, C_SOC"%s\n ",txt2);
+							strcat(gt, f("\n\t"C_DOT""C_W" Prisijungë prie gaujos: "C_SOC"%s", szBuf));
+							strcat(gt, f("\n\t"C_DOT""C_W" Reputacija: "C_SOC"%i", rep));
+							strcat(gt, f("\n\t"C_DOT""C_W" Laikas praleistas gaujoje: "C_SOC"%ih %imin", hours, mins));
+							strcat(gt, f("\n\t"C_DOT""C_W" Reputacija gauta gaujoje: "C_SOC"%i", rep_diff));
+							strcat(gt,  "\n \n"C_DOT""C_W" Iðmesti ið gaujos");
+							showDialog(pid, using inline player_menu, DIALOG_STYLE_LIST, " ", gt, "Rinkis", "Atgal");
+
+						} else {
+
+							goto dialog_list;
+						}
+					
+					} else {
+
+						DIALOG_SHOW_MAIN;
+					}
+				}
+				showDialog(pid, using inline list, DIALOG_STYLE_LIST, "  ", gt, "Rinktis", "Atgal");
+			}
+			else if(strfind(txt, "Karas") != -1)
+			{
+				new Result:r;
+				new const success = vector_size(vGangWar+pid);
+				if( ! success )
+				{
+					format(gt, sizeof gt, C_Y"Karas\n \n", GetPlayerNameEx(id));
+					strcat(gt, "\n\tðiuo metu nëra paskelbtas jokiai gaujai.");
+				
+				} else if( success == 1)
+				{
+					format(gt, sizeof gt, "Ðiuo metu karas paskelbtas ðiai gaujai:\n ");
+				
+				} else {
+
+					format(gt, sizeof gt, "Ðiuo metu karas paskelbtas ðioms gaujoms:\n ");
+				}
+				if(success)
+				{
+					for(new i, j = vector_size(vGangWar+pid); i != j; ++i)
+					{
+						r = sql_query(sqlHandle, f("SELECT SUM(patirtis), gauja_name FROM zaidejai WHERE gauja = %i", vector_get(vGangWar+pid, i)), QUERY_CACHED);
+						new name[24];
+						sql_get_field_assoc(r, "gauja_name", name);
+						new const sum = sql_get_field_assoc_int(r, "SUM(patirtis)");
+
+						strcat(gt, f("\n\t"C_DOT""C_W" %s ( "C_SOC"%i"C_W" )", name, sum));
+					}
+				}
+				inline war_list(id1, did1, response1, listitem1, string:txt1[])
+				{
+					#pragma unused id1, did1, response1, listitem1, txt1
+					DIALOG_SHOW_MAIN;
+				}
+				showDialog(pid, using inline war_list, DIALOG_STYLE_LIST, " ", gt, "Atgal", "");
+			}
+			else if(strfind(txt, "Taika") != -1)
+			{
+
+				new Result:r;
+				new const success = vector_size(vGangPeace+pid);
+				if( ! success )
+				{
+					format(gt, sizeof gt, C_Y"Taika\n \n", GetPlayerNameEx(id));
+					strcat(gt, "\n\tðiuo metu nëra sudaryta su jokia gauja.");
+				
+				} else if( success == 1)
+				{
+					format(gt, sizeof gt, "Ðiuo metu taika yra sudaryta su ðia gauja:\n");
+				
+				} else {
+
+					format(gt, sizeof gt, "Ðiuo metu taika yra sudaryta su ðiomis gaujomis:\n");
+				}
+				if(success)
+				{
+					for(new i, j = vector_size(vGangPeace+pid); i != j; ++i)
+					{
+						r = sql_query(sqlHandle, f("SELECT SUM(patirtis), gauja_name FROM zaidejai WHERE gauja = %i", vector_get(vGangPeace+pid, i)), QUERY_CACHED);
+						new name[24];
+						sql_get_field_assoc(r, "gauja_name", name);
+						new const sum = sql_get_field_assoc_int(r, "SUM(patirtis)");
+
+						strcat(gt, f("\n\t"C_DOT""C_W" %s ( "C_SOC"%i"C_W" )", name, sum));
+					}
+				}
+				inline peace_list(id1, did1, response1, listitem1, string:txt1[])
+				{
+					#pragma unused id1, did1, response1, listitem1, txt1
+					DIALOG_SHOW_MAIN;
+				}
+				showDialog(pid, using inline peace_list, DIALOG_STYLE_LIST, " ", gt, "Atgal", "");
+			}
+			else if(strfind(txt, "Uþdaryti gaujà") != -1)
+			{
+				dialog_r_u_sure:
+				inline r_u_sure(id1, did1, response1, listitem1, string:txt1[])
+				{
+					#pragma unused id1, did1, listitem1
+					if(response1)
+					{
+						new pw[129], pw2[129];
+						WP_Hash(pw, 129, txt1);
+						new const Result:r = sql_query(sqlHandle, F("SELECT slaptazodis FROM zaidejai WHERE id = %i", pinfo[DBID]), QUERY_CACHED);
+						sql_get_field(r, 0, pw2);
+						if( ! strcmp( pw, pw2 ))
+						{
+							foreach(new i : Player)
+							{
+								if(pInfo[i][gauja] == pinfo[DBID])
+								{
+									infoMsg(pid, "Gauja %s buvo panaikinta. Vël valdai savo gaujà.", pinfo[gauja][g_name]);
+									leaveGang(i);
+								}
+							}
+							sql_query(sqlHandle, F("UPDATE zaidejai SET gauja = `id` WHERE gauja = %i", pinfo[DBID]), QUERY_THREADED);
+							format(pinfo[gauja][g_name], 24, "Be pavadinimo");
+							pinfo[gauja] = 0;
+							notification2(pid, "Panaikinai savo gauja. Visi nariai buvo ismesti.");
+						
+						} else {
+
+							notification(pid, "Slaptazodis neteisingas!");
+							goto dialog_r_u_sure;
+						}
+					
+					} else {
+
+						DIALOG_SHOW_MAIN;
+					}
+				}
+				showDialog(pid, using inline r_u_sure, DIALOG_STYLE_PASSWORD, "Panaikinti gaujà", "Norëdamas panaikinti gaujà, privalai ávesti savo slaptaþodá.", "Panaikinti", "Atgal");
+			}
+			else if(strfind(txt, "Aktyvuoti gaujà") != -1)
+			{
+				joinGang(pid, pid);
+				//sql_query(sqlHandle, f("UPDATE zaidejai SET gauja = `id`, gauja_joined = %i WHERE id = '%i'", gettime(), pinfo[DBID]));
+				DIALOG_SHOW_MAIN;
+			}
+			else if(strfind(txt, "Palikti gaujà") != -1)
+			{
+
+				leaveGang(pid);
+
+			} else {
+
+				DIALOG_SHOW_MAIN;
+			}
+		}
+	}
+	if( ! pinfo[gauja])
+	{
+		format(gt, sizeof gt, C_SOC"Gauja neaktyvi.\n \n\t"C_DOT C_SOC" Aktyvuoti gaujà.");    
+		showDialog(pid, using inline dialoggauja, DIALOG_STYLE_LIST, " ", gt, "Rinktis", "Uþdaryti");
+
+	} else {
+
+		format(gt, sizeof gt, C_SOC"%s\n \n\t"C_DOT""C_W" Prisijungæ nariai: "C_SOC"%i/%i", pinfo[gauja][g_name], getMembers(pinfo[gauja]), members);
+		strcat(gt, f("\n\t"C_DOT""C_W" Gaujos reputacija: "C_SOC"%i", kt_sum));
+		strcat(gt, "\n\t"C_DOT""C_W" Karas");
+		strcat(gt, "\n\t"C_DOT""C_W" Taika");
+		if(gaujosVadas(pid))
+		{
+			strcat(gt, "\n \n"C_DOT""C_W" Uþdaryti gaujà");
+
+		} else {
+
+			strcat(gt, "\n \n"C_DOT""C_W" Iðeiti ið gaujos");
+		}
+		showDialog(pid, using inline dialoggauja, DIALOG_STYLE_LIST, " ", gt, "Rinktis", "Uþdaryti");
+	}
+
+	return 1;
+}
+
+//------------- END OF GAUJA

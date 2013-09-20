@@ -1,0 +1,10 @@
+SetPlayerPos(pid, 897.090270, -7676.755371, 59243.890625);
+SetPlayerAngle(pid, 0.000000);
+SetPlayerPos(pid, 1047.915039, -8242.772460, 62806.324218);
+SetPlayerAngle(pid, 0.000000);
+SetPlayerPos(pid, 259.874755, -262.012145, 1.624143);
+SetPlayerAngle(pid, 355.416839);
+SetPlayerPos(pid, 111.296005, -159.529647, 1.575100);
+SetPlayerAngle(pid, 91.626213);
+SetPlayerPos(pid, 131.267562, -146.285812, 1.429687);
+SetPlayerAngle(pid, 298.899505);

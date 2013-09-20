@@ -1,0 +1,47 @@
+/*
+
+
+
+
+
+
+
+
+
+                     Story of Cities
+
+                        JUNK
+
+
+
+
+
+
+
+
+*/
+
+#include <DOF2>
+
+new bool:UsingEDIT[MAX_PLAYERS];
+
+public OnPlayerEditAttachedObject(playerid, response, index, modelid, boneid, Float:fOffsetX, Float:fOffsetY, Float:fOffsetZ, Float:fRotX, Float:fRotY, Float:fRotZ, Float:fScaleX, Float:fScaleY, Float:fScaleZ)
+{
+   if(response && UsingEDIT[playerid] == true)
+   {
+      new file[30];
+      format(file, sizeof(file), "%i_%i.txt", modelid, GetPlayerSkin(pid));
+      DOF2_CreateFile(file);
+      DOF2_SetString(file, " ", F("SetPlayerAttachedObject(pid,%i,%i,%i,%f,%f,%f,%f,%f,%f,%f,%f,%f);",index,modelid,boneid,fOffsetX, fOffsetY, fOffsetZ, fRotX, fRotY, fRotZ, fScaleX, fScaleY, fScaleZ));
+      DOF2_WriteFile();
+      DOF2_SaveFile();
+      UsingEDIT[playerid] = false;
+      return SendClientMessage(playerid, 0xFF0000FF, "Project saved on a file, look for the object ID you used");
+   }
+   if(!response && UsingEDIT[playerid] == true)
+   {
+      SendClientMessage(playerid, 0xFF0000FF, "You have cancelled your attachment edition");
+      UsingEDIT[playerid] = false;
+   }
+   return 1;
+}

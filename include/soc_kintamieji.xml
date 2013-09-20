@@ -1,0 +1,604 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml-stylesheet href="file:///C|/Users/Yiin/Desktop/story/pawno/xml/pawndoc.xsl" type="text/xsl"?>
+<doc source="C:\Users\Yiin\Desktop\story\pawno\include\soc_kintamieji.inc">
+	<assembly>
+		<name>soc_kintamieji.inc</name>
+	</assembly>
+	<members>
+
+		<!-- enumerations -->
+		<member name="T:AREAS_SOC" value="2">
+			<tagname value="AREAS_SOC"/>
+			<member name="C:mech_repair" value="0">
+			</member>
+			<member name="C:mech_tune" value="1">
+			</member>
+		</member>
+		<member name="T:activities" value="1">
+			<tagname value="activities"/>
+			<member name="C:fishing_lvl" value="0">
+			</member>
+		</member>
+		<member name="T:bagedit" value="18">
+			<tagname value="bagedit"/>
+			<member name="C:row1" value="0">
+			</member>
+			<member name="C:row2" value="1">
+			</member>
+			<member name="C:row3" value="2">
+			</member>
+			<member name="C:row4" value="3">
+			</member>
+			<member name="C:row5" value="4">
+			</member>
+			<member name="C:row6" value="5">
+			</member>
+			<member name="C:row7" value="6">
+			</member>
+			<member name="C:row8" value="7">
+			</member>
+			<member name="C:row9" value="8">
+			</member>
+			<member name="C:row10" value="9">
+			</member>
+			<member name="C:row11" value="10">
+			</member>
+			<member name="C:row12" value="11">
+			</member>
+			<member name="C:row13" value="12">
+			</member>
+			<member name="C:pageid" value="13">
+			</member>
+			<member name="C:itemfsk" value="14">
+			</member>
+			<member name="C:item" value="15">
+			</member>
+			<member name="C:selecteditem" value="16">
+				<tagname value="PlayerText"/>
+			</member>
+			<member name="C:lastitem" value="17">
+				<tagname value="PlayerText"/>
+			</member>
+		</member>
+		<member name="T:car_info" value="19">
+			<tagname value="car_info"/>
+			<member name="C:modelis" value="0">
+			</member>
+			<member name="C:virtualw" value="1">
+			</member>
+			<member name="C:health" value="2">
+				<tagname value="Float"/>
+			</member>
+			<member name="C:spalva1" value="3">
+			</member>
+			<member name="C:spalva2" value="4">
+			</member>
+			<member name="C:spoiler" value="5">
+			</member>
+			<member name="C:hood" value="6">
+			</member>
+			<member name="C:roof" value="7">
+			</member>
+			<member name="C:sideskirt" value="8">
+			</member>
+			<member name="C:lamps" value="9">
+			</member>
+			<member name="C:nitro" value="10">
+			</member>
+			<member name="C:exhaust" value="11">
+			</member>
+			<member name="C:wheels" value="12">
+			</member>
+			<member name="C:stereo" value="13">
+			</member>
+			<member name="C:hidraulics" value="14">
+			</member>
+			<member name="C:fbumper" value="15">
+			</member>
+			<member name="C:rbumper" value="16">
+			</member>
+			<member name="C:ventr" value="17">
+			</member>
+			<member name="C:ventl" value="18">
+			</member>
+		</member>
+		<member name="T:car_pos" value="4">
+			<tagname value="car_pos"/>
+			<member name="C:cx" value="0">
+				<tagname value="Float"/>
+			</member>
+			<member name="C:cy" value="1">
+				<tagname value="Float"/>
+			</member>
+			<member name="C:cz" value="2">
+				<tagname value="Float"/>
+			</member>
+			<member name="C:r" value="3">
+				<tagname value="Float"/>
+			</member>
+		</member>
+		<member name="T:carstatus" value="4">
+			<tagname value="carstatus"/>
+			<member name="C:variklis" value="0">
+				<tagname value="bool"/>
+			</member>
+			<member name="C:spyna" value="1">
+				<tagname value="bool"/>
+			</member>
+			<member name="C:degalai" value="2">
+			</member>
+			<member name="C:rida" value="3">
+				<tagname value="Float"/>
+			</member>
+		</member>
+		<member name="T:darbai" value="7">
+			<tagname value="darbai"/>
+			<member name="C:bedarbis" value="0">
+			</member>
+			<member name="C:mechanikai" value="1">
+			</member>
+			<member name="C:policija" value="2">
+			</member>
+			<member name="C:medikai" value="3">
+			</member>
+			<member name="C:taxi" value="4">
+			</member>
+			<member name="C:gaisrine" value="5">
+			</member>
+			<member name="C:valytojai" value="6">
+			</member>
+		</member>
+		<member name="T:fishing" value="2">
+			<tagname value="fishing"/>
+			<member name="C:idle" value="0">
+			</member>
+			<member name="C:kimba" value="1">
+			</member>
+		</member>
+		<member name="T:gps_options" value="4">
+			<tagname value="gps_options"/>
+			<member name="C:gps_start" value="0">
+			</member>
+			<member name="C:gps_finish" value="1">
+			</member>
+			<member name="C:gps_color" value="2">
+			</member>
+			<member name="C:gps_selected" value="3">
+			</member>
+		</member>
+		<member name="T:oldwoodCARS" value="9">
+			<tagname value="oldwoodCARS"/>
+			<member name="C:oWgreitis" value="0">
+				<size value="4"/>
+			</member>
+			<member name="C:oWkuras" value="4">
+				<size value="4"/>
+			</member>
+			<member name="C:oWkaina" value="8">
+				<tagname value="Float"/>
+			</member>
+		</member>
+		<member name="T:player_bools" value="13">
+			<tagname value="player_bools"/>
+			<member name="C:loggedin" value="0">
+				<tagname value="bool"/>
+			</member>
+			<member name="C:from_login" value="1">
+				<tagname value="bool"/>
+			</member>
+			<member name="C:from_reg" value="2">
+				<tagname value="bool"/>
+			</member>
+			<member name="C:ac" value="3">
+				<tagname value="bool"/>
+			</member>
+			<member name="C:afk" value="4">
+				<tagname value="bool"/>
+			</member>
+			<member name="C:in_carshop" value="5">
+				<tagname value="bool"/>
+			</member>
+			<member name="C:pila_degalus" value="6">
+				<tagname value="bool"/>
+			</member>
+			<member name="C:new_car" value="7">
+				<tagname value="bool"/>
+			</member>
+			<member name="C:zvejoja_idle" value="8">
+				<tagname value="bool"/>
+			</member>
+			<member name="C:zvejoja_kimba" value="9">
+				<tagname value="bool"/>
+			</member>
+			<member name="C:soc_loaded" value="10">
+				<tagname value="bool"/>
+			</member>
+			<member name="C:soc_darbas" value="11">
+				<tagname value="bool"/>
+			</member>
+			<member name="C:soc_vip" value="12">
+				<tagname value="bool"/>
+			</member>
+		</member>
+		<member name="T:player_info" value="16">
+			<tagname value="player_info"/>
+			<member name="C:skin" value="0">
+			</member>
+			<member name="C:interior" value="1">
+			</member>
+			<member name="C:virtualworld" value="2">
+			</member>
+			<member name="C:patirtis" value="3">
+			</member>
+			<member name="C:lytis" value="4">
+			</member>
+			<member name="C:DBID" value="5">
+			</member>
+			<member name="C:carid" value="6">
+			</member>
+			<member name="C:darbas" value="7">
+			</member>
+			<member name="C:gauja" value="8">
+			</member>
+			<member name="C:vip" value="9">
+			</member>
+			<member name="C:kb" value="10">
+			</member>
+			<member name="C:skinid" value="11">
+			</member>
+			<member name="C:skin_darbo" value="12">
+			</member>
+			<member name="C:skin_last" value="13">
+			</member>
+			<member name="C:wanted" value="14">
+			</member>
+			<member name="C:draugai" value="15">
+			</member>
+		</member>
+		<member name="T:talpa" value="102">
+			<tagname value="talpa"/>
+			<member name="C:gps" value="0">
+			</member>
+			<member name="C:radija" value="1">
+			</member>
+			<member name="C:raktai_d" value="2">
+			</member>
+			<member name="C:raktai_mech_car" value="3">
+			</member>
+			<member name="C:raktai_m" value="4">
+			</member>
+			<member name="C:raktai_v" value="5">
+			</member>
+			<member name="C:cigaretes" value="6">
+			</member>
+			<member name="C:raktai_kma" value="7">
+			</member>
+			<member name="C:meskere" value="8">
+			</member>
+			<member name="C:sliekai" value="9">
+			</member>
+			<member name="C:armour" value="10">
+			</member>
+			<member name="C:viskis" value="11">
+			</member>
+			<member name="C:alus" value="12">
+			</member>
+			<member name="C:degtine" value="13">
+			</member>
+			<member name="C:pinigai" value="14">
+			</member>
+			<member name="C:kastetas" value="15">
+			</member>
+			<member name="C:lazda1" value="16">
+			</member>
+			<member name="C:lazda2" value="17">
+			</member>
+			<member name="C:lazda3" value="18">
+			</member>
+			<member name="C:lazda4" value="19">
+			</member>
+			<member name="C:kastuvas" value="20">
+			</member>
+			<member name="C:peilis" value="21">
+			</member>
+			<member name="C:katana" value="22">
+			</member>
+			<member name="C:pjuklas" value="23">
+			</member>
+			<member name="C:ninemm" value="24">
+			</member>
+			<member name="C:tazeris" value="25">
+			</member>
+			<member name="C:deagle" value="26">
+			</member>
+			<member name="C:shotgun" value="27">
+			</member>
+			<member name="C:sawnoff" value="28">
+			</member>
+			<member name="C:combat" value="29">
+			</member>
+			<member name="C:uzi" value="30">
+			</member>
+			<member name="C:mp5" value="31">
+			</member>
+			<member name="C:ak" value="32">
+			</member>
+			<member name="C:m4" value="33">
+			</member>
+			<member name="C:tec" value="34">
+			</member>
+			<member name="C:rifle" value="35">
+			</member>
+			<member name="C:awp" value="36">
+			</member>
+			<member name="C:molotov" value="37">
+			</member>
+			<member name="C:granata" value="38">
+			</member>
+			<member name="C:gas" value="39">
+			</member>
+			<member name="C:remotebomb" value="40">
+			</member>
+			<member name="C:flamegun" value="41">
+			</member>
+			<member name="C:minigun" value="42">
+			</member>
+			<member name="C:rocket" value="43">
+			</member>
+			<member name="C:trocket" value="44">
+			</member>
+			<member name="C:spraycan" value="45">
+			</member>
+			<member name="C:camera" value="46">
+			</member>
+			<member name="C:gesintuvas" value="47">
+			</member>
+			<member name="C:parasiutas" value="48">
+			</member>
+			<member name="C:takiniai" value="49">
+			</member>
+			<member name="C:nvakiniai" value="50">
+			</member>
+			<member name="C:jetpack" value="51">
+			</member>
+			<member name="C:detonatorius" value="52">
+			</member>
+			<member name="C:lazda" value="53">
+			</member>
+			<member name="C:geles" value="54">
+			</member>
+			<member name="C:dildo1" value="55">
+			</member>
+			<member name="C:dildo2" value="56">
+			</member>
+			<member name="C:vibro1" value="57">
+			</member>
+			<member name="C:vibro2" value="58">
+			</member>
+			<member name="C:telefonas" value="59">
+			</member>
+			<member name="C:kulkosp" value="60">
+			</member>
+			<member name="C:kulkoss" value="61">
+			</member>
+			<member name="C:kulkossm" value="62">
+			</member>
+			<member name="C:kulkosr" value="63">
+			</member>
+			<member name="C:kulkosa" value="64">
+			</member>
+			<member name="C:kulkosb" value="65">
+			</member>
+			<member name="C:degalu_bakelis" value="66">
+			</member>
+			<member name="C:zuvis_eserys" value="67">
+			</member>
+			<member name="C:zuvis_karpis" value="68">
+			</member>
+			<member name="C:zuvis_lydeka" value="69">
+			</member>
+			<member name="C:zuvis_karosas" value="70">
+			</member>
+			<member name="C:zuvis_tunas" value="71">
+			</member>
+			<member name="C:zuvis_lasisa" value="72">
+			</member>
+			<member name="C:zuvis_pleksne" value="73">
+			</member>
+			<member name="C:zuvis_menke" value="74">
+			</member>
+			<member name="C:zuvis_raude" value="75">
+			</member>
+			<member name="C:zuvis_skumbre" value="76">
+			</member>
+			<member name="C:zuvis_starkis" value="77">
+			</member>
+			<member name="C:zuvis_samas" value="78">
+			</member>
+			<member name="C:zuvis_ungurys" value="79">
+			</member>
+			<member name="C:zuvis_upetakis" value="80">
+			</member>
+			<member name="C:maistas_eserys" value="81">
+			</member>
+			<member name="C:maistas_karpis" value="82">
+			</member>
+			<member name="C:maistas_lydeka" value="83">
+			</member>
+			<member name="C:maistas_karosas" value="84">
+			</member>
+			<member name="C:maistas_tunas" value="85">
+			</member>
+			<member name="C:maistas_lasisa" value="86">
+			</member>
+			<member name="C:maistas_pleksne" value="87">
+			</member>
+			<member name="C:maistas_menke" value="88">
+			</member>
+			<member name="C:maistas_raude" value="89">
+			</member>
+			<member name="C:maistas_skumbre" value="90">
+			</member>
+			<member name="C:maistas_starkis" value="91">
+			</member>
+			<member name="C:maistas_samas" value="92">
+			</member>
+			<member name="C:maistas_ungurys" value="93">
+			</member>
+			<member name="C:maistas_upetakis" value="94">
+			</member>
+			<member name="C:maistas_ikrai" value="95">
+			</member>
+			<member name="C:maistas_duona" value="96">
+			</member>
+			<member name="C:maistas_obuolys" value="97">
+			</member>
+			<member name="C:raktai_pd_car" value="98">
+			</member>
+			<member name="C:raktai_med_car" value="99">
+			</member>
+			<member name="C:raktai_taxi_car" value="100">
+			</member>
+			<member name="C:raktai_fire_car" value="101">
+			</member>
+		</member>
+		<member name="T:textlabels" value="1">
+			<tagname value="textlabels"/>
+			<member name="C:text_afk" value="0">
+				<tagname value="Text3D"/>
+			</member>
+		</member>
+
+		<!-- constants -->
+
+		<!-- variables -->
+		<member name="F:AreaName">
+		</member>
+		<member name="F:Bag">
+		</member>
+		<member name="F:BagTalpa">
+			<tagname value="PlayerBar"/>
+		</member>
+		<member name="F:BagUse">
+		</member>
+		<member name="F:ItemInfo">
+		</member>
+		<member name="F:ItemName">
+		</member>
+		<member name="F:Routes">
+		</member>
+		<member name="F:Used">
+			<tagname value="bool"/>
+		</member>
+		<member name="F:afkc">
+		</member>
+		<member name="F:area">
+		</member>
+		<member name="F:bar_zvejyba">
+			<tagname value="PlayerBar"/>
+		</member>
+		<member name="F:car">
+		</member>
+		<member name="F:darboxp">
+		</member>
+		<member name="F:fishingspot">
+		</member>
+		<member name="F:intro_npc">
+		</member>
+		<member name="F:inv_w">
+		</member>
+		<member name="F:kma_vartai">
+		</member>
+		<member name="F:kma_vartai_pos">
+			<tagname value="bool"/>
+		</member>
+		<member name="F:mDB">
+		</member>
+		<member name="F:mPos">
+		</member>
+		<member name="F:masinos">
+			<tagname value="Iterator"/>
+		</member>
+		<member name="F:menu_selected">
+		</member>
+		<member name="F:npc_temp">
+		</member>
+		<member name="F:oldwoodcars">
+		</member>
+		<member name="F:pActivities">
+		</member>
+		<member name="F:pBools">
+		</member>
+		<member name="F:pDB">
+		</member>
+		<member name="F:pGPS">
+		</member>
+		<member name="F:string0">
+		</member>
+		<member name="F:textlabel">
+		</member>
+		<member name="F:timer_car_buy">
+		</member>
+		<member name="F:timer_car_fuel">
+		</member>
+		<member name="F:timer_degaline">
+		</member>
+		<member name="F:timer_dmgnpc">
+		</member>
+		<member name="F:timer_notification">
+		</member>
+		<member name="F:timer_p_xp">
+		</member>
+		<member name="F:timer_zvejyba">
+		</member>
+		<member name="F:trylog">
+		</member>
+		<member name="F:warning_car">
+		</member>
+
+		<!-- functions -->
+		<member name="M:GDBP" syntax="GDBP(gX, gY, gZ, PointX, PointY, PointZ)">
+			<tagname value="Float"/>
+			<stacksize value="6"/>
+			<dependency name="floatadd"/>
+			<dependency name="floatpower"/>
+			<dependency name="floatsqroot"/>
+			<dependency name="floatsub"/>
+			<param name="gX">
+				<paraminfo>Float </paraminfo>
+			</param>
+			<param name="gY">
+				<paraminfo>Float </paraminfo>
+			</param>
+			<param name="gZ">
+				<paraminfo>Float </paraminfo>
+			</param>
+			<param name="PointX">
+				<paraminfo>Float </paraminfo>
+			</param>
+			<param name="PointY">
+				<paraminfo>Float </paraminfo>
+			</param>
+			<param name="PointZ">
+				<paraminfo>Float </paraminfo>
+			</param>
+		</member>
+		<member name="M:floatadd" syntax="floatadd()">
+			<stacksize value="1"/>
+			<referrer name="GDBP"/>
+		</member>
+		<member name="M:floatpower" syntax="floatpower()">
+			<stacksize value="1"/>
+			<referrer name="GDBP"/>
+		</member>
+		<member name="M:floatsqroot" syntax="floatsqroot()">
+			<stacksize value="1"/>
+			<referrer name="GDBP"/>
+		</member>
+		<member name="M:floatsub" syntax="floatsub()">
+			<stacksize value="1"/>
+			<referrer name="GDBP"/>
+		</member>
+
+	</members>
+</doc>

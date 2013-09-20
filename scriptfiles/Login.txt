@@ -1,0 +1,73 @@
+// TextDraw developed using Zamaroht's Textdraw Editor 1.0
+
+// On top of script:
+new Text:Textdraw0;
+new Text:Textdraw1;
+new Text:Textdraw2;
+new Text:Textdraw3;
+new Text:Textdraw4;
+
+// In OnGameModeInit prefferably, we procced to create our textdraws:
+Textdraw0 = TextDrawCreate(250.000000, 10.000000, "New Textdraw");
+TextDrawBackgroundColor(Textdraw0, 255);
+TextDrawFont(Textdraw0, 1);
+TextDrawLetterSize(Textdraw0, 0.500000, 1.000000);
+TextDrawColor(Textdraw0, -1);
+TextDrawSetOutline(Textdraw0, 0);
+TextDrawSetProportional(Textdraw0, 1);
+TextDrawSetShadow(Textdraw0, 1);
+
+Textdraw1 = TextDrawCreate(320.000000, -25.000000, "~n~");
+TextDrawAlignment(Textdraw1, 2);
+TextDrawBackgroundColor(Textdraw1, 255);
+TextDrawFont(Textdraw1, 1);
+TextDrawLetterSize(Textdraw1, 0.579999, 17.799999);
+TextDrawColor(Textdraw1, -1);
+TextDrawSetOutline(Textdraw1, 0);
+TextDrawSetProportional(Textdraw1, 1);
+TextDrawSetShadow(Textdraw1, 1);
+TextDrawUseBox(Textdraw1, 1);
+TextDrawBoxColor(Textdraw1, 255);
+TextDrawTextSize(Textdraw1, 1.000000, 641.000000);
+
+Textdraw2 = TextDrawCreate(320.000000, 315.000000, "~n~");
+TextDrawAlignment(Textdraw2, 2);
+TextDrawBackgroundColor(Textdraw2, 255);
+TextDrawFont(Textdraw2, 1);
+TextDrawLetterSize(Textdraw2, 0.579999, 17.799999);
+TextDrawColor(Textdraw2, -1);
+TextDrawSetOutline(Textdraw2, 0);
+TextDrawSetProportional(Textdraw2, 1);
+TextDrawSetShadow(Textdraw2, 1);
+TextDrawUseBox(Textdraw2, 1);
+TextDrawBoxColor(Textdraw2, 255);
+TextDrawTextSize(Textdraw2, 1.000000, 641.000000);
+
+Textdraw3 = TextDrawCreate(320.000000, 315.000000, "~n~");
+TextDrawAlignment(Textdraw3, 2);
+TextDrawBackgroundColor(Textdraw3, 255);
+TextDrawFont(Textdraw3, 1);
+TextDrawLetterSize(Textdraw3, 0.579999, -0.200002);
+TextDrawColor(Textdraw3, -1);
+TextDrawSetOutline(Textdraw3, 0);
+TextDrawSetProportional(Textdraw3, 1);
+TextDrawSetShadow(Textdraw3, 1);
+TextDrawUseBox(Textdraw3, 1);
+TextDrawBoxColor(Textdraw3, -65281);
+TextDrawTextSize(Textdraw3, 1.000000, 641.000000);
+
+Textdraw4 = TextDrawCreate(320.000000, 138.000000, "~n~");
+TextDrawAlignment(Textdraw4, 2);
+TextDrawBackgroundColor(Textdraw4, 255);
+TextDrawFont(Textdraw4, 1);
+TextDrawLetterSize(Textdraw4, 0.579999, -0.200002);
+TextDrawColor(Textdraw4, -1);
+TextDrawSetOutline(Textdraw4, 0);
+TextDrawSetProportional(Textdraw4, 1);
+TextDrawSetShadow(Textdraw4, 1);
+TextDrawUseBox(Textdraw4, 1);
+TextDrawBoxColor(Textdraw4, -65281);
+TextDrawTextSize(Textdraw4, 1.000000, 641.000000);
+
+// You can now use TextDrawShowForPlayer(-ForAll), TextDrawHideForPlayer(-ForAll) and
+// TextDrawDestroy functions to show, hide, and destroy the textdraw.

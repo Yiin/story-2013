@@ -1,0 +1,10 @@
+Object ID = 373
+OffSet Float X = 0.26500001
+OffSet Float Y = 0.01900006
+OffSet Float Z = -0.16899985
+OffSet Rotation X = 70.99995422
+OffSet Rotation Y = 29.20002555
+OffSet Rotation Z = 33.70000839
+OffSet Scale X = 1.13700139
+OffSet Scale Y = 1.00099945
+OffSet Scale Z = 1.12299978

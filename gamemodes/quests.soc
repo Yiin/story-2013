@@ -1,0 +1,156 @@
+/*
+
+
+
+
+
+
+
+
+
+							Story of Cities
+
+								QUEST
+
+
+
+
+
+
+
+
+*/
+
+PLAYER::QUEST::Prev(pid)
+{
+	--ptemp[quest];
+	QUEST::UpdateText(pid);
+}
+
+PLAYER::QUEST::Next(pid)
+{
+	++ptemp[quest];
+	QUEST::UpdateText(pid);
+}
+
+QUEST::GetListID(pid, questid)
+{
+	new id = -1;
+	for(new i; i < sizeof quest_list; ++i)
+	{
+		if( ( !quest_list[i][quest_type] || 
+				quest_list[i][quest_type] == PLAYER::JOB::Get(pid) || 
+				quest_list[i][quest_type] == PLAYER::JOB::GetDirector(pid)
+
+			) && (
+
+				!pinfo[quests][i]
+			)
+		)
+		{
+			++id;
+			if(id == questid)
+			{
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+
+QUEST::GetCount(pid)
+{
+	new count;
+	for(new i; i < sizeof quest_list; ++i)
+	{
+		if( ( !	quest_list[i][quest_type] || 
+				quest_list[i][quest_type] == PLAYER::JOB::Get(pid) ||
+				quest_list[i][quest_type] == PLAYER::JOB::Get(pid)
+
+			) && (
+
+				!pinfo[quests][i]
+			)
+		)
+		{
+			++count;
+		}
+	}
+	return count;
+}
+
+QUEST::ShowMenu(pid)
+{
+	player.bool.on(pid, bQuestListOpen);
+	ptemp[quest] = 0;
+	for(new i; i < 5; ++i)
+		TextDrawShowForPlayer(pid, g_questList[i]);
+	QUEST::UpdateText(pid);
+}
+
+QUEST::HideMenu(pid)
+{
+	player.bool.off(pid, bQuestListOpen);
+	for(new i; i < 5; ++i)
+		TextDrawHideForPlayer(pid, g_questList[i]);
+	for(new i; i < 4; ++i)
+		PlayerTextDrawHide(pid, p_questList[i][pid]);
+}
+
+QUEST::UpdateText(pid)
+{
+	new const questCount = QUEST::GetCount(pid);
+	#define id ptemp[quest]
+
+	if(id >= questCount - 1)
+	{
+		id = questCount - 1;
+		TextDrawHideForPlayer(pid, g_questList[4]);
+	
+	}
+	if(0 >= id) {
+
+		id = 0;
+		TextDrawHideForPlayer(pid, g_questList[3]);
+	}
+	new const questid = QUEST::GetListID(pid, id);
+
+	if(questid != -1)
+	{
+		PlayerTextDrawSetString(pid, p_questList[0][pid], IntToStr(id+1));
+		for(new i; i < 6; ++i)
+			TextDrawShowForPlayer(pid, g_questList[i]);
+		PlayerTextDrawSetString(pid, p_questList[1][pid], quest_list[questid][quest_head]);
+		PlayerTextDrawSetString(pid, p_questList[2][pid], quest_list[questid][quest_body]);
+		PlayerTextDrawShow(pid, p_questList[0][pid]);
+		PlayerTextDrawShow(pid, p_questList[1][pid]);
+		PlayerTextDrawShow(pid, p_questList[2][pid]);
+
+		PlayerTextDrawSetString(pid, p_questList[3][pid], 
+			(format(gt, sizeof gt, "Atlygis:~n~%s%s%s%s",
+				(quest_list[questid][quest_reward][rMoney])?(f("~y~%i~w~ lt  ", quest_list[questid][quest_reward][rMoney])):(""),
+				(quest_list[questid][quest_reward][rPatirtis])?(f("~y~%i~w~ patirties  ", quest_list[questid][quest_reward][rPatirtis])):(""),
+				(quest_list[questid][quest_reward][rRubinai])?(f("~y~%i~w~ rubinai  ", quest_list[questid][quest_reward][rRubinai])):(""),
+				(quest_list[questid][quest_reward][rItem])?(f("~y~%s~w~(~y~%i~w~)", ItemInfo[quest_list[questid][quest_reward][rItem]][item_name], quest_list[questid][quest_reward][rItemCount])):("")
+			), gt)
+		);
+	
+	} else {
+
+		if( ! QUEST::GetCount(pid))
+		{
+			id = 0;
+			PlayerTextDrawHide(pid, p_questList[0][pid]);
+			PlayerTextDrawHide(pid, p_questList[1][pid]);
+			PlayerTextDrawHide(pid, p_questList[3][pid]);
+			PlayerTextDrawSetString(pid, p_questList[2][pid], "Siuo metu tu jokiu uzduociu neturi.");
+			PlayerTextDrawShow(pid, p_questList[2][pid]);
+
+		} else {
+
+			id = 0;
+			QUEST::UpdateText(pid);
+		}
+	}
+	#undef id
+}

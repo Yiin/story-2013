@@ -1,0 +1,175 @@
+/*
+
+
+
+
+
+
+
+
+
+                     Story of Cities
+
+                        GANG
+
+
+
+
+
+
+
+
+*/
+
+function::joinGang(pid, id)
+{
+   leaveGang(pid);
+   new const gID = pInfo[id][DBID];
+   new playerNAME[MAX_PLAYER_NAME];
+   GetPlayerName(pid, playerNAME, MAX_PLAYER_NAME);
+
+   pinfo[gauja][g_ID] = gID;
+   PLAYER::GANG::SetName(pid, PLAYER::GANG::GetName(id));
+   PLAYER::GANG::SetJoined(pid, gettime());
+   pinfo[gauja][g_joinTime] = 0;
+   pinfo[gauja][g_rep_diff] = 0;
+
+   vector_clear(vGangWar+pid);
+   for(new i, j = vector_size(vGangWar+id); i != j; ++i)
+
+   {   // war sync
+      vector_push_back(vGangWar+pid, vector_get(vGangWar+id, i));
+   }
+   vector_clear(vGangPeace+pid);
+   for(new i, j = vector_size(vGangPeace+id); i != j; ++i)
+
+   {   // peace sync
+      vector_push_back(vGangPeace+pid, vector_get(vGangPeace+id, i));
+   }
+
+   notification(pid, F("Prisijungei prie gaujos ~y~%s", PLAYER::GANG::GetName(pid)));
+
+   foreach(new i : Player)
+   {
+      if(pInfo[i][gauja] == gID)
+      {
+         if(player.flag.get(i, fIsInJail) || player.bool.get(i, bIsInTaxi))
+            notification(i, F("~y~%s ~w~prisijunge prie gaujos.", playerNAME));
+         else
+            notification2(i, F("~y~%s ~w~prisijunge prie gaujos.", playerNAME));
+      }
+   }
+   updateMarkersForPlayer(pid);
+   updatePlayer(pid);
+}
+
+function::leaveGang(pid)
+{
+   vector_clear(vGangWar+pid); // war reset
+   vector_clear(vGangPeace+pid); // peace reset
+
+   if(pinfo[gauja] == pinfo[DBID])
+   {
+      for(new i; i < gTag_count; ++i)
+      {
+         if(objects[gTag(i)][obj_other_ids][obj_gang_id] == pinfo[gauja])
+         {
+            destroyDynamicArea(objects[gTag(i)][obj_other_ids][obj_area_id]);
+            Update3DTextLabelText(objects[gTag(i)][obj_other_ids][obj_text_id], COLOR_SOC, "Teritorija neuþimta.");
+
+            objects[gTag(i)][obj_other_ids][obj_area_id] = 0;
+            objects[gTag(i)][obj_other_ids][obj_gang_id] = 0;
+            objects[gTag(i)][obj_other_info][obj_gang_influence] = 0;
+         }
+      }
+      foreach(new i : Player)
+      {
+         if(pInfo[i][gauja] == pinfo[DBID] && i != pid)
+         {
+            notification2(i, "Gauja uzdaroma, esi automatiskai ismetamas.");
+            leaveGang(i);
+         }
+      }
+
+   } else {
+
+      new playerNAME[MAX_PLAYER_NAME];
+      GetPlayerName(pid, playerNAME, MAX_PLAYER_NAME);
+
+      foreach(new i : Player)
+      {
+         if(pInfo[i][gauja] == pinfo[gauja] && i != pid)
+         {
+            notification2(i, F("~y~%s~w~ paliko gauja.", playerNAME));
+         }
+      }
+   }
+
+
+
+   pinfo[gauja][g_ID] = pinfo[DBID];
+   PLAYER::GANG::SetName(pid, "Be pavadinimo");
+   pinfo[gauja][g_rep_diff] = 0;
+
+   updateMarkersForPlayer(pid);
+
+   sql_query(sqlHandle, F("UPDATE zaidejai SET gauja = `id`, gauja_name = 'Be pavadinimo', gauja_war = '', gauja_peace = '' WHERE id = %i", pinfo[DBID]), QUERY_THREADED);
+   //updatePlayer(pid);
+}
+
+stock kickFromGang(pid = INVALID_PLAYER_ID, dbid = -1)
+{
+   if(IsPlayerConnected(pid))
+   {
+      leaveGang(pid);
+   
+   } else if(dbid != -1) {
+
+      sql_query(sqlHandle, F("UPDATE zaidejai SET gauja = `id`, gauja_name = 'Be pavadinimo' WHERE id = %i", dbid), QUERY_THREADED);
+   }
+}
+
+GANG::SetName(id, name[])
+{
+   new buff[24];
+   if(0 <strlen(name) < 24)
+   {
+      sql_escape_string( sqlHandle, name, buff);
+      foreach(new i : Player)
+      {
+         if(PLAYER::GANG::Get(i) == id)
+            PLAYER::GANG::SetName(i, buff);
+      }
+      sql_query(sqlHandle, F("UPDATE zaidejai SET gauja_name = '%s' WHERE gauja = %i", buff, id),QUERY_THREADED);
+      format(name, 24, buff);
+
+      return 1;
+   
+   } else {
+
+      return 0;
+   }
+}
+
+function::getMembers(id)
+{
+   new count = 0;
+   foreach(new i : Player)
+   {
+      if(pInfo[i][gauja][g_ID] == id)
+         count++;
+   }
+   return count;
+}
+
+function::isPlayerInGang(pid, id)
+{
+   if(pinfo[gauja][g_ID] == id) return 1;
+   else return 0;
+}
+
+function::isPlayerInAnyGang(pid)
+{
+   if(pinfo[gauja][g_ID] != pinfo[DBID]) return 1;
+   return 0;
+}
